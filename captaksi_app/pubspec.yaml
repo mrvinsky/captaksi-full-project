@@ -1,0 +1,36 @@
+name: captaksi_app
+description: "A new Flutter project."
+publish_to: 'none' 
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.4.3 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+  google_maps_flutter: ^2.6.1
+  geolocator: ^12.0.0
+  # API istekleri yapmak için gerekli olan paket
+  http: ^1.2.1
+  flutter_secure_storage: ^9.1.1
+  image_picker: ^1.1.2
+  geocoding: ^3.0.0
+  
+  # YENİ: Cihazdan dosya (PDF vb.) seçmek için
+  file_picker: ^8.0.5
+  uuid: ^4.4.0
+  flutter_polyline_points: ^2.0.0
+  
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^3.0.0
+  socket_io_client: ^2.0.3+1
+
+flutter:
+  uses-material-design: true

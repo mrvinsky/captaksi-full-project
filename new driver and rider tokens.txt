@@ -1,0 +1,64 @@
+{
+  "ad": "Test",
+  "soyad":"Yolcusu",
+  "telefon_numarasi":"5522622414",
+  "email":"yolcu@test.com",
+  "sifre":"e+m.c2+enerji"
+}
+
+token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjo0fSwiaWF0IjoxNzYwMjc5NDUwLCJleHAiOjE3NjAyOTc0NTB9.x6sZo2S9fYY81LWGc2Cw-AOu8KNmszUfLA5rAHV0JZA"
+}
+
+
+
+{
+  "ad": "Zeynep (XL)",
+  "soyad": "Can",
+  "telefon_numarasi": "5001110004",
+  "email": "xl@taksi.com",
+  "sifre": "123456"
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkcml2ZXIiOnsiaWQiOjR9LCJpYXQiOjE3NjA3OTAyNjUsImV4cCI6MTc2MDgwODI2NX0.qjDC1QdutNxHvOOiHUF1YbI5EJ0QVd2etpSUd_KZH0w"
+}
+
+
+{
+  "ad": "Ayşe (Pet)",
+  "soyad": "Demir",
+  "telefon_numarasi": "5001110003",
+  "email": "pet@taksi.com",
+  "sifre": "123456"
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkcml2ZXIiOnsiaWQiOjN9LCJpYXQiOjE3NjA3OTAzMDUsImV4cCI6MTc2MDgwODMwNX0.LTcKDj_moaUKY2BcPNgAOkXvU9UP1JQhOWuvrCNLWeQ"
+}
+
+
+{
+  "ad": "Veli (VIP)",
+  "soyad": "Kaya",
+  "telefon_numarasi": "5001110002",
+  "email": "vip@taksi.com",
+  "sifre": "123456"
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkcml2ZXIiOnsiaWQiOjJ9LCJpYXQiOjE3NjA3OTAzNDAsImV4cCI6MTc2MDgwODM0MH0.vNE43LUozhwzkE9M1U8opuHhAKNsLqxFHlBb4sQKaos"
+}
+
+
+{
+  "ad": "Ali (Standart)",
+  "soyad": "Yılmaz",
+  "telefon_numarasi": "5001110001",
+  "email": "standart@taksi.com",
+  "sifre": "123456"
+
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkcml2ZXIiOnsiaWQiOjF9LCJpYXQiOjE3NjA3OTAzNzAsImV4cCI6MTc2MDgwODM3MH0.xuGPPaH-_1PGUjmI5IEo1R3lZJWDejefYRW_9CTUKZw"
+}
+
+
+{
+  "email": "admin@captaksi.com",
+  "sifre": "123456"
+}
+TOKEN
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6eyJpZCI6MSwicm9sIjoiYWRtaW4ifSwiaWF0IjoxNzYwNzkzNTAyLCJleHAiOjE3NjA4Nzk5MDJ9.-IzKRmKEBAdQyboN2zKWlkjJS6Ipzg3x9euflyMB6MM"
