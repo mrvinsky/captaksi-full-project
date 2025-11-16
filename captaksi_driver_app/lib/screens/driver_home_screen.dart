@@ -1,13 +1,22 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:captaksi_driver_app/services/socket_service.dart';
+import '../services/location_service.dart';
+
 import 'package:flutter/material.dart';
-import '../services/api_service.dart';
-import 'login_screen.dart';
 import 'package:geolocator/geolocator.dart';
-import 'profile_screen.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
+
+import '../services/api_service.dart';
+import '../services/socket_service.dart';
+import 'login_screen.dart';
+import 'profile_screen.dart';
+
+enum RidePhase {
+  idle,
+  enRouteToPickup,
+  enRouteToDropoff,
+}
 
 class DriverHomeScreen extends StatefulWidget {
   const DriverHomeScreen({super.key});
@@ -17,105 +26,127 @@ class DriverHomeScreen extends StatefulWidget {
 }
 
 class _DriverHomeScreenState extends State<DriverHomeScreen> {
+  final ApiService _apiService = ApiService();
+  final SocketService _socketService = SocketService();
+  final Completer<GoogleMapController> _mapController = Completer();
+
   bool _isOnline = false;
   bool _isLoading = false;
-  final ApiService _apiService = ApiService();
-  
-  final SocketService _socketService = SocketService();
-  StreamSubscription? _rideRequestSubscription;
-  bool _isRideDialogShowing = false;
-  
-  final List<Map<String, dynamic>> _rideRequests = [];
-
-  GoogleMapController? _mapController;
   Position? _currentPosition;
+
   Timer? _locationUpdateTimer;
 
-  // YOLCULUK DURUM DEĞİŞKENLERİ
-  Map<String, dynamic>? _activeRide; // Kabul edilen yolculuğun verilerini tutar
-  bool _isEnrouteToPassenger = false; // Yolcuya mı gidiyor?
-  bool _isEnrouteToDestination = false; // Yolcuyla hedefe mi gidiyor?
+  // Socket'ten gelen aktif yolculuk
+  Map<String, dynamic>? _activeRide;
+  RidePhase _ridePhase = RidePhase.idle;
 
-  final Set<Polyline> _polylines = {};
+  // Harita durumları
   final Set<Marker> _markers = {};
-
-  static const CameraPosition _kInitialPosition = CameraPosition(
-    target: LatLng(41.0082, 28.9784), // İstanbul
-    zoom: 11.0,
-  );
+  final Set<Polyline> _polylines = {};
+  PolylinePoints polylinePoints = PolylinePoints();
 
   @override
   void initState() {
     super.initState();
-    _rideRequestSubscription = _socketService.rideRequests.listen((ride) {
-      print("Stream'den yeni yolculuk talebi geldi!");
-      if (mounted && !_isEnrouteToPassenger && !_isEnrouteToDestination) {
-        setState(() {
-          _rideRequests.insert(0, ride);
-        });
-      }
-    });
+    _initLocation();
+    _listenRideRequests();
   }
 
   @override
   void dispose() {
     _locationUpdateTimer?.cancel();
-    _rideRequestSubscription?.cancel();
     _socketService.dispose();
     super.dispose();
   }
 
-  Future<Position> _determinePosition() async {
-    bool serviceEnabled;
-    LocationPermission permission;
+  Future<void> _initLocation() async {
+    try {
+      final permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied ||
+          permission == LocationPermission.deniedForever) {
+        final newPerm = await Geolocator.requestPermission();
+        if (newPerm == LocationPermission.denied ||
+            newPerm == LocationPermission.deniedForever) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Konum izni olmadan uygulama çalışamaz.'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+          return;
+        }
+      }
 
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) throw Exception('Konum servisleri kapalı.');
+      final position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
 
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) throw Exception('Konum izni verilmedi.');
-    }
-    
-    if (permission == LocationPermission.deniedForever) throw Exception('Konum izinleri kalıcı olarak reddedildi, ayarları açın.');
-
-    Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
-    
-    if(mounted) {
       setState(() {
         _currentPosition = position;
       });
-    }
-    return position;
-  }
 
-  void _animateToUserLocation() {
-    if (_mapController != null && _currentPosition != null) {
-      _mapController!.animateCamera(
-        CameraUpdate.newCameraPosition(
-          CameraPosition(
-            target: LatLng(_currentPosition!.latitude, _currentPosition!.longitude),
-            zoom: 15.0,
-          ),
+      _moveCamera(
+        LatLng(position.latitude, position.longitude),
+        zoom: 15,
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Konum alınamadı: $e'),
+          backgroundColor: Colors.red,
         ),
       );
     }
   }
 
-  Future<void> _toggleOnlineStatus() async {
-    setState(() => _isLoading = true);
-    try {
-      final Position position = await _determinePosition();
-      final bool newStatus = !_isOnline;
-      await _apiService.updateDriverStatus(newStatus, position.latitude, position.longitude);
-      
-      if(mounted) {
-        setState(() { _isOnline = newStatus; });
+  void _listenRideRequests() {
+    _socketService.rideRequests.listen((rideData) {
+      if (!mounted) return;
+      if (_ridePhase != RidePhase.idle || _activeRide != null) {
+        // Şimdilik sadece loglayalım; ileride "queue" mantığı eklenebilir.
+        debugPrint('Yeni ride geldi ama sürücü meşgul: $rideData');
+        return;
       }
+      _showIncomingRideSheet(rideData);
+    });
+  }
 
-      if (_isOnline) {
-        _animateToUserLocation();
+  Future<void> _moveCamera(LatLng target, {double zoom = 14}) async {
+    if (!_mapController.isCompleted) return;
+    final controller = await _mapController.future;
+    await controller.animateCamera(
+      CameraUpdate.newCameraPosition(
+        CameraPosition(target: target, zoom: zoom),
+      ),
+    );
+  }
+
+  // ONLINE / OFFLINE
+  Future<void> _toggleOnlineStatus() async {
+    if (_currentPosition == null) {
+      await _initLocation();
+      if (_currentPosition == null) return;
+    }
+
+    final newStatus = !_isOnline;
+
+    setState(() => _isLoading = true);
+
+    try {
+      await _apiService.updateDriverStatus(
+        newStatus,
+        _currentPosition!.latitude,
+        _currentPosition!.longitude,
+      );
+
+      setState(() {
+        _isOnline = newStatus;
+      });
+
+      if (newStatus) {
         await _socketService.connectAndListen();
         _startSendingLocationUpdates();
       } else {
@@ -123,446 +154,581 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
         _socketService.dispose();
       }
 
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(_isOnline ? 'Artık aktifsiniZ ve çağrı alabilirsiniz.' : 'Çevrimdışı oldunuz.'),
-          backgroundColor: _isOnline ? Colors.green : Colors.orange,
-        ));
-      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(newStatus
+              ? 'Artık aktifsiniz ve çağrı alabilirsiniz.'
+              : 'Çevrimdışı oldunuz.'),
+          backgroundColor: newStatus ? Colors.green : Colors.orange,
+        ),
+      );
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString().replaceAll('Exception: ', '')), backgroundColor: Colors.red));
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.toString().replaceFirst('Exception: ', '')),
+          backgroundColor: Colors.red,
+        ),
+      );
     } finally {
-      if (mounted) setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
   void _startSendingLocationUpdates() {
     _locationUpdateTimer?.cancel();
-    _locationUpdateTimer = Timer.periodic(const Duration(seconds: 15), (timer) async {
-      if (!_isOnline || _currentPosition == null) { timer.cancel(); return; }
+    _locationUpdateTimer =
+        Timer.periodic(const Duration(seconds: 15), (timer) async {
+      if (!_isOnline || _currentPosition == null) {
+        timer.cancel();
+        return;
+      }
+
       try {
-        final Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
-        await _apiService.updateDriverStatus(true, position.latitude, position.longitude);
-        if(mounted) {
-          setState(() => _currentPosition = position);
-        }
-        print("Sürücü konumu güncellendi: ${position.latitude}, ${position.longitude}");
+        final position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.best,
+        );
+
+        setState(() {
+          _currentPosition = position;
+        });
+
+        await _apiService.updateDriverStatus(
+          true,
+          position.latitude,
+          position.longitude,
+        );
       } catch (e) {
-        print("Periyodik konum güncelleme hatası: $e");
+        debugPrint('Konum güncellenemedi: $e');
       }
     });
   }
 
-  // Koordinatları parse eden yardımcı fonksiyon
-  LatLng _parseCoordinates(String geoJsonString) {
-    try {
-      var coords = jsonDecode(geoJsonString)['coordinates'];
-      return LatLng(coords[1], coords[0]); // GeoJSON [lon, lat]'dır, LatLng (lat, lon) ister
-    } catch (e) {
-      print("Koordinat parse hatası: $e");
-      return const LatLng(0, 0); // Hata durumunda geçersiz konum
-    }
-  }
+  // GİRİŞ / ÇIKIŞ
+  Future<void> _logout() async {
+    await ApiService.deleteToken();
+    _socketService.dispose();
+    _locationUpdateTimer?.cancel();
 
-  // Rota Çizme Fonksiyonu
-  Future<void> _drawRoute(LatLng origin, LatLng destination, {String id = 'route', Color color = Colors.blueAccent}) async {
-    try {
-      final routeInfo = await _apiService.getDirections(origin, destination);
-      final String encodedPolyline = routeInfo['polyline_points'];
-      
-      List<PointLatLng> polylineCoordinates = PolylinePoints().decodePolyline(encodedPolyline);
-      List<LatLng> polylinePoints = polylineCoordinates.map((point) => LatLng(point.latitude, point.longitude)).toList();
-      
-      setState(() {
-        _polylines.clear();
-        _polylines.add(Polyline(
-          polylineId: PolylineId(id),
-          color: color,
-          width: 6,
-          points: polylinePoints,
-        ));
-      });
-
-      _mapController?.animateCamera(CameraUpdate.newLatLngBounds(LatLngBounds(
-          southwest: LatLng(
-            origin.latitude < destination.latitude ? origin.latitude : destination.latitude,
-            origin.longitude < destination.longitude ? origin.longitude : destination.longitude,
-          ),
-          northeast: LatLng(
-            origin.latitude > destination.latitude ? origin.latitude : destination.latitude,
-            origin.longitude > destination.longitude ? origin.longitude : destination.longitude,
-          ),
-        ), 100.0,),);
-    } catch(e) {
-      print("Rota çizilirken hata: $e");
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Rota çizilemedi: ${e.toString()}'), backgroundColor: Colors.red));
-    }
-  }
-  
-  // "Yolcuyu Aldım" Butonuna Basılınca
-  Future<void> _startTrip() async {
-    if (_activeRide == null) return;
-    
-    try {
-      await _apiService.startRide(_activeRide!['id'].toString());
-      
-      final LatLng passengerPos = _parseCoordinates(_activeRide!['baslangic_konumu']);
-      final LatLng destinationPos = _parseCoordinates(_activeRide!['bitis_konumu']);
-
-      // 2. Pipeline'ı (Yolcudan Hedefe) kırmızı renkte çiz
-      _drawRoute(passengerPos, destinationPos, id: 'route_to_destination', color: Colors.redAccent);
-
-      setState(() {
-        _isEnrouteToPassenger = false;
-        _isEnrouteToDestination = true;
-        _markers.clear();
-        _markers.add(Marker(
-          markerId: const MarkerId('destination_pin'),
-          position: destinationPos,
-          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
-          infoWindow: InfoWindow(title: "Varış Noktası", snippet: _activeRide!['bitis_adres_metni'])
-        ));
-      });
-      
-    } catch(e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString()), backgroundColor: Colors.red));
-    }
-  }
-
-  // "Yolculuğu Bitir" Butonuna Basılınca
-  Future<void> _finishTrip() async {
-    if (_activeRide == null) return;
-    
-    try {
-      await _apiService.finishRide(_activeRide!['id'].toString());
-      
-      setState(() {
-        _activeRide = null;
-        _isEnrouteToPassenger = false;
-        _isEnrouteToDestination = false;
-        _polylines.clear();
-        _markers.clear();
-      });
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Yolculuk Tamamlandı!'), backgroundColor: Colors.green)
-        );
-      }
-      
-    } catch(e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString()), backgroundColor: Colors.red));
-    }
-  }
-
-
-  // Yolculuk talebi geldiğinde gösterilecek pencere
-  void _showRideRequestDialog(Map<String, dynamic> ride) {
-    if (!mounted || _currentPosition == null || _isRideDialogShowing) return;
-    
-    setState(() => _isRideDialogShowing = true);
-    
-    final LatLng passengerPos = _parseCoordinates(ride['baslangic_konumu']);
-    final double distanceInMeters = Geolocator.distanceBetween(
-        _currentPosition!.latitude, _currentPosition!.longitude, passengerPos.latitude, passengerPos.longitude);
-    final String passengerDistance = "${(distanceInMeters / 1000).toStringAsFixed(1)} km";
-
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Yeni Yolculuk Talebi!'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Alış: ${ride['baslangic_adres_metni']}'),
-              Text('Varış: ${ride['bitis_adres_metni']}'),
-              const SizedBox(height: 10),
-              Text('Yolcu Mesafesi: $passengerDistance', style: const TextStyle(fontWeight: FontWeight.bold)),
-              Text('Tahmini Kazanç: ₺${ride['gerceklesen_ucret']}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-            ],
-          ),
-          actions: [
-            TextButton(
-              child: const Text('REDDET'),
-              onPressed: () {
-                Navigator.of(context).pop();
-                setState(() => _rideRequests.remove(ride));
-              },
-            ),
-            ElevatedButton(
-              child: const Text('KABUL ET'),
-              onPressed: () async {
-                try {
-                  final rideId = ride['id'].toString();
-                  final result = await _apiService.acceptRide(rideId);
-                  
-                  Navigator.of(context).pop();
-                  setState(() {
-                    _activeRide = result['ride']; // Güncellenmiş yolculuk bilgisini al
-                    _rideRequests.clear(); // Diğer tüm talepleri temizle
-                    _isEnrouteToPassenger = true; // 1. Aşamaya geç
-                  });
-                  
-                  // 1. Pipeline'ı (Sürücüden Yolcuya) mavi renkte çiz
-                  final LatLng driverPos = LatLng(_currentPosition!.latitude, _currentPosition!.longitude);
-                  _drawRoute(driverPos, passengerPos, id: 'route_to_passenger', color: Colors.blueAccent);
-                  
-                  // Yolcu için pin ekle
-                  setState(() {
-                    _markers.clear();
-                    _markers.add(Marker(
-                      markerId: const MarkerId('passenger_pickup'),
-                      position: passengerPos,
-                      icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
-                      infoWindow: InfoWindow(title: 'Yolcu Alış Noktası', snippet: ride['baslangic_adres_metni'])
-                    ));
-                  });
-
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Yolculuk Kabul Edildi! Lütfen yolcuyu alın.'), backgroundColor: Colors.green)
-                    );
-                  }
-                } catch(e) {
-                  Navigator.of(context).pop();
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(e.toString().replaceAll('Exception: ', '')), backgroundColor: Colors.red)
-                    );
-                  }
-                }
-              },
-            ),
-          ],
-        );
-      },
-    ).then((_) {
-      if(mounted) {
-        setState(() => _isRideDialogShowing = false);
-      }
-    });
-  }
-
-  // Çevrimdışı ekranını (büyük buton) oluşturan fonksiyon
-  Widget _buildOfflineView() {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32.0),
-        child: SizedBox(
-          width: 200,
-          height: 200,
-          child: ElevatedButton(
-            onPressed: _isLoading ? null : _toggleOnlineStatus,
-            style: ElevatedButton.styleFrom(
-              shape: const CircleBorder(),
-              padding: const EdgeInsets.all(24),
-              backgroundColor: _isLoading ? Colors.grey : Colors.green[700],
-              foregroundColor: Colors.white,
-            ),
-            child: _isLoading
-                ? const CircularProgressIndicator(color: Colors.white)
-                : Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.play_arrow, size: 70),
-                      const Text(
-                        'ÇALIŞMAYA BAŞLA',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
-          ),
-        ),
-      ),
+    if (!mounted) return;
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const LoginScreen()),
+      (_) => false,
     );
   }
 
-  // Çevrimiçi (harita + alttan açılan panel) ekranını oluşturan fonksiyon
-  Widget _buildOnlineView() {
-    return Stack(
-      children: [
-        GoogleMap(
-          initialCameraPosition: _kInitialPosition,
-          onMapCreated: (GoogleMapController controller) {
-            _mapController = controller;
-            if (_currentPosition != null) {
-              _animateToUserLocation();
-            }
-          },
-          myLocationEnabled: true,
-          myLocationButtonEnabled: false,
-          zoomControlsEnabled: false,
-          markers: _markers,
-          polylines: _polylines,
-        ),
-        
-        // Konumumu Bul Butonu
-        Positioned(
-          // Butonun yerini, alttaki panelin durumuna göre ayarla
-          bottom: _isEnrouteToPassenger || _isEnrouteToDestination ? 220.0 : MediaQuery.of(context).size.height * 0.3 + 20, // Panelin yüksekliğine göre ayarlandı
-          right: 16,
-          child: FloatingActionButton(
-            onPressed: _animateToUserLocation,
-            backgroundColor: Colors.white,
-            child: const Icon(Icons.my_location),
-          ),
-        ),
+  // RIDE AKIŞI
 
-        // Arayüzü duruma göre değiştir
-        if (!_isEnrouteToPassenger && !_isEnrouteToDestination)
-          // Durum: Boşta, iş bekliyor
-          DraggableScrollableSheet(
-            initialChildSize: 0.3,
-            minChildSize: 0.15,
-            maxChildSize: 0.5,
-            builder: (BuildContext context, ScrollController scrollController) {
-              return Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: const BorderRadius.only(topLeft: Radius.circular(24.0), topRight: Radius.circular(24.0),),
-                  boxShadow: [ BoxShadow(blurRadius: 10.0, color: Colors.grey.withOpacity(0.5),),],
-                ),
-                child: Column(
+  void _showIncomingRideSheet(Map<String, dynamic> rideData) {
+    showModalBottomSheet(
+      context: context,
+      isDismissible: false,
+      enableDrag: false,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (ctx) {
+        final pickup = rideData['baslangic_adres_metni'] ?? 'Alış noktası';
+        final dropoff = rideData['bitis_adres_metni'] ?? 'Varış noktası';
+
+        return Padding(
+          padding: const EdgeInsets.all(16),
+          child: SafeArea(
+            top: false,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 12.0),
-                      child: Container(width: 40, height: 5, decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(12),),),
-                    ),
-                    Text(
-                      _rideRequests.isEmpty ? "Yeni yolculuk talepleri bekleniyor..." : "Gelen Talepler (${_rideRequests.length})",
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    const Divider(),
-                    Expanded(
-                      child: _rideRequests.isEmpty
-                          ? const Center(child: Text("Şu anda aktif bir talep yok."))
-                          : ListView.builder(
-                              controller: scrollController,
-                              itemCount: _rideRequests.length,
-                              itemBuilder: (BuildContext context, int index) {
-                                final ride = _rideRequests[index];
-                                return ListTile(
-                                  leading: const Icon(Icons.person_pin_circle, color: Colors.blue, size: 40),
-                                  title: Text('Alış: ${ride['baslangic_adres_metni']}', style: const TextStyle(fontWeight: FontWeight.bold)),
-                                  subtitle: Text('Varış: ${ride['bitis_adres_metni']}'),
-                                  trailing: Text('₺${ride['gerceklesen_ucret']}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.green)),
-                                  onTap: () => _showRideRequestDialog(ride),
-                                );
-                              },
-                            ),
+                    const Icon(Icons.directions_car, size: 28),
+                    const SizedBox(width: 8),
+                    const Text(
+                      'Yeni Yolculuk Talebi',
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),
-              );
-            },
-          )
-        else
-          // Durum: Bir yolculukta (Yolcuya gidiyor veya hedefe gidiyor)
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: Container(
-              padding: const EdgeInsets.all(24.0),
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(topLeft: Radius.circular(24.0), topRight: Radius.circular(24.0),),
-                boxShadow: [BoxShadow(blurRadius: 10.0, color: Colors.black26,)],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    _isEnrouteToPassenger ? "YOLCUYA GİDİLİYOR" : "YOLCULUK DEVAM EDİYOR",
-                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    _isEnrouteToPassenger 
-                        ? (_activeRide?['baslangic_adres_metni'] ?? 'Adres yükleniyor...')
-                        :( _activeRide?['bitis_adres_metni'] ?? 'Adres yükleniyor...'),
-                    style: const TextStyle(fontSize: 16),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 24),
-                  ElevatedButton(
-                    onPressed: _isEnrouteToPassenger ? _startTrip : _finishTrip,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: _isEnrouteToPassenger ? Colors.blueAccent : Colors.green,
-                      foregroundColor: Colors.white,
-                      minimumSize: const Size(double.infinity, 55),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                const SizedBox(height: 12),
+                Text(
+                  'Alış: $pickup',
+                  style: const TextStyle(fontSize: 14),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Varış: $dropoff',
+                  style: const TextStyle(fontSize: 14),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () {
+                          Navigator.of(ctx).pop();
+                        },
+                        child: const Text('Reddet'),
+                      ),
                     ),
-                    child: Text(_isEnrouteToPassenger ? 'YOLCUYU ALDIM' : 'YOLCULUĞU BİTİR'),
-                  )
-                ],
-              ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          Navigator.of(ctx).pop();
+                          await _acceptRide(rideData);
+                        },
+                        child: const Text('Kabul Et'),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
-      ],
+        );
+      },
     );
   }
+
+  Future<void> _acceptRide(Map<String, dynamic> rideData) async {
+    try {
+      final rideId = _extractRideId(rideData);
+      final response = await _apiService.acceptRide(rideId);
+
+      // Backend ya direkt ride objesini, ya da { ride: {...} } dönebilir.
+      final rideFromResponse =
+          response['ride'] is Map<String, dynamic> ? response['ride'] as Map<String, dynamic> : response;
+
+      setState(() {
+        _activeRide = rideFromResponse;
+        _ridePhase = RidePhase.enRouteToPickup;
+      });
+
+      await _drawRouteToPickup();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Yolculuk kabul edilemedi: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  String _extractRideId(Map<String, dynamic> ride) {
+    // Bazı endpointler { ride: {...} } şeklinde dönebilir.
+    final inner = ride['ride'];
+    final map = inner is Map<String, dynamic> ? inner : ride;
+
+    final dynamicId = map['id'] ?? map['_id'] ?? map['rideId'];
+    if (dynamicId == null) {
+      throw Exception('Yolculuk bilgisi eksik: id alanı bulunamadı.');
+    }
+    return dynamicId.toString();
+  }
+
+  Future<void> _drawRouteToPickup() async {
+    if (_activeRide == null || _currentPosition == null) return;
+
+    final pickupPoint = _parseCoordinates(_activeRide!['baslangic_konumu']);
+    final driverPoint =
+        LatLng(_currentPosition!.latitude, _currentPosition!.longitude);
+
+    await _drawRoute(
+      driverPoint,
+      pickupPoint,
+      id: 'route_to_pickup',
+      color: Colors.blueAccent,
+    );
+
+    setState(() {
+      _markers
+        ..clear()
+        ..add(
+          Marker(
+            markerId: const MarkerId('pickup'),
+            position: pickupPoint,
+            icon: BitmapDescriptor.defaultMarkerWithHue(
+              BitmapDescriptor.hueGreen,
+            ),
+            infoWindow: InfoWindow(
+              title: 'Yolcu Alış Noktası',
+              snippet: _activeRide!['baslangic_adres_metni'] ?? '',
+            ),
+          ),
+        );
+    });
+
+    await _moveCamera(pickupPoint, zoom: 14);
+  }
+
+  Future<void> _drawRouteToDropoff() async {
+    if (_activeRide == null || _currentPosition == null) return;
+
+    final dropoffPoint = _parseCoordinates(_activeRide!['bitis_konumu']);
+    final pickupPoint = _parseCoordinates(_activeRide!['baslangic_konumu']);
+
+    await _drawRoute(
+      pickupPoint,
+      dropoffPoint,
+      id: 'route_to_dropoff',
+      color: Colors.redAccent,
+    );
+
+    setState(() {
+      _markers
+        ..clear()
+        ..add(
+          Marker(
+            markerId: const MarkerId('dropoff'),
+            position: dropoffPoint,
+            icon: BitmapDescriptor.defaultMarkerWithHue(
+              BitmapDescriptor.hueRed,
+            ),
+            infoWindow: InfoWindow(
+              title: 'Varış Noktası',
+              snippet: _activeRide!['bitis_adres_metni'] ?? '',
+            ),
+          ),
+        );
+    });
+
+    await _moveCamera(dropoffPoint, zoom: 14);
+  }
+
+  LatLng _parseCoordinates(dynamic value) {
+    // Backend'den "POINT(lon lat)" veya [lon, lat] gelebilir.
+    if (value is String) {
+      // "POINT(lon lat)" formatını çöz
+      final cleaned = value
+          .replaceAll('POINT', '')
+          .replaceAll('(', '')
+          .replaceAll(')', '')
+          .trim();
+      final parts = cleaned.split(RegExp(r'\s+'));
+      if (parts.length == 2) {
+        final lon = double.tryParse(parts[0]) ?? 0;
+        final lat = double.tryParse(parts[1]) ?? 0;
+        return LatLng(lat, lon);
+      }
+    } else if (value is List && value.length == 2) {
+      final lon = (value[0] as num).toDouble();
+      final lat = (value[1] as num).toDouble();
+      return LatLng(lat, lon);
+    }
+
+    // Fallback: Mevcut konum
+    if (_currentPosition != null) {
+      return LatLng(_currentPosition!.latitude, _currentPosition!.longitude);
+    }
+    return const LatLng(0, 0);
+  }
+
+  Future<void> _drawRoute(
+    LatLng origin,
+    LatLng destination, {
+    required String id,
+    required Color color,
+  }) async {
+    try {
+      final routeData = await _apiService.getDirections(origin, destination);
+      final encodedPolyline = routeData['polyline_points'] as String;
+      final distanceText = routeData['distance'] as String?;
+      final durationText = routeData['duration'] as String?;
+
+      final points = polylinePoints.decodePolyline(encodedPolyline);
+      final polylineCoordinates = points
+          .map((p) => LatLng(p.latitude, p.longitude))
+          .toList(growable: false);
+
+      setState(() {
+        _polylines.removeWhere((p) => p.polylineId.value == id);
+        _polylines.add(
+          Polyline(
+            polylineId: PolylineId(id),
+            width: 5,
+            color: color,
+            points: polylineCoordinates,
+          ),
+        );
+      });
+
+      debugPrint(
+          'Rota çizildi ($id) - Mesafe: $distanceText, Süre: $durationText');
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Rota çizilemedi: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  Future<void> _startTrip() async {
+    if (_activeRide == null) return;
+
+    try {
+      final rideId = _extractRideId(_activeRide!);
+      await _apiService.startRide(rideId);
+      setState(() {
+        _ridePhase = RidePhase.enRouteToDropoff;
+      });
+      await _drawRouteToDropoff();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Yolculuk başlatılamadı: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  Future<void> _finishTrip() async {
+    if (_activeRide == null) return;
+
+    try {
+      final rideId = _extractRideId(_activeRide!);
+      await _apiService.finishRide(rideId);
+
+      setState(() {
+        _activeRide = null;
+        _ridePhase = RidePhase.idle;
+        _markers.clear();
+        _polylines.clear();
+      });
+
+      if (_currentPosition != null) {
+        await _moveCamera(
+          LatLng(_currentPosition!.latitude, _currentPosition!.longitude),
+          zoom: 15,
+        );
+      }
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Yolculuk başarıyla tamamlandı.'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Yolculuk bitirilemedi: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  // UI
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(_isOnline ? 'Durum: Aktif' : 'Durum: Çevrimdışı'),
-        backgroundColor: _isOnline ? Colors.green[700] : Colors.blue[700],
-        foregroundColor: Colors.white,
-        leading: IconButton(
-          icon: const Icon(Icons.person),
-          onPressed: () {
-            if (!_isEnrouteToPassenger && !_isEnrouteToDestination) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const ProfileScreen()),
-              );
-            } else {
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                content: Text('Yolculuk sırasında profilinize bakamazsınız.'),
-                backgroundColor: Colors.orange,
-              ));
-            }
-          },
-        ),
+        title: const Text('CapTaksi Sürücü'),
         actions: [
           IconButton(
-            tooltip: _isOnline ? 'Çalışmayı Bitir' : 'Çalışmaya Başla',
-            icon: Icon(_isOnline ? Icons.pause_circle_filled : Icons.play_circle_fill, size: 30),
-            onPressed: _isLoading || (_isEnrouteToPassenger || _isEnrouteToDestination) ? null : _toggleOnlineStatus,
+            icon: const Icon(Icons.person),
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const ProfileScreen()),
+              );
+            },
           ),
           IconButton(
-            tooltip: 'Çıkış Yap',
             icon: const Icon(Icons.logout),
-            onPressed: (_isEnrouteToPassenger || _isEnrouteToDestination) ? null : () async {
-              if(_isOnline) {
-                try {
-                  await _apiService.updateDriverStatus(false, 0, 0);
-                } catch (e) {
-                  print("Çıkış yaparken çevrimdışı olma hatası: $e");
-                }
-              }
-              _locationUpdateTimer?.cancel();
-              _socketService.dispose();
-              await ApiService.deleteToken();
-              if (context.mounted) {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => const LoginScreen()),
-                );
-              }
-            },
-          )
+            onPressed: _logout,
+          ),
         ],
       ),
-      body: _isOnline ? _buildOnlineView() : _buildOfflineView(),
+      body: Stack(
+        children: [
+          _buildMap(),
+          _buildTopStatusBar(),
+          _buildBottomPanel(),
+          if (_isLoading)
+            const Center(
+              child: CircularProgressIndicator(),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMap() {
+    if (_currentPosition == null) {
+      return const Center(
+        child: Text('Konum alınıyor...'),
+      );
+    }
+
+    return GoogleMap(
+      initialCameraPosition: CameraPosition(
+        target: LatLng(
+          _currentPosition!.latitude,
+          _currentPosition!.longitude,
+        ),
+        zoom: 15,
+      ),
+      myLocationEnabled: true,
+      myLocationButtonEnabled: true,
+      markers: _markers,
+      polylines: _polylines,
+      onMapCreated: (controller) {
+        if (!_mapController.isCompleted) {
+          _mapController.complete(controller);
+        }
+      },
+    );
+  }
+
+  Widget _buildTopStatusBar() {
+    return Positioned(
+      top: 16,
+      left: 16,
+      right: 16,
+      child: Card(
+        elevation: 4,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Row(
+            children: [
+              Icon(
+                _isOnline ? Icons.wifi : Icons.wifi_off,
+                color: _isOnline ? Colors.green : Colors.grey,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  _isOnline ? 'Çevrimiçi - Çağrı alıyorsunuz' : 'Çevrimdışı',
+                  style: const TextStyle(fontSize: 14),
+                ),
+              ),
+              Switch(
+                value: _isOnline,
+                onChanged: (_) => _toggleOnlineStatus(),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBottomPanel() {
+    return Positioned(
+      left: 0,
+      right: 0,
+      bottom: 0,
+      child: SafeArea(
+        top: false,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 250),
+          padding: const EdgeInsets.all(16),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                blurRadius: 12,
+                color: Colors.black26,
+                offset: Offset(0, -4),
+              ),
+            ],
+            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+          ),
+          child: _buildRideInfoContent(),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRideInfoContent() {
+    if (_activeRide == null) {
+      return const Text(
+        'Aktif yolculuk yok.\nYeni çağrılar geldiğinde burada göreceksiniz.',
+        textAlign: TextAlign.center,
+      );
+    }
+
+    final pickup = _activeRide!['baslangic_adres_metni'] ?? 'Alış noktası';
+    final dropoff = _activeRide!['bitis_adres_metni'] ?? 'Varış noktası';
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          _ridePhase == RidePhase.enRouteToPickup
+              ? 'Yolcuya Gidiliyor'
+              : 'Yolculuk Devam Ediyor',
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            const Icon(Icons.location_on, size: 18),
+            const SizedBox(width: 4),
+            Expanded(
+              child: Text(
+                pickup,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        Row(
+          children: [
+            const Icon(Icons.flag, size: 18),
+            const SizedBox(width: 4),
+            Expanded(
+              child: Text(
+                dropoff,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            if (_ridePhase == RidePhase.enRouteToPickup)
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: _startTrip,
+                  icon: const Icon(Icons.play_arrow),
+                  label: const Text('Yolculuğu Başlat'),
+                ),
+              ),
+            if (_ridePhase == RidePhase.enRouteToDropoff)
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: _finishTrip,
+                  icon: const Icon(Icons.check),
+                  label: const Text('Yolculuğu Bitir'),
+                ),
+              ),
+          ],
+        ),
+      ],
     );
   }
 }

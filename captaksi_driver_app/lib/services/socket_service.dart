@@ -1,58 +1,117 @@
-import 'dart:async'; // StreamController için bu gerekli (HATA DÜZELTİLDİ)
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
-import 'api_service.dart'; // Token almak için ApiService'i kullanacağız
 
+import 'api_service.dart';
+
+/// Sürücü uygulaması için Socket.IO servisi.
+/// - JWT token ile bağlanır.
+/// - `new_ride_request` event'lerini dinler.
+/// - Dışarıya Stream üzerinden bildirir.
 class SocketService {
+  SocketService({ApiService? apiService})
+      : _apiService = apiService ?? ApiService();
+
+  final ApiService _apiService;
   IO.Socket? _socket;
-
-  // Gelen yolculuk taleplerini 'HomeScreen'e iletmek için bir Stream (yayın kanalı) oluşturuyoruz.
   final StreamController<Map<String, dynamic>> _rideRequestController =
-      StreamController.broadcast();
-  
-  // HomeScreen bu stream'i dinleyecek
-  Stream<Map<String, dynamic>> get rideRequests => _rideRequestController.stream;
+      StreamController<Map<String, dynamic>>.broadcast();
 
+  /// Yeni yolculuk taleplerini dışarıya ileten stream.
+  Stream<Map<String, dynamic>> get rideRequests =>
+      _rideRequestController.stream;
+
+  bool get isConnected => _socket != null && _socket!.connected;
+
+  /// Socket bağlantısı kur ve event'leri dinlemeye başla.
   Future<void> connectAndListen() async {
-    // Önce Sürücünün token'ını güvenli hafızadan al
     final token = await ApiService.getToken();
-    if (token == null) {
-      print("Socket bağlantısı için token bulunamadı.");
+    if (token == null || token.isEmpty) {
+      debugPrint('Socket bağlantısı için token bulunamadı.');
       return;
     }
 
-    // Sunucu adresimiz
+    // Emülatörde backend: 10.0.2.2
     const String socketUrl = 'http://10.0.2.2:3000';
 
-    _socket = IO.io(socketUrl, <String, dynamic>{
-      'transports': ['websocket'],
-      'autoConnect': false,
-    });
+    if (_socket != null && _socket!.connected) {
+      debugPrint('Socket zaten bağlı.');
+      return;
+    }
 
-    // Bağlantıyı manuel olarak başlat
-    _socket!.connect();
+    _socket = IO.io(
+      socketUrl,
+      IO.OptionBuilder()
+          .setTransports(['websocket'])
+          .disableAutoConnect()
+          .setExtraHeaders(<String, dynamic>{
+            'x-auth-token': token,
+          })
+          .build(),
+    );
 
-    // Bağlantı başarılı olduğunda...
     _socket!.onConnect((_) {
-      print('Socket sunucusuna bağlandı: ${_socket!.id}');
-      // Sunucuya kim olduğumuzu (token) söylüyoruz ve doğru odaya katılmasını istiyoruz
-      _socket!.emit('join_driver_room', token);
+      debugPrint('Socket connected: ${_socket!.id}');
+      // Sürücü odasına katılma (backend implementasyonuna göre değişebilir)
+      _socket!.emit('join_driver', <String, dynamic>{
+        'token': token,
+      });
     });
 
-    // Sunucudan 'new_ride_request' sinyalini dinle
-    _socket!.on('new_ride_request', (data) {
-      print('Yeni yolculuk talebi alındı!');
-      // Gelen veriyi (yolculuk detayları) stream'e ekle
-      _rideRequestController.add(data as Map<String, dynamic>);
+    _socket!.onDisconnect((_) {
+      debugPrint('Socket disconnected');
     });
 
-    _socket!.onDisconnect((_) => print('Socket bağlantısı kesildi.'));
-    _socket!.onError((data) => print('Socket Hatası: $data'));
+    _socket!.onError((data) {
+      debugPrint('Socket error: $data');
+    });
+
+    _socket!.on('new_ride_request', (dynamic data) {
+      try {
+        if (data is Map<String, dynamic>) {
+          _rideRequestController.add(data);
+        } else if (data is Map) {
+          _rideRequestController.add(
+            Map<String, dynamic>.from(data as Map),
+          );
+        } else {
+          debugPrint(
+            'new_ride_request data tipi beklenmedik: ${data.runtimeType}',
+          );
+        }
+      } catch (e) {
+        debugPrint('new_ride_request parse edilemedi: $e');
+      }
+    });
+
+    _socket!.connect();
   }
 
-  // Sürücü çevrimdışı olduğunda veya çıkış yaptığında bağlantıyı kapat
-  void dispose() {
+  /// Sunucuya manuel event göndermek gerektiğinde kullanılabilir.
+  void emit(String event, dynamic data) {
+    if (_socket == null || !_socket!.connected) return;
+    _socket!.emit(event, data);
+  }
+
+  void _clearSocketListeners() {
+    if (_socket == null) return;
+    _socket!
+      ..off('new_ride_request')
+      ..off('connect')
+      ..off('disconnect')
+      ..off('error');
+  }
+
+  void disconnect() {
+    _clearSocketListeners();
     _socket?.disconnect();
+    _socket = null;
+  }
+
+  void dispose() {
+    disconnect();
     _rideRequestController.close();
+    _apiService.dispose();
   }
 }
-

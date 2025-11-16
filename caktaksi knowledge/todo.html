@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CAPTAKSI – Proje Durumu | Mr. Vinsky</title>
+  <title>CAPTAKSI – Yapılacaklar | Mr. Vinsky</title>
 
   <!-- Feather Icons -->
   <script src="https://unpkg.com/feather-icons"></script>
@@ -12,7 +12,7 @@
     body {
       margin: 0;
       font-family: "Segoe UI", sans-serif;
-      background: linear-gradient(135deg, #dfe9f3, #ffffff);
+      background: linear-gradient(135deg, #e3edf7, #ffffff);
       color: #333;
     }
 
@@ -38,8 +38,8 @@
     }
 
     @keyframes rotate {
-      from { transform: rotate(0deg);}
-      to { transform: rotate(360deg);}
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
     }
 
     .brand-box {
@@ -56,7 +56,6 @@
     .brand-title {
       font-size: 34px;
       font-weight: 700;
-      letter-spacing: 1px;
     }
 
     /* NAV */
@@ -79,6 +78,7 @@
       color: #ffeb3b;
     }
 
+    /* CONTAINER */
     .container {
       max-width: 1100px;
       margin: 40px auto;
@@ -87,24 +87,24 @@
     }
 
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(25px);}
-      to { opacity: 1; transform: translateY(0);}
+      from { opacity: 0; transform: translateY(25px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
-    /* SECTIONS */
+    /* SECTION */
     .section {
       background: white;
       border-radius: 14px;
       padding: 30px;
-      margin-bottom: 35px;
       box-shadow: 0 6px 20px rgba(0,0,0,0.08);
-      transition: 0.25s;
+      margin-bottom: 30px;
       animation: fadeUp 0.8s ease-out;
+      transition: 0.25s;
     }
 
     @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(30px);}
-      to { opacity: 1; transform: translateY(0);}
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     .section:hover {
@@ -114,51 +114,39 @@
 
     .section h2 {
       display: flex;
-      gap: 10px;
       align-items: center;
+      gap: 12px;
       font-size: 24px;
       color: #0d47a1;
     }
 
-    /* PROGRESS */
-    .progress-circles {
+    /* TODO ITEMS */
+    .todo-item {
       display: flex;
-      justify-content: space-around;
-      text-align: center;
-      flex-wrap: wrap;
-      gap: 40px;
-      margin-top: 20px;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 14px 0;
+      border-bottom: 1px solid #eee;
+      transition: 0.3s;
     }
 
-    .circle-box {
-      width: 160px;
+    .todo-item:last-child {
+      border-bottom: none;
     }
 
-    .circle {
-      width: 130px;
-      height: 130px;
-      border-radius: 50%;
-      margin: auto;
-      font-size: 26px;
-      font-weight: 700;
-      color: #ffffff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: conic-gradient(#1565c0 var(--progress), #4e2626 0deg);
-      animation: fillCircle 2s forwards;
+    .todo-item i {
+      color: #0d47a1;
     }
 
-    @keyframes fillCircle {
-      from { --progress: 0deg; }
-      to { --progress: var(--target); }
+    .todo-item:hover {
+      transform: translateX(6px);
     }
 
     footer {
       background: #0d47a1;
       color: white;
       text-align: center;
-      padding: 18px;
+      padding: 20px;
       margin-top: 40px;
     }
 
@@ -166,9 +154,9 @@
       color: #ffeb3b;
       font-weight: 600;
     }
+
   </style>
 </head>
-
 <body>
 
 <header>
@@ -190,43 +178,88 @@
 
 <div class="container">
 
+  <!-- GENEL YAPILACAKLAR -->
   <div class="section">
-    <h2><i data-feather="info"></i> Proje Özeti</h2>
-    <p>CAPTAKSI, yolcu ve sürücüleri hızlı ve güvenli şekilde buluşturan modern ulaşım uygulamasıdır.</p>
+    <h2><i data-feather="check-circle"></i> Genel Yapılacaklar</h2>
+
+    <div class="todo-item">
+      <i data-feather="loader"></i>
+      <div>Sunucu optimizasyonu ve güvenlik kontrollerinin tamamlanması</div>
+    </div>
+
+    <div class="todo-item">
+      <i data-feather="globe"></i>
+      <div>Gerçek domain ve SSL kurulumu</div>
+    </div>
+
+    <div class="todo-item">
+      <i data-feather="smartphone"></i>
+      <div>Uygulamaların Play Store & App Store yayına hazırlanması</div>
+    </div>
+
   </div>
 
+  <!-- YOLCU UYGULAMASI -->
   <div class="section">
-    <h2><i data-feather="smartphone"></i> Uygulama Durumu</h2>
+    <h2><i data-feather="user"></i> Yolcu Uygulaması (Customer App)</h2>
 
-    <div class="progress-circles">
-      <div class="circle-box">
-        <div class="circle" style="--target: 306deg;">85%</div>
-        <p>Yolcu Uygulaması</p>
-      </div>
-      <div class="circle-box">
-        <div class="circle" style="--target: 270deg;">75%</div>
-        <p>Sürücü Uygulaması</p>
-      </div>
+    <div class="todo-item">
+      <i data-feather="map-pin"></i>
+      <div>Adres arama sistemi %100 doğruluk için geliştirme</div>
     </div>
+
+    <div class="todo-item">
+      <i data-feather="credit-card"></i>
+      <div>Ödeme sistemi (isteğe bağlı)</div>
+    </div>
+
+    <div class="todo-item">
+      <i data-feather="star"></i>
+      <div>Yolculuk sonrası puanlama arayüzü</div>
+    </div>
+
   </div>
 
+  <!-- SÜRÜCÜ UYGULAMASI -->
   <div class="section">
-    <h2><i data-feather="server"></i> Backend Durumu</h2>
+    <h2><i data-feather="truck"></i> Sürücü Uygulaması (Driver App)</h2>
 
-    <div class="progress-circles">
-      <div class="circle-box">
-        <div class="circle" style="--target: 324deg;">90%</div>
-        <p>Auth & Database</p>
-      </div>
-      <div class="circle-box">
-        <div class="circle" style="--target: 144deg;">40%</div>
-        <p>Yolculuk Sistemi</p>
-      </div>
-      <div class="circle-box">
-        <div class="circle" style="--target: 288deg;">80%</div>
-        <p>Socket.IO</p>
-      </div>
+    <div class="todo-item">
+      <i data-feather="toggle-left"></i>
+      <div>Aktif/Pasif durum ekranının iyileştirilmesi</div>
     </div>
+
+    <div class="todo-item">
+      <i data-feather="map"></i>
+      <div>Rota çizimi performans optimizasyonu</div>
+    </div>
+
+    <div class="todo-item">
+      <i data-feather="alert-triangle"></i>
+      <div>Konum hatası durum yönetimi</div>
+    </div>
+
+  </div>
+
+  <!-- BACKEND -->
+  <div class="section">
+    <h2><i data-feather="server"></i> Backend (Node.js API)</h2>
+
+    <div class="todo-item">
+      <i data-feather="shield"></i>
+      <div>JWT güvenlik katmanı güncellemeleri</div>
+    </div>
+
+    <div class="todo-item">
+      <i data-feather="refresh-cw"></i>
+      <div>Socket.IO gerçek zamanlı bağlantı stabilizasyonu</div>
+    </div>
+
+    <div class="todo-item">
+      <i data-feather="database"></i>
+      <div>Yolculuk yönetimi için yeni endpoint'lerin eklenmesi</div>
+    </div>
+
   </div>
 
 </div>
@@ -235,7 +268,9 @@
   © 2025 <span>Mr. Vinsky</span> | CAPTAKSI Proje Süreci
 </footer>
 
-<script>feather.replace();</script>
+<script>
+  feather.replace();
+</script>
 
 </body>
 </html>
