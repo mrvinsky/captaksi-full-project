@@ -1,0 +1,37 @@
+# Environment
+.env
+*.env
+.env.*
+.env.backup
+.env.local
+
+# Flutter
+build/
+.dart_tool/
+.flutter-plugins*
+.pub/
+pubspec.lock
+android/.gradle/
+ios/Pods/
+web/.dart_tool/
+
+# Node Backend
+node_modules/
+uploads/
+tmp/
+dist/
+logs/
+*.log
+
+# Secrets
+*.key
+*.crt
+*.pem
+service-account.json
+google-services.json
+GoogleService-Info.plist
+
+# System
+.vscode/
+.DS_Store
+Thumbs.db
