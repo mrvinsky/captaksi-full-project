@@ -13,7 +13,7 @@ class HelpScreen extends StatelessWidget {
       ),
       body: const Center(
         child: Text(
-          "Burada müşteri hizmetleri, sık sorulan sorular vb. olacak.",
+          "Yardım içerikleri buraya gelecek.",
           style: TextStyle(color: Colors.white),
         ),
       ),

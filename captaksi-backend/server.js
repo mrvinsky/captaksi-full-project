@@ -131,3 +131,5 @@ app.use('/api/rides', rideRoutes);
 server.listen(PORT, () => {
   console.log(`🚖 captaksi sunucusu ${PORT} portunda çalışıyor...`);
 });
+app.use('/api/drivers', require('./routes/driverRoutes'));
+app.use("/api/vehicles", require("./routes/vehicleRoutes"));

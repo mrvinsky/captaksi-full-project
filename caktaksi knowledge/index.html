@@ -99,12 +99,6 @@
       margin-bottom: 35px;
       box-shadow: 0 6px 20px rgba(0,0,0,0.08);
       transition: 0.25s;
-      animation: fadeUp 0.8s ease-out;
-    }
-
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(30px);}
-      to { opacity: 1; transform: translateY(0);}
     }
 
     .section:hover {
@@ -130,9 +124,7 @@
       margin-top: 20px;
     }
 
-    .circle-box {
-      width: 160px;
-    }
+    .circle-box { width: 170px; }
 
     .circle {
       width: 130px;
@@ -154,6 +146,28 @@
       to { --progress: var(--target); }
     }
 
+    /* TIMELINE */
+    .timeline {
+      border-left: 4px solid #0d47a1;
+      padding-left: 20px;
+      margin-top: 20px;
+    }
+
+    .tl-item {
+      margin-bottom: 18px;
+    }
+
+    .tl-item h4 {
+      margin: 0;
+      color: #0d47a1;
+      font-size: 18px;
+    }
+
+    .tl-item p {
+      margin: 3px 0 0;
+      font-size: 14px;
+    }
+
     footer {
       background: #0d47a1;
       color: white;
@@ -173,12 +187,10 @@
 
 <header>
   <div class="brand-box">
-    <!-- Logo -->
     <svg width="45" height="45" viewBox="0 0 100 100">
       <circle cx="50" cy="50" r="46" fill="white" stroke="#ffeb3b" stroke-width="4" />
       <text x="50" y="57" text-anchor="middle" font-size="40" font-family="Segoe UI" fill="#0d47a1" font-weight="800">V</text>
     </svg>
-
     <span class="brand-title">Mr. Vinsky</span>
   </div>
 </header>
@@ -190,42 +202,98 @@
 
 <div class="container">
 
+  <!-- PROJE ÖZETİ -->
   <div class="section">
     <h2><i data-feather="info"></i> Proje Özeti</h2>
-    <p>CAPTAKSI, yolcu ve sürücüleri hızlı ve güvenli şekilde buluşturan modern ulaşım uygulamasıdır.</p>
+    <p>CAPTAKSI, yolcu ve sürücüleri gerçek zamanlı olarak eşleştiren modern ulaşım ekosistemi.  
+    Bugün yapılanlar backend refactor, driver profile sistemi, araç yönetimi, güvenlik ekranları ve yönlendirme/rota geliştirmeleri içerir.</p>
   </div>
 
+  <!-- UYGULAMA DURUMU -->
   <div class="section">
     <h2><i data-feather="smartphone"></i> Uygulama Durumu</h2>
 
     <div class="progress-circles">
       <div class="circle-box">
-        <div class="circle" style="--target: 306deg;">85%</div>
+        <div class="circle" style="--target: 324deg;">90%</div>
         <p>Yolcu Uygulaması</p>
       </div>
+
       <div class="circle-box">
-        <div class="circle" style="--target: 270deg;">75%</div>
+        <div class="circle" style="--target: 288deg;">80%</div>
         <p>Sürücü Uygulaması</p>
       </div>
     </div>
   </div>
 
+  <!-- BACKEND DURUMU -->
   <div class="section">
     <h2><i data-feather="server"></i> Backend Durumu</h2>
 
     <div class="progress-circles">
       <div class="circle-box">
-        <div class="circle" style="--target: 324deg;">90%</div>
-        <p>Auth & Database</p>
+        <div class="circle" style="--target: 342deg;">95%</div>
+        <p>Auth + Profil</p>
       </div>
+
       <div class="circle-box">
-        <div class="circle" style="--target: 144deg;">40%</div>
+        <div class="circle" style="--target: 270deg;">75%</div>
         <p>Yolculuk Sistemi</p>
       </div>
+
       <div class="circle-box">
-        <div class="circle" style="--target: 288deg;">80%</div>
+        <div class="circle" style="--target: 306deg;">85%</div>
         <p>Socket.IO</p>
       </div>
+
+      <div class="circle-box">
+        <div class="circle" style="--target: 252deg;">70%</div>
+        <p>Araç Yönetimi</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- VISUAL TIMELINE (ARCHITECTURE FLOW) -->
+  <div class="section">
+    <h2><i data-feather="git-branch"></i> Architecture / Visual Timeline</h2>
+
+    <div class="timeline">
+
+      <div class="tl-item">
+        <h4>✔ Backend Refactor – Driver Routes</h4>
+        <p>driverRoutes.js yeniden düzenlendi, update + vehicle endpointleri eklendi.</p>
+      </div>
+
+      <div class="tl-item">
+        <h4>✔ Controller Improve – Profile & Vehicle</h4>
+        <p>Güncel driverController: profil, stats, araç bilgisi, güncelleme fonksiyonları.</p>
+      </div>
+
+      <div class="tl-item">
+        <h4>✔ Driver App – Profile Screen Upgrade</h4>
+        <p>Profil, istatistikler, settings, logout, responsivelayout tamamlandı.</p>
+      </div>
+
+      <div class="tl-item">
+        <h4>✔ Vehicle Screen Tamamlandı</h4>
+        <p>Backend bağlantısı, araç ekleme / düzenleme endpointleri hazır.</p>
+      </div>
+
+      <div class="tl-item">
+        <h4>✔ Security Screen eklendi</h4>
+        <p>Şifre değiştirme + e-mail/telefon güncelleme dinamik olarak çalışıyor.</p>
+      </div>
+
+      <div class="tl-item">
+        <h4>✔ Directions + Polyline Upgrade</h4>
+        <p>Google Directions API tam entegre edildi, rota çizimi optimize edildi.</p>
+      </div>
+
+      <div class="tl-item">
+        <h4>✔ Driver Home Screen Fix</h4>
+        <p>getDirections, activeRide branch fix, UI hataları çözüldü.</p>
+      </div>
+
     </div>
   </div>
 

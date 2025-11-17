@@ -3,160 +3,187 @@ const db = require('../db');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
-// =========================
-// GET NEARBY DRIVERS
-// =========================
-exports.getNearbyDrivers = async (req, res) => {
-  try {
-    const { lat, lon } = req.query;
-    if (!lat || !lon) {
-      return res.status(400).json({ message: 'Konum bilgisi (lat, lon) eksik.' });
-    }
-
-    const nearbyDrivers = await db.query(
-      `
-      SELECT 
-        d.id, 
-        d.ad, 
-        d.puan_ortalamasi, 
-        ST_AsGeoJSON(d.anlik_konum) as konum, 
-        v.tip_id as vehicle_type_id, 
-        vt.tip_adi as vehicle_type_name
-      FROM drivers d
-      JOIN vehicles v ON d.id = v.surucu_id
-      JOIN vehicle_types vt ON v.tip_id = vt.id
-      WHERE 
-        d.aktif_mi = true AND 
-        ST_DWithin(d.anlik_konum::geography, ST_MakePoint($1, $2)::geography, 5000)
-      `,
-      [lon, lat]
-    );
-
-    res.json(nearbyDrivers.rows);
-  } catch (err) {
-    console.error("Yakındaki sürücüler alınırken hata:", err.message);
-    res.status(500).send("Sunucu hatası");
-  }
-};
-
-// =========================
-// REGISTER DRIVER
-// =========================
+// ---------------- REGISTER ----------------
 exports.registerDriver = async (req, res) => {
   try {
     const { ad, soyad, telefon_numarasi, email, sifre } = req.body;
 
-    if (!ad || !soyad || !telefon_numarasi || !email || !sifre) {
-      return res.status(400).json({ message: "Lütfen tüm alanları doldurun." });
-    }
-
     const salt = await bcrypt.genSalt(10);
     const sifre_hash = await bcrypt.hash(sifre, salt);
 
-    const newDriverResult = await db.query(
-      "INSERT INTO drivers (ad, soyad, telefon_numarasi, email, sifre_hash) VALUES ($1, $2, $3, $4, $5) RETURNING id",
+    const newDriver = await db.query(
+      "INSERT INTO drivers (ad, soyad, telefon_numarasi, email, sifre_hash) VALUES ($1,$2,$3,$4,$5) RETURNING id",
       [ad, soyad, telefon_numarasi, email, sifre_hash]
     );
 
-    const newDriverId = newDriverResult.rows[0].id;
+    const payload = { driver: { id: newDriver.rows[0].id } };
+    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "5h" });
 
-    if (req.files && req.files.profileImage) {
-      await db.query(
-        "INSERT INTO documents (surucu_id, belge_tipi, dosya_url) VALUES ($1, $2, $3)",
-        [newDriverId, 'profil_fotografi', `/uploads/drivers/${newDriverId}/profile.jpg`]
-      );
-    }
-
-    if (req.files && req.files.criminalRecord) {
-      await db.query(
-        "INSERT INTO documents (surucu_id, belge_tipi, dosya_url) VALUES ($1, $2, $3)",
-        [newDriverId, 'sabika_kaydi', `/uploads/drivers/${newDriverId}/criminal_record.pdf`]
-      );
-    }
-
-    const payload = { driver: { id: newDriverId } };
-    jwt.sign(
-      payload,
-      process.env.JWT_SECRET,
-      { expiresIn: '5h' },
-      (err, token) => {
-        if (err) throw err;
-        res.status(201).json({
-          message: "Sürücü başarıyla oluşturuldu! Onay bekleniyor.",
-          driver: { id: newDriverId },
-          token
-        });
-      }
-    );
+    res.status(201).json({
+      message: "Sürücü oluşturuldu",
+      token,
+      id: newDriver.rows[0].id
+    });
   } catch (err) {
-    console.error("Sürücü kaydı sırasında hata:", err.message);
-    res.status(500).send("Sunucu hatası");
+    console.log(err);
+    res.status(500).json({ message: "Sunucu hatası" });
   }
 };
 
-// =========================
-// LOGIN DRIVER
-// =========================
+// ---------------- LOGIN ----------------
 exports.loginDriver = async (req, res) => {
   try {
     const { email, sifre } = req.body;
 
-    const driver = await db.query(
-      "SELECT * FROM drivers WHERE email = $1",
-      [email]
-    );
-
-    if (driver.rows.length === 0) {
-      return res.status(400).json({ message: "Hatalı kullanıcı bilgileri" });
-    }
+    const driver = await db.query("SELECT * FROM drivers WHERE email=$1", [email]);
+    if (driver.rows.length === 0)
+      return res.status(400).json({ message: "Geçersiz giriş" });
 
     const isMatch = await bcrypt.compare(sifre, driver.rows[0].sifre_hash);
-    if (!isMatch) {
-      return res.status(400).json({ message: "Hatalı kullanıcı bilgileri" });
-    }
+    if (!isMatch)
+      return res.status(400).json({ message: "Geçersiz giriş" });
 
     const payload = { driver: { id: driver.rows[0].id } };
-    jwt.sign(
-      payload,
-      process.env.JWT_SECRET,
-      { expiresIn: '5h' },
-      (err, token) => {
-        if (err) throw err;
-        res.json({ token });
-      }
-    );
+    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "5h" });
+
+    res.json({ token });
   } catch (err) {
-    console.error("Sürücü girişi sırasında hata:", err.message);
-    res.status(500).send("Sunucu hatası");
+    res.status(500).json({ message: "Sunucu hatası" });
   }
 };
 
-// =========================
-// UPDATE DRIVER STATUS
-// =========================
+// ---------------- DURUM / KONUM ----------------
 exports.updateDriverStatus = async (req, res) => {
   try {
-    const { aktif, konum } = req.body;
     const driverId = req.driver.id;
+    const { aktif, konum } = req.body;
 
-    const updateQuery = `
-      UPDATE drivers 
-      SET aktif_mi = $1, 
-          anlik_konum = ST_SetSRID(ST_MakePoint($2, $3), 4326) 
-      WHERE id = $4
-    `;
-    const values = [
-      aktif,
-      konum.longitude,
-      konum.latitude,
-      driverId
-    ];
+    await db.query(
+      `UPDATE drivers SET 
+         aktif_mi=$1,
+         anlik_konum = ST_SetSRID(ST_MakePoint($2,$3),4326)
+       WHERE id=$4`,
+      [aktif, konum.longitude, konum.latitude, driverId]
+    );
 
-    await db.query(updateQuery, values);
-
-    res.json({ message: "Durum ve konum başarıyla güncellendi." });
+    res.json({ message: "Güncellendi" });
   } catch (err) {
-    console.error("Sürücü durumu güncellenirken hata:", err.message);
-    res.status(500).send("Sunucu hatası");
+    res.status(500).json({ message: "Sunucu hatası" });
+  }
+};
+
+// ---------------- PROFİL GETIR ----------------
+exports.getDriverProfile = async (req, res) => {
+  try {
+    const id = req.driver.id;
+
+    const result = await db.query(
+      "SELECT id, ad, soyad, email, telefon_numarasi, aktif_mi FROM drivers WHERE id=$1",
+      [id]
+    );
+
+    res.json(result.rows[0]);
+  } catch (e) {
+    res.status(500).json({ message: "Sunucu hatası" });
+  }
+};
+
+// ---------------- İSTATİSTİKLER ----------------
+exports.getDriverStats = async (req, res) => {
+  try {
+    const id = req.driver.id;
+
+    const stats = await db.query(`
+      SELECT 
+        COUNT(*) AS rides,
+        COALESCE(SUM(gerceklesen_ucret),0) AS earnings,
+        COALESCE(SUM(ST_Distance(baslangic_konumu::geography, bitis_konumu::geography)/1000),0) AS distance
+      FROM rides
+      WHERE surucu_id=$1 AND durum='tamamlandi'
+    `, [id]);
+
+    res.json(stats.rows[0]);
+  } catch (err) {
+    res.status(500).json({ message: "Sunucu hatası" });
+  }
+};
+
+// ---------------- PROFİL GÜNCELLE ----------------
+exports.updateDriverProfile = async (req, res) => {
+  try {
+    const id = req.driver.id;
+    const { ad, soyad, email, telefon_numarasi } = req.body;
+
+    await db.query(
+      `UPDATE drivers 
+         SET ad=$1, soyad=$2, email=$3, telefon_numarasi=$4
+       WHERE id=$5`,
+      [ad, soyad, email, telefon_numarasi, id]
+    );
+
+    res.json({ message: "Profil güncellendi" });
+  } catch (err) {
+    res.status(500).json({ message: "Sunucu hatası" });
+  }
+};
+// ---------------- ARAÇ BİLGİLERİ GET ----------------
+// ---------------- ARAÇ BİLGİLERİ GET ----------------
+exports.getDriverVehicle = async (req, res) => {
+  try {
+    const id = req.driver.id;
+
+    const result = await db.query(
+      "SELECT * FROM vehicles WHERE surucu_id = $1 LIMIT 1",
+      [id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.json({ vehicle: null });
+    }
+
+    res.json({ vehicle: result.rows[0] });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "Sunucu hatası" });
+  }
+};
+
+
+// ---------------- ARAÇ EKLE ----------------
+exports.addDriverVehicle = async (req, res) => {
+  try {
+    const id = req.driver.id;
+    const { marka, model, plaka, renk } = req.body;
+
+    const result = await db.query(
+      `INSERT INTO vehicles (surucu_id, marka, model, plaka, renk)
+       VALUES ($1,$2,$3,$4,$5)
+       RETURNING *`,
+      [id, marka, model, plaka, renk]
+    );
+
+    res.status(201).json({ vehicle: result.rows[0] });
+  } catch (err) {
+    res.status(500).json({ message: "Sunucu hatası" });
+  }
+};
+
+// ---------------- ARAÇ GÜNCELLE ----------------
+exports.updateDriverVehicle = async (req, res) => {
+  try {
+    const id = req.driver.id;
+    const { marka, model, plaka, renk } = req.body;
+
+    const result = await db.query(
+      `UPDATE vehicles
+       SET marka=$1, model=$2, plaka=$3, renk=$4
+       WHERE surucu_id=$5
+       RETURNING *`,
+      [marka, model, plaka, renk, id]
+    );
+
+    res.json({ vehicle: result.rows[0] });
+  } catch (err) {
+    res.status(500).json({ message: "Sunucu hatası" });
   }
 };

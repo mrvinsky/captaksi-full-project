@@ -188,55 +188,44 @@
     </div>
 
     <div class="todo-item">
+      <i data-feather="git-merge"></i>
+      <div>**Backend Architecture + Visual Timeline** dokümantasyonu tamamlanacak</div>
+    </div>
+
+    <div class="todo-item">
       <i data-feather="globe"></i>
-      <div>Gerçek domain ve SSL kurulumu</div>
-    </div>
-
-    <div class="todo-item">
-      <i data-feather="smartphone"></i>
-      <div>Uygulamaların Play Store & App Store yayına hazırlanması</div>
+      <div>Gerçek domain ve SSL kurulumu (Nginx + Certbot)</div>
     </div>
 
   </div>
 
-  <!-- YOLCU UYGULAMASI -->
-  <div class="section">
-    <h2><i data-feather="user"></i> Yolcu Uygulaması (Customer App)</h2>
-
-    <div class="todo-item">
-      <i data-feather="map-pin"></i>
-      <div>Adres arama sistemi %100 doğruluk için geliştirme</div>
-    </div>
-
-    <div class="todo-item">
-      <i data-feather="credit-card"></i>
-      <div>Ödeme sistemi (isteğe bağlı)</div>
-    </div>
-
-    <div class="todo-item">
-      <i data-feather="star"></i>
-      <div>Yolculuk sonrası puanlama arayüzü</div>
-    </div>
-
-  </div>
-
-  <!-- SÜRÜCÜ UYGULAMASI -->
+  <!-- DRIVER APP -->
   <div class="section">
     <h2><i data-feather="truck"></i> Sürücü Uygulaması (Driver App)</h2>
 
     <div class="todo-item">
       <i data-feather="toggle-left"></i>
-      <div>Aktif/Pasif durum ekranının iyileştirilmesi</div>
+      <div>Aktif / Pasif durum yönetimi ve konum güncelleme stabilizasyonu</div>
     </div>
 
     <div class="todo-item">
       <i data-feather="map"></i>
-      <div>Rota çizimi performans optimizasyonu</div>
+      <div>Rota çizimi optimize edildi → son testler yapılacak</div>
     </div>
 
     <div class="todo-item">
-      <i data-feather="alert-triangle"></i>
-      <div>Konum hatası durum yönetimi</div>
+      <i data-feather="user"></i>
+      <div>Profil ekranı → <b>Detaylı profil düzenleme</b> + <b>Güvenlik ayarları</b></div>
+    </div>
+
+    <div class="todo-item">
+      <i data-feather="truck"></i>
+      <div>Araç Bilgileri ekranı (vehicle_screen.dart) → <b>Backend bağlantısı tamamlandı</b></div>
+    </div>
+
+    <div class="todo-item">
+      <i data-feather="cpu"></i>
+      <div>Yeni Vehicle endpoint'lerinin Flutter tarafında test edilmesi</div>
     </div>
 
   </div>
@@ -246,18 +235,28 @@
     <h2><i data-feather="server"></i> Backend (Node.js API)</h2>
 
     <div class="todo-item">
+      <i data-feather="bookmark"></i>
+      <div>Driver araç endpoint'leri tamamlandı → <b>/api/drivers/me/vehicle</b></div>
+    </div>
+
+    <div class="todo-item">
       <i data-feather="shield"></i>
-      <div>JWT güvenlik katmanı güncellemeleri</div>
+      <div>Profil Güncelleme endpoint'i → <b>/me/update</b> eklendi ve test edildi</div>
     </div>
 
     <div class="todo-item">
-      <i data-feather="refresh-cw"></i>
-      <div>Socket.IO gerçek zamanlı bağlantı stabilizasyonu</div>
+      <i data-feather="code"></i>
+      <div>driverRoutes.js refactor → tekrarlanan importlar temizlendi</div>
     </div>
 
     <div class="todo-item">
-      <i data-feather="database"></i>
-      <div>Yolculuk yönetimi için yeni endpoint'lerin eklenmesi</div>
+      <i data-feather="triangle"></i>
+      <div>404 & 500 hata yönetimi için global middleware eklenecek</div>
+    </div>
+
+    <div class="todo-item">
+      <i data-feather="cpu"></i>
+      <div>Vehicle DB tablosu tam bağlandı → CRUD işlemleri sırada</div>
     </div>
 
   </div>

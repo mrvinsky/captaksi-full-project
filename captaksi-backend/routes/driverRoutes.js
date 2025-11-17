@@ -1,35 +1,34 @@
-// routes/driverRoutes.js
 const express = require('express');
 const router = express.Router();
-const multer = require('multer');
-const upload = multer({ storage: multer.memoryStorage() });
-
-const authDriverMiddleware = require('../middleware/authDriver');
 
 const {
   registerDriver,
   loginDriver,
   updateDriverStatus,
-  getNearbyDrivers
+  getDriverProfile,
+  getDriverStats,
+  updateDriverProfile,
+  getDriverVehicle,        // ← Araç endpoints
+  updateDriverVehicle      // ← Araç endpoints
 } = require('../controllers/driverController');
 
-// NEARBY DRIVERS
-router.get('/nearby', authDriverMiddleware, getNearbyDrivers);
+const authDriver = require('../middleware/authDriver');
+const upload = require('../middleware/upload'); // multer
 
-// REGISTER
-router.post(
-  '/register',
-  upload.fields([
-    { name: 'profileImage', maxCount: 1 },
-    { name: 'criminalRecord', maxCount: 1 }
-  ]),
-  registerDriver
-);
-
-// LOGIN
+// ---------- AUTH ----------
+router.post('/register', upload, registerDriver);
 router.post('/login', loginDriver);
 
-// STATUS UPDATE (aktif + konum)
-router.patch('/me/status', authDriverMiddleware, updateDriverStatus);
+// ---------- DRIVER STATUS ----------
+router.patch('/me/status', authDriver, updateDriverStatus);
+
+// ---------- PROFILE ----------
+router.get('/me', authDriver, getDriverProfile);
+router.get('/me/stats', authDriver, getDriverStats);
+router.put('/me', authDriver, updateDriverProfile);
+
+// ---------- VEHICLE ----------
+router.get('/me/vehicles', authDriver, getDriverVehicle);
+router.put('/me/vehicles', authDriver, updateDriverVehicle);
 
 module.exports = router;

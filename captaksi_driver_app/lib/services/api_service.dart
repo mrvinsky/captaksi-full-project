@@ -1,94 +1,80 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 
-/// Sürücü uygulaması için API katmanı.
-/// Tüm HTTP istekleri buradan geçer, token yönetimi merkezi olarak yapılır.
 class ApiService {
-  // Emülatörde backend için 10.0.2.2 kullanıyoruz.
   static const String _driverBaseUrl = 'http://10.0.2.2:3000/api/drivers';
   static const String _rideBaseUrl = 'http://10.0.2.2:3000/api/rides';
 
-  // !!! GERÇEK KEYİ REPOYA KOYMA !!!
-  static const String _googleApiKey = 'BURAYA_GOOGLE_API_KEY_GELECEK';
+  // GOOGLE KEY
+  static const String _googleApiKey = "BURAYA_GOOGLE_KEY_GELECEK";
 
+  // <<< BURASI ÖNEMLİ: typo düzeltildi >>>
   static const FlutterSecureStorage _storage = FlutterSecureStorage();
 
   final http.Client _client;
-
   ApiService({http.Client? client}) : _client = client ?? http.Client();
 
-  // ---------------- TOKEN YÖNETİMİ ----------------
+  // ---------------- TOKEN ----------------
+  static Future<void> storeToken(String token) async =>
+      await _storage.write(key: "jwt_token", value: token);
 
-  static Future<void> storeToken(String token) async {
-    await _storage.write(key: 'jwt_token', value: token);
-  }
+  static Future<String?> getToken() async =>
+      await _storage.read(key: "jwt_token");
 
-  static Future<String?> getToken() async {
-    return _storage.read(key: 'jwt_token');
-  }
+  static Future<void> deleteToken() async =>
+      await _storage.delete(key: "jwt_token");
 
-  static Future<void> deleteToken() async {
-    await _storage.delete(key: 'jwt_token');
-  }
-
-  // ---------------- GENEL ----------------
-
-  Uri _buildUri(String base, String path) {
-    return Uri.parse('$base$path');
-  }
+  // ---------------- HELPERS ----------------
+  Uri _buildUri(String base, String path) => Uri.parse("$base$path");
 
   Map<String, String> _jsonHeaders(String? token) {
-    final headers = <String, String>{
-      HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8',
+    final headers = {
+      HttpHeaders.contentTypeHeader: "application/json; charset=utf-8",
     };
     if (token != null && token.isNotEmpty) {
-      headers['x-auth-token'] = token;
+      headers["x-auth-token"] = token;
     }
     return headers;
   }
 
-  Exception _buildException(http.Response response) {
+  Exception _buildException(http.Response res) {
     try {
-      final body = jsonDecode(response.body);
-      final msg = body is Map && body['message'] != null
-          ? body['message']
-          : 'İstek başarısız oldu. (${response.statusCode})';
-      return Exception(msg.toString());
-    } catch (e) {
-      return Exception('HTTP ${response.statusCode}');
+      final data = jsonDecode(res.body);
+      return Exception(data["message"] ?? "Hata: ${res.statusCode}");
+    } catch (_) {
+      return Exception("HTTP ${res.statusCode}");
     }
   }
 
   // ---------------- AUTH ----------------
 
   Future<String> loginDriver(String email, String password) async {
-    final url = _buildUri(_driverBaseUrl, '/login');
+    final url = _buildUri(_driverBaseUrl, "/login");
 
-    final response = await _client.post(
+    final res = await _client.post(
       url,
       headers: _jsonHeaders(null),
       body: jsonEncode({
-        'email': email,
-        'sifre': password,
+        "email": email,
+        "sifre": password,
       }),
     );
 
-    if (response.statusCode == 200) {
-      final body = jsonDecode(response.body);
-      final token = body['token']?.toString() ?? "";
-      if (token.isEmpty) throw Exception("Token alınamadı.");
+    if (res.statusCode == 200) {
+      final body = jsonDecode(res.body);
+      final token = body["token"];
+      if (token == null) throw Exception("Token alınamadı.");
 
-      await ApiService.storeToken(token);
+      await storeToken(token);
       return token;
     }
 
-    throw _buildException(response);
+    throw _buildException(res);
   }
 
   Future<String> registerDriver({
@@ -100,167 +86,232 @@ class ApiService {
     File? profileImage,
     File? criminalRecordPdf,
   }) async {
-    final url = _buildUri(_driverBaseUrl, '/register');
+    final url = _buildUri(_driverBaseUrl, "/register");
 
     final req = http.MultipartRequest("POST", url)
-      ..fields['ad'] = ad
-      ..fields['soyad'] = soyad
-      ..fields['telefon_numarasi'] = telefonNumarasi
-      ..fields['email'] = email
-      ..fields['sifre'] = password;
+      ..fields["ad"] = ad
+      ..fields["soyad"] = soyad
+      ..fields["telefon_numarasi"] = telefonNumarasi
+      ..fields["email"] = email
+      ..fields["sifre"] = password;
 
     if (profileImage != null) {
-      req.files.add(await http.MultipartFile.fromPath(
-          'profileImage', profileImage.path));
+      req.files.add(
+        await http.MultipartFile.fromPath("profileImage", profileImage.path),
+      );
     }
 
     if (criminalRecordPdf != null) {
-      req.files.add(await http.MultipartFile.fromPath(
-          'criminalRecord', criminalRecordPdf.path));
+      req.files.add(
+        await http.MultipartFile.fromPath(
+            "criminalRecord", criminalRecordPdf.path),
+      );
     }
 
     final stream = await req.send();
-    final response = await http.Response.fromStream(stream);
+    final res = await http.Response.fromStream(stream);
 
-    if (response.statusCode == 201) {
-      final body = jsonDecode(response.body);
-      return body['message'] ?? "Kayıt başarılı.";
+    if (res.statusCode == 201) {
+      final body = jsonDecode(res.body);
+      return body["message"] ?? "Kayıt başarılı.";
     }
 
-    throw _buildException(response);
+    throw _buildException(res);
   }
 
-  // ---------------- STATUS ----------------
+  // ---------------- DURUM / KONUM ----------------
 
-  Future<void> updateDriverStatus(
-      bool isActive, double lat, double lng) async {
-    final token = await ApiService.getToken();
+  Future<void> updateDriverStatus(bool aktif, double lat, double lng) async {
+    final token = await getToken();
     if (token == null) throw Exception("Giriş gerekli.");
 
-    final url = _buildUri(_driverBaseUrl, '/me/status');
+    final url = _buildUri(_driverBaseUrl, "/me/status");
 
-    final response = await _client.patch(
+    final res = await _client.patch(
       url,
       headers: _jsonHeaders(token),
       body: jsonEncode({
-        'aktif': isActive,
-        'konum': {'latitude': lat, 'longitude': lng}
+        "aktif": aktif,
+        "konum": {
+          "latitude": lat,
+          "longitude": lng,
+        }
       }),
     );
 
-    if (response.statusCode != 200) throw _buildException(response);
+    if (res.statusCode != 200) throw _buildException(res);
   }
 
-  // ---------------- RIDES ----------------
+  // ---------------- RIDE ----------------
 
-  Future<Map<String, dynamic>> acceptRide(String rideId) async {
-    final token = await ApiService.getToken();
+  Future<Map<String, dynamic>> acceptRide(String id) async {
+    final token = await getToken();
     if (token == null) throw Exception("Giriş gerekli.");
 
-    final url = _buildUri(_rideBaseUrl, '/$rideId/accept');
-    final response = await _client.patch(url, headers: _jsonHeaders(token));
+    final url = _buildUri(_rideBaseUrl, "/$id/accept");
 
-    if (response.statusCode == 200) {
-      return jsonDecode(response.body);
-    }
+    final res = await _client.patch(url, headers: _jsonHeaders(token));
 
-    throw _buildException(response);
+    if (res.statusCode == 200) return jsonDecode(res.body);
+
+    throw _buildException(res);
   }
 
-  Future<Map<String, dynamic>> startRide(String rideId) async {
-    final token = await ApiService.getToken();
+  Future<Map<String, dynamic>> startRide(String id) async {
+    final token = await getToken();
     if (token == null) throw Exception("Giriş gerekli.");
 
-    final url = _buildUri(_rideBaseUrl, '/$rideId/start');
-    final response = await _client.patch(url, headers: _jsonHeaders(token));
+    final url = _buildUri(_rideBaseUrl, "/$id/start");
 
-    if (response.statusCode == 200) return jsonDecode(response.body);
+    final res = await _client.patch(url, headers: _jsonHeaders(token));
+    if (res.statusCode == 200) return jsonDecode(res.body);
 
-    throw _buildException(response);
+    throw _buildException(res);
   }
 
-  Future<Map<String, dynamic>> finishRide(String rideId) async {
-    final token = await ApiService.getToken();
+  Future<Map<String, dynamic>> finishRide(String id) async {
+    final token = await getToken();
     if (token == null) throw Exception("Giriş gerekli.");
 
-    final url = _buildUri(_rideBaseUrl, '/$rideId/finish');
-    final response = await _client.patch(url, headers: _jsonHeaders(token));
+    final url = _buildUri(_rideBaseUrl, "/$id/finish");
 
-    if (response.statusCode == 200) return jsonDecode(response.body);
+    final res = await _client.patch(url, headers: _jsonHeaders(token));
+    if (res.statusCode == 200) return jsonDecode(res.body);
 
-    throw _buildException(response);
+    throw _buildException(res);
   }
 
-  // ---------------- GOOGLE DIRECTIONS ----------------
+  // ---------------- PROFILE GET ----------------
 
-  Future<Map<String, dynamic>> getDirections(
-      LatLng origin, LatLng destination) async {
-    final url = Uri.parse(
-      "https://maps.googleapis.com/maps/api/directions/json?"
-      "origin=${origin.latitude},${origin.longitude}"
-      "&destination=${destination.latitude},${destination.longitude}"
-      "&key=$_googleApiKey",
+  Future<Map<String, dynamic>> getDriverProfile() async {
+    final token = await getToken();
+    if (token == null) throw Exception("Giriş gerekli.");
+
+    final url = _buildUri(_driverBaseUrl, "/me");
+
+    final res = await _client.get(url, headers: _jsonHeaders(token));
+
+    if (res.statusCode == 200) return jsonDecode(res.body);
+
+    throw _buildException(res);
+  }
+
+  Future<Map<String, dynamic>> getDriverStats() async {
+    final token = await getToken();
+    if (token == null) throw Exception("Giriş gerekli.");
+
+    final url = _buildUri(_driverBaseUrl, "/me/stats");
+
+    final res = await _client.get(url, headers: _jsonHeaders(token));
+
+    if (res.statusCode == 200) return jsonDecode(res.body);
+
+    throw _buildException(res);
+  }
+
+  // ---------------- PROFILE UPDATE ----------------
+
+  Future<void> updateDriverInfo({
+    String? email,
+    String? telefonNumarasi,
+    String? oldPassword,
+    String? newPassword,
+  }) async {
+    final token = await getToken();
+    if (token == null) throw Exception("Giriş gerekli.");
+
+    final url = _buildUri(_driverBaseUrl, "/me/update");
+
+    final res = await _client.patch(
+      url,
+      headers: _jsonHeaders(token),
+      body: jsonEncode({
+        "email": email,
+        "telefon_numarasi": telefonNumarasi,
+        "oldPassword": oldPassword,
+        "newPassword": newPassword,
+      }),
     );
 
-    final response = await _client.get(url);
+    if (res.statusCode != 200) throw _buildException(res);
+  }
 
-    if (response.statusCode != 200) {
-      throw Exception("Rota alınamadı: HTTP ${response.statusCode}");
+  // ---------------- VEHICLE ----------------
+  // vehicle_screen.dart içindeki getDriverVehicle çağrısını karşılar
+
+  Future<Map<String, dynamic>> getDriverVehicle() async {
+    final token = await ApiService.getToken();
+    if (token == null) throw Exception("Giriş gerekli.");
+
+    final url = _buildUri(_driverBaseUrl, "/me/vehicles");
+
+    final res = await _client.get(
+      url,
+      headers: _jsonHeaders(token),
+    );
+
+    if (res.statusCode == 200) {
+      return jsonDecode(res.body);
     }
 
-    final data = jsonDecode(response.body);
-    if (data['status'] != 'OK') {
-      throw Exception("Rota bulunamadı. Status: ${data['status']}");
+    throw _buildException(res);
+  }
+
+  // Eğer ileride ihtiyaç olursa:
+  Future<void> updateDriverVehicle({
+    required int vehicleTypeId,
+    required String plaka,
+    String? marka,
+    String? model,
+    String? renk,
+  }) async {
+    final token = await getToken();
+    if (token == null) throw Exception("Giriş gerekli.");
+
+    final url = _buildUri(_driverBaseUrl, "/me/vehicle");
+
+    final res = await _client.put(
+      url,
+      headers: _jsonHeaders(token),
+      body: jsonEncode({
+        "vehicle_type_id": vehicleTypeId,
+        "plaka": plaka,
+        "marka": marka,
+        "model": model,
+        "renk": renk,
+      }),
+    );
+
+    if (res.statusCode != 200) throw _buildException(res);
+  }
+
+  // ---------------- GOOGLE ROUTE ----------------
+
+  Future<Map<String, dynamic>> getDirections(LatLng origin, LatLng dest) async {
+    final url =
+        Uri.parse("https://maps.googleapis.com/maps/api/directions/json?"
+            "origin=${origin.latitude},${origin.longitude}"
+            "&destination=${dest.latitude},${dest.longitude}"
+            "&mode=driving"
+            "&key=$_googleApiKey");
+
+    final res = await _client.get(url);
+
+    if (res.statusCode != 200) throw Exception("Google Directions hatası");
+
+    final data = jsonDecode(res.body);
+    if (data["routes"] == null || data["routes"].isEmpty) {
+      throw Exception("Rota bulunamadı");
     }
 
-    final route = data['routes'][0];
-    final leg = route['legs'][0];
+    final route = data["routes"][0];
 
     return {
-      'polyline_points': route['overview_polyline']['points'],
-      'distance': leg['distance']['text'],
-      'duration': leg['duration']['text'],
-      'distance_value': leg['distance']['value'],
+      "polyline_points": route["overview_polyline"]["points"],
+      "distance_text": route["legs"][0]["distance"]["text"],
+      "duration_text": route["legs"][0]["duration"]["text"],
     };
   }
 
-  // ---------------- PROFILE ----------------
-
-  /// Sürücü profil bilgilerini getirir.
-  Future<Map<String, dynamic>> getDriverProfile() async {
-    final token = await ApiService.getToken();
-    if (token == null) throw Exception("Giriş gerekli.");
-
-    final url = _buildUri(_driverBaseUrl, '/me');
-    final response = await _client.get(url, headers: _jsonHeaders(token));
-
-    if (response.statusCode == 200) {
-      final body = jsonDecode(response.body);
-      return body['driver'];
-    }
-
-    throw _buildException(response);
-  }
-
-  /// Sürücü istatistiklerini getirir (Bolt Driver tarzı).
-  Future<Map<String, dynamic>> getDriverStats() async {
-    final token = await ApiService.getToken();
-    if (token == null) throw Exception("Giriş gerekli.");
-
-    final url = _buildUri(_driverBaseUrl, '/me/stats');
-    final response = await _client.get(url, headers: _jsonHeaders(token));
-
-    if (response.statusCode == 200) {
-      final body = jsonDecode(response.body);
-      return body['stats'];
-    }
-
-    throw _buildException(response);
-  }
-
-  // ---------------- CLEANUP ----------------
-
-  void dispose() {
-    _client.close();
-  }
+  void dispose() => _client.close();
 }
