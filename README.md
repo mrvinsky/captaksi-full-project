@@ -133,5 +133,5 @@ Aşağıdaki yapılacaklar aşağıda ayrıca listelenmiştir.
 
 ---
 
-<a href:"http://instagram.com/mr.vinsky"><h3 align="center">Developed with ❤️ by mr.vinsky</h3></a>
+<h3 align="center">Developed with ❤️ by<a href:"http://instagram.com/mr.vinsky"> mr.vinsky</h3></a>
 
