@@ -7,7 +7,6 @@
   <img src="https://img.shields.io/badge/Realtime-Socket.IO-yellow?style=for-the-badge">
 </p>
 
-<p align="center"><b>Uber benzeri iki taraflı sürücü–yolcu eşleme sistemi</b></p>
 
 ---
 
@@ -134,5 +133,5 @@ Aşağıdaki yapılacaklar aşağıda ayrıca listelenmiştir.
 
 ---
 
-<h3 align="center">Developed with ❤️ by Captaksi Team</h3>
+<a href:"http://instagram.com/mr.vinsky"><h3 align="center">Developed with ❤️ by mr.vinsky</h3></a>
 
