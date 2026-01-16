@@ -1,14 +1,16 @@
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
-module.exports = function(req, res, next) {
-  console.log("\n--- KORUMALI ROTA İSTEĞİ GELDİ (auth.js) ---");
-  
+module.exports = function (req, res, next) {
+  if (process.env.NODE_ENV === 'development') {
+    console.log("\n--- KORUMALI ROTA İSTEĞİ GELDİ (auth.js) ---");
+  }
+
   const token = req.header('x-auth-token');
-  console.log("Gelen Token:", token ? "VAR" : "YOK");
+  // console.log("Gelen Token:", token ? "VAR" : "YOK");
 
   if (!token) {
-    console.log("HATA: Token bulunamadı.");
+    // console.log("HATA: Token bulunamadı.");
     return res.status(401).json({ message: 'Yetki reddedildi, token bulunamadı' });
   }
 
@@ -17,7 +19,6 @@ module.exports = function(req, res, next) {
     console.log("Token başarıyla çözüldü. Payload:", decoded);
 
     req.user = decoded.user;
-    console.log("İstek bir sonraki adıma (endpoint'e) yönlendiriliyor...");
     next();
   } catch (err) {
     console.log("HATA: Token geçerli değil veya süresi dolmuş.");

@@ -10,6 +10,13 @@
 
 ---
 
+## 🚀 Son Güncellemeler (v1.1)
+- **Mobil Uygulama:** Release modunda çökme yaratan bağımlılık sorunu giderildi.
+- **Backend Güvenlik:** `helmet` eklendi, CORS kısıtlandı.
+- **Kod Temizliği:** Gereksiz loglar ve tekrarlanan rotalar temizlendi.
+
+---
+
 ## 📦 Proje Yapısı
 
 ```bash
@@ -88,9 +95,13 @@ npm install
 
 ```env
 PORT=3000
-DATABASE_URL=postgres://user:pass@localhost:5432/captaksi
+DB_USER=postgres
+DB_HOST=localhost
+DB_DATABASE=captaksi_db
+DB_PASSWORD=your_password
+DB_PORT=5432
 JWT_SECRET=super-secret-key
-GOOGLE_MAPS_KEY=xxxxx
+NODE_ENV=development
 ```
 
 Çalıştır:
@@ -120,10 +131,11 @@ static const baseUrl = "http://<your-ip>:3000/api";
 
 ## 🔐 Güvenlik Önemli Notlar
 
-- `.env` asla repo içinde olmaz  
-- Google Maps key → restrict et  
-- CORS → production domain ver  
-- Rate limit ekle  
+- [x] `.env` asla repo içinde olmaz  
+- [ ] Google Maps key → restrict et  
+- [x] CORS → production domain ver  
+- [x] Helmet ile güvenlik başlıkları ekle
+- [ ] Rate limit ekle  
 
 ---
 

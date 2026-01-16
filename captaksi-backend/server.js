@@ -5,6 +5,7 @@ const { Server } = require("socket.io");
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const db = require('./db');
+const helmet = require('helmet');
 
 const authMiddleware = require('./middleware/auth');
 const authDriverMiddleware = require('./middleware/authDriver');
@@ -31,7 +32,11 @@ const PORT = process.env.PORT || 3000;
 // =======================
 // GLOBAL MIDDLEWARE
 // =======================
-app.use(cors());
+app.use(helmet());
+app.use(cors({
+  origin: process.env.NODE_ENV === 'production' ? ['https://admin.captaksi.com'] : '*', // Prodüksiyon için düzenleyiniz
+  credentials: true
+}));
 app.use(express.json());
 
 
@@ -131,5 +136,4 @@ app.use('/api/rides', rideRoutes);
 server.listen(PORT, () => {
   console.log(`🚖 captaksi sunucusu ${PORT} portunda çalışıyor...`);
 });
-app.use('/api/drivers', require('./routes/driverRoutes'));
 app.use("/api/vehicles", require("./routes/vehicleRoutes"));
