@@ -63,7 +63,17 @@ node server.js
 
 ## 🔄 Son Değişiklikler (Changelog)
 
-*   **Driver App V2.0 (YENİ):**
+*   **User App V2.1 (YENİ - Midnight Taxi Update):**
+    *   **UI Overhaul:** Tüm tasarım "Midnight Taxi" konseptiyle yenilendi. Koyu gri (**Deep Charcoal**) zemin üzerine Premium Sarı (**Cheddar Yellow**) vurgular.
+    *   **Typography:** Google Fonts (**Poppins**) entegrasyonu ile modern yazı tipleri.
+    *   **UX İyileştirmeleri:** 
+        *   Login/Register ekranları modernize edildi (Hero Header, Şeffaf AppBar).
+        *   Taksi çağırma listesindeki görünmez yazı hatası giderildi (Dark Theme Fix).
+*   **Backend & Veritabanı:**
+    *   **PostGIS Kaldırıldı:** Kurulumu kolaylaştırmak için `GEOMETRY` tipleri yerine standart `DOUBLE PRECISION` (lat/lng) sütunlarına geçildi.
+    *   **Create Ride Fix:** Yolculuk oluşturma (`/api/rides`) endpoint'i ve veritabanı mantığı sıfırdan yazıldı.
+    *   **Socket.IO:** `rideController.js` içerisine manuel bildirim tetikleyicisi eklendi.
+*   **Driver App V2.0:**
     *   **UI Redesign:** Modern "Deep Blue & Cyan" temasına geçildi. Altın/Siyah renkler kaldırıldı.
     *   **Gelişmiş Kart Yapısı:** Yolculuk talepleri artık doğrudan kart üzerinden "Kabul Et" ve "Reddet" butonlarına sahip.
     *   **Platform Desteği:** Android'in yanı sıra **macOS (Desktop Native)** ve **Web** desteği eklendi.
