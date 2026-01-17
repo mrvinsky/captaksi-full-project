@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="tr">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,55 +8,50 @@
 
   <!-- Feather Icons -->
   <script src="https://unpkg.com/feather-icons"></script>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 
   <style>
+    :root {
+      --bg-color: #1E1E1E;
+      --surface-color: #2C2C2C;
+      --primary-color: #FFD600;
+      --text-color: #FFFFFF;
+      --text-secondary: #B0B0B0;
+      --glass-bg: rgba(44, 44, 44, 0.7);
+    }
+
     body {
       margin: 0;
-      font-family: "Segoe UI", sans-serif;
-      background: linear-gradient(135deg, #dfe9f3, #ffffff);
-      color: #333;
+      font-family: 'Poppins', sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      overflow-x: hidden;
     }
 
     /* HEADER */
     header {
-      padding: 50px 20px;
+      padding: 60px 20px;
       text-align: center;
-      background: linear-gradient(135deg, #0d47a1, #1565c0, #1e88e5);
-      color: white;
+      background: radial-gradient(circle at top, #333333, var(--bg-color));
       position: relative;
-      overflow: hidden;
-    }
-
-    header::after {
-      content: "";
-      position: absolute;
-      top: -50px;
-      left: -50px;
-      width: 200%;
-      height: 200%;
-      background: radial-gradient(circle, rgba(255,255,255,0.15), transparent 60%);
-      animation: rotate 20s linear infinite;
-    }
-
-    @keyframes rotate {
-      from { transform: rotate(0deg);}
-      to { transform: rotate(360deg);}
     }
 
     .brand-box {
       display: inline-flex;
       align-items: center;
-      gap: 14px;
-      background: rgba(255,255,255,0.18);
-      padding: 12px 25px;
-      border-radius: 18px;
-      backdrop-filter: blur(6px);
-      border: 1px solid rgba(255,255,255,0.3);
+      gap: 15px;
+      padding: 15px 30px;
+      border-radius: 50px;
+      background: rgba(255, 214, 0, 0.1);
+      border: 1px solid var(--primary-color);
+      box-shadow: 0 0 20px rgba(255, 214, 0, 0.2);
     }
 
     .brand-title {
-      font-size: 34px;
+      font-size: 32px;
       font-weight: 700;
+      color: var(--primary-color);
       letter-spacing: 1px;
     }
 
@@ -63,247 +59,294 @@
     nav {
       display: flex;
       justify-content: center;
-      background: #0d47a1;
-      padding: 14px 0;
+      gap: 30px;
+      padding: 20px 0;
+      background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.2));
     }
 
     nav a {
-      color: white;
+      color: var(--text-secondary);
       text-decoration: none;
-      margin: 0 20px;
-      font-size: 18px;
-      transition: 0.3s;
+      font-size: 16px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border-radius: 30px;
+      transition: all 0.3s ease;
     }
 
-    nav a:hover {
-      color: #ffeb3b;
+    nav a:hover,
+    nav a.active {
+      color: #000;
+      background: var(--primary-color);
+      transform: translateY(-2px);
     }
 
     .container {
       max-width: 1100px;
       margin: 40px auto;
       padding: 0 20px;
-      animation: fadeIn 1s ease-out;
+      animation: fadeIn 0.8s ease-out;
     }
 
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(25px);}
-      to { opacity: 1; transform: translateY(0);}
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     /* SECTIONS */
     .section {
-      background: white;
-      border-radius: 14px;
-      padding: 30px;
-      margin-bottom: 35px;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.08);
-      transition: 0.25s;
+      background: var(--surface-color);
+      border-radius: 20px;
+      padding: 40px;
+      margin-bottom: 30px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      transition: transform 0.3s;
     }
 
     .section:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 12px 35px rgba(0,0,0,0.15);
+      transform: translateY(-5px);
+      box-shadow: 0 15px 40px rgba(255, 214, 0, 0.05);
     }
 
     .section h2 {
       display: flex;
-      gap: 10px;
+      gap: 12px;
       align-items: center;
       font-size: 24px;
-      color: #0d47a1;
+      color: var(--primary-color);
+      margin-top: 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 15px;
+    }
+
+    p {
+      color: var(--text-secondary);
+      line-height: 1.6;
     }
 
     /* PROGRESS */
     .progress-circles {
       display: flex;
       justify-content: space-around;
-      text-align: center;
       flex-wrap: wrap;
-      gap: 40px;
-      margin-top: 20px;
+      gap: 30px;
+      margin-top: 30px;
     }
 
-    .circle-box { width: 170px; }
+    .circle-box {
+      text-align: center;
+      width: 160px;
+    }
 
     .circle {
-      width: 130px;
-      height: 130px;
+      width: 120px;
+      height: 120px;
       border-radius: 50%;
-      margin: auto;
-      font-size: 26px;
+      margin: 0 auto 15px;
+      font-size: 24px;
       font-weight: 700;
-      color: #ffffff;
+      color: var(--primary-color);
       display: flex;
       align-items: center;
       justify-content: center;
-      background: conic-gradient(#1565c0 var(--progress), #4e2626 0deg);
-      animation: fillCircle 2s forwards;
+      background: conic-gradient(var(--primary-color) var(--progress), rgba(255, 255, 255, 0.05) 0deg);
+      position: relative;
+      box-shadow: 0 0 15px rgba(255, 214, 0, 0.1);
     }
 
-    @keyframes fillCircle {
-      from { --progress: 0deg; }
-      to { --progress: var(--target); }
+    .circle::before {
+      content: "";
+      position: absolute;
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: var(--surface-color);
+    }
+
+    .circle span {
+      position: relative;
+      z-index: 2;
     }
 
     /* TIMELINE */
     .timeline {
-      border-left: 4px solid #0d47a1;
-      padding-left: 20px;
+      border-left: 2px solid var(--primary-color);
+      padding-left: 30px;
       margin-top: 20px;
     }
 
     .tl-item {
-      margin-bottom: 18px;
+      position: relative;
+      margin-bottom: 25px;
+    }
+
+    .tl-item::before {
+      content: "";
+      position: absolute;
+      left: -36px;
+      top: 5px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--primary-color);
+      box-shadow: 0 0 10px var(--primary-color);
     }
 
     .tl-item h4 {
       margin: 0;
-      color: #0d47a1;
+      color: #FFF;
       font-size: 18px;
     }
 
-    .tl-item p {
-      margin: 3px 0 0;
-      font-size: 14px;
-    }
-
     footer {
-      background: #0d47a1;
-      color: white;
       text-align: center;
-      padding: 18px;
-      margin-top: 40px;
+      padding: 40px;
+      color: var(--text-secondary);
+      font-size: 14px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      margin-top: 50px;
     }
 
     footer span {
-      color: #ffeb3b;
-      font-weight: 600;
+      color: var(--primary-color);
     }
   </style>
 </head>
 
 <body>
 
-<header>
-  <div class="brand-box">
-    <svg width="45" height="45" viewBox="0 0 100 100">
-      <circle cx="50" cy="50" r="46" fill="white" stroke="#ffeb3b" stroke-width="4" />
-      <text x="50" y="57" text-anchor="middle" font-size="40" font-family="Segoe UI" fill="#0d47a1" font-weight="800">V</text>
-    </svg>
-    <span class="brand-title">Mr. Vinsky</span>
-  </div>
-</header>
+  <header>
+    <div class="brand-box">
+      <img src="logo.svg" alt="Mr. Vinsky Logo" width="50" height="50">
+      <span class="brand-title">Mr. Vinsky</span>
+    </div>
+  </header>
 
-<nav>
-  <a href="index.html"><i data-feather="activity"></i> Durum</a>
-  <a href="todo.html"><i data-feather="list"></i> Yapılacaklar</a>
-</nav>
+  <nav>
+    <a href="index.html" class="active"><i data-feather="activity"></i> Durum</a>
+    <a href="todo.html"><i data-feather="list"></i> Yapılacaklar</a>
+  </nav>
 
-<div class="container">
+  <div class="container">
 
-  <!-- PROJE ÖZETİ -->
-  <div class="section">
-    <h2><i data-feather="info"></i> Proje Özeti</h2>
-    <p>CAPTAKSI, yolcu ve sürücüleri gerçek zamanlı olarak eşleştiren modern ulaşım ekosistemi.  
-    Bugün yapılanlar backend refactor, driver profile sistemi, araç yönetimi, güvenlik ekranları ve yönlendirme/rota geliştirmeleri içerir.</p>
-  </div>
+    <!-- PROJE ÖZETİ -->
+    <div class="section">
+      <h2><i data-feather="info"></i> Proje Özeti</h2>
+      <p>CAPTAKSI, yolcu ve sürücüleri buluşturan yeni nesil ulaşım platformu.
+        Yolcu Uygulaması, Sürücü Uygulaması, Yönetim Paneli ve güçlü Backend altyapısı ile tam kapsamlı bir çözüm sunar.
+        Son güncelleme ile <strong>"Midnight Taxi"</strong> konseptine geçildi, <strong>PostGIS</strong> bağımlılığı
+        kaldırıldı ve <strong>Yolculuk Algoritması</strong> yenilendi.</p>
+    </div>
 
-  <!-- UYGULAMA DURUMU -->
-  <div class="section">
-    <h2><i data-feather="smartphone"></i> Uygulama Durumu</h2>
+    <!-- UYGULAMA DURUMU -->
+    <div class="section">
+      <h2><i data-feather="smartphone"></i> Uygulama Durumu</h2>
 
-    <div class="progress-circles">
-      <div class="circle-box">
-        <div class="circle" style="--target: 324deg;">90%</div>
-        <p>Yolcu Uygulaması</p>
-      </div>
+      <div class="progress-circles">
+        <div class="circle-box">
+          <div class="circle" style="background: conic-gradient(#FFD600 350deg, rgba(255,255,255,0.05) 0deg);">
+            <span>98%</span>
+          </div>
+          <p>Yolcu Uygulaması<br><small>(Midnight UI)</small></p>
+        </div>
 
-      <div class="circle-box">
-        <div class="circle" style="--target: 288deg;">80%</div>
-        <p>Sürücü Uygulaması</p>
+        <div class="circle-box">
+          <div class="circle" style="background: conic-gradient(#00E5FF 340deg, rgba(255,255,255,0.05) 0deg);">
+            <span style="color:#00E5FF">95%</span>
+          </div>
+          <p>Sürücü Uygulaması<br><small>(Web + Desktop)</small></p>
+        </div>
+
+        <div class="circle-box">
+          <div class="circle" style="background: conic-gradient(#FF3D00 324deg, rgba(255,255,255,0.05) 0deg);">
+            <span style="color:#FF3D00">90%</span>
+          </div>
+          <p>Admin Paneli<br><small>(React Dashboard)</small></p>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- BACKEND DURUMU -->
-  <div class="section">
-    <h2><i data-feather="server"></i> Backend Durumu</h2>
+    <!-- BACKEND DURUMU -->
+    <div class="section">
+      <h2><i data-feather="server"></i> Backend & Altyapı</h2>
 
-    <div class="progress-circles">
-      <div class="circle-box">
-        <div class="circle" style="--target: 342deg;">95%</div>
-        <p>Auth + Profil</p>
-      </div>
+      <div class="progress-circles">
+        <div class="circle-box">
+          <div class="circle" style="background: conic-gradient(#76FF03 360deg, rgba(255,255,255,0.05) 0deg);">
+            <span style="color:#76FF03">100%</span>
+          </div>
+          <p>REST API</p>
+        </div>
 
-      <div class="circle-box">
-        <div class="circle" style="--target: 270deg;">75%</div>
-        <p>Yolculuk Sistemi</p>
-      </div>
+        <div class="circle-box">
+          <div class="circle" style="background: conic-gradient(#FFD600 330deg, rgba(255,255,255,0.05) 0deg);">
+            <span>92%</span>
+          </div>
+          <p>Socket.IO</p>
+        </div>
 
-      <div class="circle-box">
-        <div class="circle" style="--target: 306deg;">85%</div>
-        <p>Socket.IO</p>
-      </div>
-
-      <div class="circle-box">
-        <div class="circle" style="--target: 252deg;">70%</div>
-        <p>Araç Yönetimi</p>
+        <div class="circle-box">
+          <div class="circle" style="background: conic-gradient(#D500F9 300deg, rgba(255,255,255,0.05) 0deg);">
+            <span style="color:#D500F9">85%</span>
+          </div>
+          <p>Raporlama</p>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- VISUAL TIMELINE (ARCHITECTURE FLOW) -->
-  <div class="section">
-    <h2><i data-feather="git-branch"></i> Architecture / Visual Timeline</h2>
+    <!-- VISUAL TIMELINE -->
+    <div class="section">
+      <h2><i data-feather="git-branch"></i> Son Güncellemeler</h2>
 
-    <div class="timeline">
+      <div class="timeline">
 
-      <div class="tl-item">
-        <h4>✔ Backend Refactor – Driver Routes</h4>
-        <p>driverRoutes.js yeniden düzenlendi, update + vehicle endpointleri eklendi.</p>
+        <div class="tl-item">
+          <h4>✔ UI Redesign - Midnight Taxi</h4>
+          <p>Tüm mobil arayüz "Koyu Tema" ve "Sarı Akcent" ile yenilendi. Google Fonts eklendi.</p>
+        </div>
+
+        <div class="tl-item">
+          <h4>✔ Backend - PostGIS Removal</h4>
+          <p>Karmaşık PostGIS kurulumu yerine standart Latitude/Longitude sistemine geçildi. Kurulum kolaylaştı.</p>
+        </div>
+
+        <div class="tl-item">
+          <h4>✔ Admin Panel - V3.0</h4>
+          <p>React tabanlı yönetim paneli eklendi. Sürücü onayı, kullanıcı takibi ve gelir grafikleri aktif.</p>
+        </div>
+
+        <div class="tl-item">
+          <h4>✔ Driver App - Multiplatform</h4>
+          <p>Sürücü uygulaması artık macOS ve Web üzerinde de çalışıyor.</p>
+        </div>
+
+        <div class="tl-item">
+          <h4>✔ Fix - Ride Request</h4>
+          <p>Yolculuk oluşturma hatası (501) backend fonksiyonu yazılarak giderildi. Socket entegrasyonu yapıldı.</p>
+        </div>
+
       </div>
-
-      <div class="tl-item">
-        <h4>✔ Controller Improve – Profile & Vehicle</h4>
-        <p>Güncel driverController: profil, stats, araç bilgisi, güncelleme fonksiyonları.</p>
-      </div>
-
-      <div class="tl-item">
-        <h4>✔ Driver App – Profile Screen Upgrade</h4>
-        <p>Profil, istatistikler, settings, logout, responsivelayout tamamlandı.</p>
-      </div>
-
-      <div class="tl-item">
-        <h4>✔ Vehicle Screen Tamamlandı</h4>
-        <p>Backend bağlantısı, araç ekleme / düzenleme endpointleri hazır.</p>
-      </div>
-
-      <div class="tl-item">
-        <h4>✔ Security Screen eklendi</h4>
-        <p>Şifre değiştirme + e-mail/telefon güncelleme dinamik olarak çalışıyor.</p>
-      </div>
-
-      <div class="tl-item">
-        <h4>✔ Directions + Polyline Upgrade</h4>
-        <p>Google Directions API tam entegre edildi, rota çizimi optimize edildi.</p>
-      </div>
-
-      <div class="tl-item">
-        <h4>✔ Driver Home Screen Fix</h4>
-        <p>getDirections, activeRide branch fix, UI hataları çözüldü.</p>
-      </div>
-
     </div>
+
   </div>
 
-</div>
+  <footer>
+    © 2026 <span>Mr. Vinsky</span> | CAPTAKSI Proje Süreci
+  </footer>
 
-<footer>
-  © 2025 <span>Mr. Vinsky</span> | CAPTAKSI Proje Süreci
-</footer>
-
-<script>feather.replace();</script>
+  <script>feather.replace();</script>
 
 </body>
+
 </html>

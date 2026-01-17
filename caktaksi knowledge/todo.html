@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="tr">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,75 +8,77 @@
 
   <!-- Feather Icons -->
   <script src="https://unpkg.com/feather-icons"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 
   <style>
+    :root {
+      --bg-color: #1E1E1E;
+      --surface-color: #2C2C2C;
+      --primary-color: #FFD600;
+      --text-color: #FFFFFF;
+      --text-secondary: #B0B0B0;
+    }
+
     body {
       margin: 0;
-      font-family: "Segoe UI", sans-serif;
-      background: linear-gradient(135deg, #e3edf7, #ffffff);
-      color: #333;
+      font-family: 'Poppins', sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      overflow-x: hidden;
     }
 
     /* HEADER */
     header {
-      padding: 50px 20px;
+      padding: 60px 20px;
       text-align: center;
-      background: linear-gradient(135deg, #0d47a1, #1565c0, #1e88e5);
-      color: white;
+      background: radial-gradient(circle at top, #333333, var(--bg-color));
       position: relative;
-      overflow: hidden;
-    }
-
-    header::after {
-      content: "";
-      position: absolute;
-      top: -50px;
-      left: -50px;
-      width: 200%;
-      height: 200%;
-      background: radial-gradient(circle, rgba(255,255,255,0.15), transparent 60%);
-      animation: rotate 20s linear infinite;
-    }
-
-    @keyframes rotate {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
     }
 
     .brand-box {
       display: inline-flex;
       align-items: center;
-      gap: 14px;
-      background: rgba(255,255,255,0.18);
-      padding: 12px 25px;
-      border-radius: 18px;
-      backdrop-filter: blur(6px);
-      border: 1px solid rgba(255,255,255,0.3);
+      gap: 15px;
+      padding: 15px 30px;
+      border-radius: 50px;
+      background: rgba(255, 214, 0, 0.1);
+      border: 1px solid var(--primary-color);
+      box-shadow: 0 0 20px rgba(255, 214, 0, 0.2);
     }
 
     .brand-title {
-      font-size: 34px;
+      font-size: 32px;
       font-weight: 700;
+      color: var(--primary-color);
     }
 
     /* NAV */
     nav {
       display: flex;
       justify-content: center;
-      background: #0d47a1;
-      padding: 14px 0;
+      gap: 30px;
+      padding: 20px 0;
+      background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.2));
     }
 
     nav a {
-      color: white;
+      color: var(--text-secondary);
       text-decoration: none;
-      margin: 0 20px;
-      font-size: 18px;
-      transition: 0.3s;
+      font-size: 16px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border-radius: 30px;
+      transition: all 0.3s ease;
     }
 
-    nav a:hover {
-      color: #ffeb3b;
+    nav a:hover,
+    nav a.active {
+      color: #000;
+      background: var(--primary-color);
+      transform: translateY(-2px);
     }
 
     /* CONTAINER */
@@ -83,33 +86,35 @@
       max-width: 1100px;
       margin: 40px auto;
       padding: 0 20px;
-      animation: fadeIn 1s ease-out;
+      animation: fadeIn 0.8s ease-out;
     }
 
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(25px); }
-      to { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     /* SECTION */
     .section {
-      background: white;
-      border-radius: 14px;
-      padding: 30px;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+      background: var(--surface-color);
+      border-radius: 20px;
+      padding: 40px;
       margin-bottom: 30px;
-      animation: fadeUp 0.8s ease-out;
-      transition: 0.25s;
-    }
-
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(30px); }
-      to { opacity: 1; transform: translateY(0); }
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      transition: 0.3s;
     }
 
     .section:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 12px 35px rgba(0,0,0,0.15);
+      transform: translateY(-5px);
+      box-shadow: 0 15px 40px rgba(255, 214, 0, 0.05);
     }
 
     .section h2 {
@@ -117,159 +122,197 @@
       align-items: center;
       gap: 12px;
       font-size: 24px;
-      color: #0d47a1;
+      color: var(--primary-color);
+      margin-top: 0;
+      padding-bottom: 15px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
 
     /* TODO ITEMS */
+    .todo-group {
+      margin-top: 20px;
+    }
+
     .todo-item {
       display: flex;
-      align-items: flex-start;
-      gap: 14px;
-      padding: 14px 0;
-      border-bottom: 1px solid #eee;
-      transition: 0.3s;
-    }
-
-    .todo-item:last-child {
-      border-bottom: none;
-    }
-
-    .todo-item i {
-      color: #0d47a1;
+      align-items: center;
+      gap: 15px;
+      padding: 18px 20px;
+      margin-bottom: 10px;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 12px;
+      border-left: 4px solid transparent;
+      transition: all 0.3s;
     }
 
     .todo-item:hover {
-      transform: translateX(6px);
+      background: rgba(255, 255, 255, 0.06);
+      transform: translateX(5px);
+    }
+
+    .todo-item.high-priority {
+      border-left-color: #FF5252;
+    }
+
+    .todo-item.medium-priority {
+      border-left-color: #FFD600;
+    }
+
+    .todo-item.low-priority {
+      border-left-color: #64FFDA;
+    }
+
+    .todo-item i {
+      color: var(--text-secondary);
+    }
+
+    .todo-item.completed {
+      opacity: 0.5;
+      text-decoration: line-through;
+    }
+
+    /* BADGE */
+    .badge {
+      font-size: 11px;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-weight: 600;
+      margin-left: auto;
+      text-transform: uppercase;
+    }
+
+    .bg-red {
+      background: rgba(255, 82, 82, 0.2);
+      color: #FF5252;
+    }
+
+    .bg-yellow {
+      background: rgba(255, 214, 0, 0.2);
+      color: #FFD600;
+    }
+
+    .bg-green {
+      background: rgba(100, 255, 218, 0.2);
+      color: #64FFDA;
     }
 
     footer {
-      background: #0d47a1;
-      color: white;
       text-align: center;
-      padding: 20px;
-      margin-top: 40px;
+      padding: 40px;
+      color: var(--text-secondary);
+      font-size: 14px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      margin-top: 50px;
     }
 
     footer span {
-      color: #ffeb3b;
-      font-weight: 600;
+      color: var(--primary-color);
     }
-
   </style>
 </head>
+
 <body>
 
-<header>
-  <div class="brand-box">
-    <!-- Logo -->
-    <svg width="45" height="45" viewBox="0 0 100 100">
-      <circle cx="50" cy="50" r="46" fill="white" stroke="#ffeb3b" stroke-width="4" />
-      <text x="50" y="57" text-anchor="middle" font-size="40" font-family="Segoe UI" fill="#0d47a1" font-weight="800">V</text>
-    </svg>
+  <header>
+    <div class="brand-box">
+      <img src="logo.svg" alt="Mr. Vinsky Logo" width="50" height="50">
+      <span class="brand-title">Mr. Vinsky</span>
+    </div>
+  </header>
 
-    <span class="brand-title">Mr. Vinsky</span>
-  </div>
-</header>
+  <nav>
+    <a href="index.html"><i data-feather="activity"></i> Durum</a>
+    <a href="todo.html" class="active"><i data-feather="list"></i> Yapılacaklar</a>
+  </nav>
 
-<nav>
-  <a href="index.html"><i data-feather="activity"></i> Durum</a>
-  <a href="todo.html"><i data-feather="list"></i> Yapılacaklar</a>
-</nav>
+  <div class="container">
 
-<div class="container">
+    <!-- YAKLAŞAN GÖREVLER -->
+    <div class="section">
+      <h2><i data-feather="alert-circle"></i> Kritik Öncelikli (Yüksek)</h2>
 
-  <!-- GENEL YAPILACAKLAR -->
-  <div class="section">
-    <h2><i data-feather="check-circle"></i> Genel Yapılacaklar</h2>
+      <div class="todo-item high-priority">
+        <i data-feather="server"></i>
+        <div>Production Server (DigitalOcean/AWS) Kurulumu</div>
+        <span class="badge bg-red">V1.0 Launch</span>
+      </div>
 
-    <div class="todo-item">
-      <i data-feather="loader"></i>
-      <div>Sunucu optimizasyonu ve güvenlik kontrollerinin tamamlanması</div>
+      <div class="todo-item high-priority">
+        <i data-feather="shield"></i>
+        <div>SSL Sertifikası ve Domain Entegrasyonu</div>
+        <span class="badge bg-red">Güvenlik</span>
+      </div>
+
+      <div class="todo-item high-priority">
+        <i data-feather="smartphone"></i>
+        <div>iOS Uygulama Testleri & TestFlight Yayınlama</div>
+        <span class="badge bg-red">Mobile</span>
+      </div>
+
     </div>
 
-    <div class="todo-item">
-      <i data-feather="git-merge"></i>
-      <div>**Backend Architecture + Visual Timeline** dokümantasyonu tamamlanacak</div>
+    <!-- GELİŞTİRME SÜRECİ -->
+    <div class="section">
+      <h2><i data-feather="code"></i> Geliştirme Süreci (Orta Öncelik)</h2>
+
+      <div class="todo-item medium-priority">
+        <i data-feather="bell"></i>
+        <div>Push Notification Servisi Entegrasyonu (OneSignal / FCM)</div>
+        <span class="badge bg-yellow">Feature</span>
+      </div>
+
+      <div class="todo-item medium-priority">
+        <i data-feather="credit-card"></i>
+        <div>Ödeme Sistemi (Stripe/Iyzico) Entegrasyonu</div>
+        <span class="badge bg-yellow">Backend</span>
+      </div>
+
+      <div class="todo-item medium-priority">
+        <i data-feather="message-square"></i>
+        <div>Sürücü-Yolcu Arası Chat Sistemi</div>
+        <span class="badge bg-yellow">Socket.IO</span>
+      </div>
     </div>
 
-    <div class="todo-item">
-      <i data-feather="globe"></i>
-      <div>Gerçek domain ve SSL kurulumu (Nginx + Certbot)</div>
-    </div>
+    <!-- TAMAMLANANLAR (Log) -->
+    <div class="section">
+      <h2><i data-feather="check-circle"></i> Son Tamamlananlar</h2>
 
-  </div>
+      <div class="todo-item low-priority completed">
+        <i data-feather="check"></i>
+        <div>UI Redesign (Midnight Taxi Theme)</div>
+        <span class="badge bg-green">Done</span>
+      </div>
 
-  <!-- DRIVER APP -->
-  <div class="section">
-    <h2><i data-feather="truck"></i> Sürücü Uygulaması (Driver App)</h2>
+      <div class="todo-item low-priority completed">
+        <i data-feather="check"></i>
+        <div>Backend PostGIS Kaldırılması & Optimizasyon</div>
+        <span class="badge bg-green">Done</span>
+      </div>
 
-    <div class="todo-item">
-      <i data-feather="toggle-left"></i>
-      <div>Aktif / Pasif durum yönetimi ve konum güncelleme stabilizasyonu</div>
-    </div>
+      <div class="todo-item low-priority completed">
+        <i data-feather="check"></i>
+        <div>Admin Paneli Kurulumu (React)</div>
+        <span class="badge bg-green">Done</span>
+      </div>
 
-    <div class="todo-item">
-      <i data-feather="map"></i>
-      <div>Rota çizimi optimize edildi → son testler yapılacak</div>
-    </div>
-
-    <div class="todo-item">
-      <i data-feather="user"></i>
-      <div>Profil ekranı → <b>Detaylı profil düzenleme</b> + <b>Güvenlik ayarları</b></div>
-    </div>
-
-    <div class="todo-item">
-      <i data-feather="truck"></i>
-      <div>Araç Bilgileri ekranı (vehicle_screen.dart) → <b>Backend bağlantısı tamamlandı</b></div>
-    </div>
-
-    <div class="todo-item">
-      <i data-feather="cpu"></i>
-      <div>Yeni Vehicle endpoint'lerinin Flutter tarafında test edilmesi</div>
-    </div>
-
-  </div>
-
-  <!-- BACKEND -->
-  <div class="section">
-    <h2><i data-feather="server"></i> Backend (Node.js API)</h2>
-
-    <div class="todo-item">
-      <i data-feather="bookmark"></i>
-      <div>Driver araç endpoint'leri tamamlandı → <b>/api/drivers/me/vehicle</b></div>
-    </div>
-
-    <div class="todo-item">
-      <i data-feather="shield"></i>
-      <div>Profil Güncelleme endpoint'i → <b>/me/update</b> eklendi ve test edildi</div>
-    </div>
-
-    <div class="todo-item">
-      <i data-feather="code"></i>
-      <div>driverRoutes.js refactor → tekrarlanan importlar temizlendi</div>
-    </div>
-
-    <div class="todo-item">
-      <i data-feather="triangle"></i>
-      <div>404 & 500 hata yönetimi için global middleware eklenecek</div>
-    </div>
-
-    <div class="todo-item">
-      <i data-feather="cpu"></i>
-      <div>Vehicle DB tablosu tam bağlandı → CRUD işlemleri sırada</div>
+      <div class="todo-item low-priority completed">
+        <i data-feather="check"></i>
+        <div>Yolculuk Oluşturma Sorunu (Fix 501)</div>
+        <span class="badge bg-green">Done</span>
+      </div>
     </div>
 
   </div>
 
-</div>
+  <footer>
+    © 2026 <span>Mr. Vinsky</span> | CAPTAKSI Proje Süreci
+  </footer>
 
-<footer>
-  © 2025 <span>Mr. Vinsky</span> | CAPTAKSI Proje Süreci
-</footer>
-
-<script>
-  feather.replace();
-</script>
+  <script>
+    feather.replace();
+  </script>
 
 </body>
+
 </html>

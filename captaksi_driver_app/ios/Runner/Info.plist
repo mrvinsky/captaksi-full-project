@@ -45,5 +45,23 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
-</dict>
+    
+    <!-- Permissions -->
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>Sürücü uygulamasının yolculuk takibi yapabilmesi için konum izniniz gereklidir.</string>
+    <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+    <string>Arka planda çalışırken konumunuzu güncelleyebilmek için bu izne ihtiyaç duyulabilir.</string>
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>Belge ve profil fotoğrafı yüklemek için galeriye erişim izni gereklidir.</string>
+    <key>NSCameraUsageDescription</key>
+    <string>Fotoğraf çekmek için kameraya erişim izni gereklidir.</string>
+
+    <!-- Local Network & HTTP -->
+    <key>NSAppTransportSecurity</key>
+    <dict>
+        <key>NSAllowsArbitraryLoads</key>
+        <true/>
+        <key>NSAllowsLocalNetworking</key>
+        <true/>
+    </dict>
 </plist>
