@@ -62,3 +62,21 @@ token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjo0fSwiaWF0IjoxNz
 }
 TOKEN
 eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6eyJpZCI6MSwicm9sIjoiYWRtaW4ifSwiaWF0IjoxNzYwNzkzNTAyLCJleHAiOjE3NjA4Nzk5MDJ9.-IzKRmKEBAdQyboN2zKWlkjJS6Ipzg3x9euflyMB6MM"
+
+--------------------------------------------------
+USER TYPE: RIDER (Test Automation)
+DATE: 2026-01-17T06:27:22.133Z
+EMAIL: test_1768631241909@example.com
+PASSWORD: password123
+PHONE: 5551241909
+TOKEN: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoxMX0sImlhdCI6MTc2ODYzMTI0MiwiZXhwIjoxNzY4NjQ5MjQyfQ.pZAYmLr4i5avKsk7XST3TJr4XSGc0iVUhE8E99_SVmw
+--------------------------------------------------
+
+--------------------------------------------------
+USER TYPE: DRIVER (Test Automation)
+DATE: 2026-01-17T06:38:37.443Z
+EMAIL: driver_1768631916903@example.com
+PASSWORD: driver123
+PHONE: 5551916903
+TOKEN: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkcml2ZXIiOnsiaWQiOjF9LCJpYXQiOjE3Njg2MzE5MTcsImV4cCI6MTc2ODY0OTkxN30.4VjO4mjRkCP3lDNhZdbMRyHNPiNxjLPuMnHL_iV-HmE
+--------------------------------------------------

@@ -61,13 +61,15 @@ exports.updateDriverStatus = async (req, res) => {
     await db.query(
       `UPDATE drivers SET 
          aktif_mi=$1,
-         anlik_konum = ST_SetSRID(ST_MakePoint($2,$3),4326)
+         latitude=$2,
+         longitude=$3
        WHERE id=$4`,
-      [aktif, konum.longitude, konum.latitude, driverId]
+      [aktif, konum.latitude, konum.longitude, driverId]
     );
 
     res.json({ message: "Güncellendi" });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: "Sunucu hatası" });
   }
 };
@@ -93,17 +95,20 @@ exports.getDriverStats = async (req, res) => {
   try {
     const id = req.driver.id;
 
+    // PostGIS olmadığı için distance hesabını şimdilik 0 geçiyoruz veya JS tarafında hesaplanabilir.
+    // Basit olması adına şimdilik 0.
     const stats = await db.query(`
       SELECT 
         COUNT(*) AS rides,
         COALESCE(SUM(gerceklesen_ucret),0) AS earnings,
-        COALESCE(SUM(ST_Distance(baslangic_konumu::geography, bitis_konumu::geography)/1000),0) AS distance
+        0 AS distance
       FROM rides
       WHERE surucu_id=$1 AND durum='tamamlandi'
     `, [id]);
 
     res.json(stats.rows[0]);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: "Sunucu hatası" });
   }
 };

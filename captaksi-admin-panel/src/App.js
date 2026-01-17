@@ -1,297 +1,253 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import {
+    BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
+    PieChart, Pie, Cell
+} from 'recharts';
 import './App.css';
 
-// API sunucusunun adresi
 const API_URL = 'http://localhost:3000/api/admin';
+const COLORS = ['#F7C948', '#333'];
 
-// Ana App Bileşeni
 function App() {
-  const [token, setToken] = useState(localStorage.getItem('admin_token'));
-
-  if (!token) {
-    return <Login onLoginSuccess={setToken} />;
-  }
-
-  return <Dashboard token={token} onLogout={() => setToken(null)} />;
-}
-
-// Login Ekranı Bileşeni
-function Login({ onLoginSuccess }) {
-  const [email, setEmail] = useState('admin@captaksi.com');
-  const [password, setPassword] = useState('123456');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-    try {
-      const response = await fetch(`${API_URL}/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, sifre: password }),
-      });
-      const data = await response.json();
-      if (response.ok) {
-        localStorage.setItem('admin_token', data.token);
-        onLoginSuccess(data.token);
-      } else {
-        setError(data.message || 'Giriş başarısız.');
-      }
-    } catch (err) {
-      setError('Sunucuya bağlanılamadı.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <div className="login-container">
-      <div className="login-box">
-        <div className="icon">🚖</div>
-        <h2>Captaksi Admin Paneli</h2>
-        <form onSubmit={handleLogin}>
-          <div className="form-group">
-            <input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </div>
-          <div className="form-group">
-            <input
-              type="password"
-              placeholder="Şifre"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
-          {error && <p className="error-message">{error}</p>}
-          <button type="submit" disabled={loading}>
-            {loading ? 'Giriş yapılıyor...' : 'Giriş Yap'}
-          </button>
-        </form>
-      </div>
-    </div>
-  );
-}
-
-
-// Ana Panel (Dashboard) Bileşeni
-function Dashboard({ token, onLogout }) {
-  const [activePage, setActivePage] = useState('pendingDrivers');
-  const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
-  
-  const handleLogout = () => {
-    localStorage.removeItem('admin_token');
-    onLogout();
-  };
-
-  const navigateTo = (page) => {
-    setActivePage(page);
-    setMobileMenuOpen(false);
-  };
-
-  return (
-    <div className="dashboard-layout">
-      <aside className={`sidebar ${isMobileMenuOpen ? 'open' : ''}`}>
-        <h1>Captaksi</h1>
-        <nav>
-          <ul>
-            <li className={activePage === 'pendingDrivers' ? 'active' : ''} onClick={() => navigateTo('pendingDrivers')}>Onay Bekleyenler</li>
-            <li className={activePage === 'drivers' ? 'active' : ''} onClick={() => navigateTo('drivers')}>Sürücüler</li>
-            <li className={activePage === 'users' ? 'active' : ''} onClick={() => navigateTo('users')}>Kullanıcılar</li>
-            <li className={activePage === 'settings' ? 'active' : ''} onClick={() => navigateTo('settings')}>Ayarlar</li>
-          </ul>
-        </nav>
-        <button onClick={handleLogout} className="logout-button">Çıkış Yap</button>
-      </aside>
-
-      <div className={`sidebar-overlay ${isMobileMenuOpen ? 'open' : ''}`} onClick={() => setMobileMenuOpen(false)}></div>
-      
-      <main className="main-content">
-        <div className="content-header">
-           <div className="hamburger-menu" onClick={() => setMobileMenuOpen(!isMobileMenuOpen)}>
-              &#9776;
-            </div>
-          <h2>
-            {activePage === 'pendingDrivers' && `Onay Bekleyen Sürücüler`}
-            {activePage === 'drivers' && `Tüm Sürücüler`}
-            {activePage === 'users' && `Tüm Kullanıcılar`}
-            {activePage === 'settings' && `Ayarlar`}
-          </h2>
-        </div>
-
-        {activePage === 'pendingDrivers' && <PendingDriversPage token={token} />}
-        {activePage === 'drivers' && <DriversPage token={token} />}
-        {activePage === 'users' && <UsersPage token={token} />}
-        {activePage === 'settings' && <p>Genel ayarlar sayfası burada olacak.</p>}
-      </main>
-    </div>
-  );
-}
-
-
-// Onay Bekleyen Sürücüler Sayfası Bileşeni
-function PendingDriversPage({ token }) {
-    const [drivers, setDrivers] = useState([]);
-    const [stats, setStats] = useState(null);
-    const [selectedDriverId, setSelectedDriverId] = useState(null);
-
-    const fetchData = useCallback(() => {
-        const fetchPending = async () => {
-            try {
-                const response = await fetch(`${API_URL}/drivers/pending`, {
-                    headers: { 'x-auth-token': token },
-                });
-                const data = await response.json();
-                if (response.ok) {
-                    setDrivers(data);
-                }
-            } catch (err) {
-                console.error('Onay bekleyen sürücüler alınamadı:', err);
-            }
-        };
-
-        const fetchAllStats = async () => {
-            try {
-                const response = await fetch(`${API_URL}/stats`, {
-                    headers: { 'x-auth-token': token },
-                });
-                const data = await response.json();
-                if (response.ok) {
-                    setStats(data);
-                }
-            } catch (err) {
-                console.error('İstatistikler alınamadı:', err);
-            }
-        };
-
-        fetchPending();
-        fetchAllStats();
-    }, [token]);
+    const [token, setToken] = useState(localStorage.getItem('admin_token'));
 
     useEffect(() => {
-        fetchData();
-    }, [fetchData]);
-
-    const handleUpdateDriverStatus = async (driverId, status) => {
-        if (!window.confirm(`Sürücü #${driverId} hesabını "${status}" olarak işaretlemek istediğinizden emin misiniz?`)) {
-            return;
+        if (token) {
+            localStorage.setItem('admin_token', token);
+        } else {
+            localStorage.removeItem('admin_token');
         }
+    }, [token]);
+
+    if (!token) {
+        return <Login onLoginSuccess={setToken} />;
+    }
+
+    return <Dashboard token={token} onLogout={() => setToken(null)} />;
+}
+
+function Login({ onLoginSuccess }) {
+    const [email, setEmail] = useState('admin@captaksi.com');
+    const [password, setPassword] = useState('123456');
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
+
+    const handleLogin = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        setError('');
         try {
-            const response = await fetch(`${API_URL}/drivers/${driverId}/status`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'x-auth-token': token,
-                },
-                body: JSON.stringify({ status }),
+            const response = await fetch(`${API_URL}/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, sifre: password }),
             });
             const data = await response.json();
             if (response.ok) {
-                alert(data.message);
-                fetchData();
+                onLoginSuccess(data.token);
             } else {
-                alert('Hata: ' + data.message);
+                setError(data.message || 'Giriş başarısız.');
             }
         } catch (err) {
-            alert('Sunucuya bağlanılamadı.');
+            setError('Sunucuya bağlanılamadı.');
+        } finally {
+            setLoading(false);
         }
     };
 
     return (
-        <>
-            {selectedDriverId && <DriverDetailModal driverId={selectedDriverId} token={token} onClose={() => setSelectedDriverId(null)} />}
-            <div className="table-container">
-                {drivers.length > 0 ? (
-                    <table className="drivers-table">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Ad Soyad</th>
-                                <th>Email</th>
-                                <th>Telefon</th>
-                                <th>İşlemler</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {drivers.map((driver) => (
-                                <tr key={driver.id}>
-                                    <td>{driver.id}</td>
-                                    <td>{`${driver.ad || ''} ${driver.soyad || ''}`}</td>
-                                    <td>{driver.email}</td>
-                                    <td>{driver.telefon_numarasi}</td>
-                                    <td className="actions">
-                                        <button onClick={() => setSelectedDriverId(driver.id)} className="details">Detaylar</button>
-                                        <button onClick={() => handleUpdateDriverStatus(driver.id, 'onaylandi')} className="approve">Onayla</button>
-                                        <button onClick={() => handleUpdateDriverStatus(driver.id, 'reddedildi')} className="reject">Reddet</button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                ) : (
-                    <p>Onay bekleyen sürücü bulunmuyor.</p>
-                )}
+        <div className="login-container">
+            <div className="login-box">
+                <div className="icon">🚖</div>
+                <h2>Captaksi Takip Merkezi</h2>
+                <form onSubmit={handleLogin}>
+                    <div className="form-group">
+                        <input
+                            type="email"
+                            placeholder="Email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                        />
+                    </div>
+                    <div className="form-group">
+                        <input
+                            type="password"
+                            placeholder="Şifre"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                        />
+                    </div>
+                    {error && <p className="error-message">{error}</p>}
+                    <button type="submit" disabled={loading}>
+                        {loading ? 'Giriş yapılıyor...' : 'Giriş Yap'}
+                    </button>
+                </form>
             </div>
+        </div>
+    );
+}
 
+function Dashboard({ token, onLogout }) {
+    const [activePage, setActivePage] = useState('dashboard');
+    const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+    const navigateTo = (page) => {
+        setActivePage(page);
+        setMobileMenuOpen(false);
+    };
+
+    return (
+        <div className="dashboard-layout">
+            <aside className={`sidebar ${isMobileMenuOpen ? 'open' : ''}`}>
+                <h1>Captaksi</h1>
+                <nav>
+                    <ul>
+                        <li className={activePage === 'dashboard' ? 'active' : ''} onClick={() => navigateTo('dashboard')}>
+                            📊 Dashboard
+                        </li>
+                        <li className={activePage === 'pendingDrivers' ? 'active' : ''} onClick={() => navigateTo('pendingDrivers')}>
+                            ⏳ Bekleyenler
+                        </li>
+                        <li className={activePage === 'drivers' ? 'active' : ''} onClick={() => navigateTo('drivers')}>
+                            🚕 Sürücüler
+                        </li>
+                        <li className={activePage === 'users' ? 'active' : ''} onClick={() => navigateTo('users')}>
+                            👥 Kullanıcılar
+                        </li>
+                    </ul>
+                </nav>
+                <button onClick={onLogout} className="logout-button">🚪 Çıkış Yap</button>
+            </aside>
+
+            <div className={`sidebar-overlay ${isMobileMenuOpen ? 'open' : ''}`} onClick={() => setMobileMenuOpen(false)}></div>
+
+            <main className="main-content">
+                <div className="content-header">
+                    <div className="hamburger-menu" onClick={() => setMobileMenuOpen(!isMobileMenuOpen)}>
+                        &#9776;
+                    </div>
+                    <h2>
+                        {activePage === 'dashboard' && `Genel Bakış`}
+                        {activePage === 'pendingDrivers' && `Onay Bekleyen Başvurular`}
+                        {activePage === 'drivers' && `Tüm Sürücüler`}
+                        {activePage === 'users' && `Tüm Kullanıcılar`}
+                    </h2>
+                </div>
+
+                {activePage === 'dashboard' && <DashboardHome token={token} />}
+                {activePage === 'pendingDrivers' && <PendingDriversPage token={token} />}
+                {activePage === 'drivers' && <DriversPage token={token} />}
+                {activePage === 'users' && <UsersPage token={token} />}
+            </main>
+        </div>
+    );
+}
+
+function DashboardHome({ token }) {
+    const [stats, setStats] = useState(null);
+    const [chartData, setChartData] = useState(null);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                // Temel istatistikler
+                const statsRes = await fetch(`${API_URL}/stats`, { headers: { 'x-auth-token': token } });
+                if (statsRes.ok) setStats(await statsRes.json());
+
+                // Grafik verileri
+                const chartRes = await fetch(`${API_URL}/stats/charts`, { headers: { 'x-auth-token': token } });
+                if (chartRes.ok) setChartData(await chartRes.json());
+
+            } catch (err) { console.error(err); }
+        };
+        fetchData();
+    }, [token]);
+
+    return (
+        <div>
             <div className="stats-grid">
                 <StatCard title="Toplam Kullanıcı" value={stats?.totalUsers || '...'} />
                 <StatCard title="Toplam Sürücü" value={stats?.totalDrivers || '...'} />
-                <StatCard title="Tamamlanan Yolculuk" value={stats?.totalRides || '...'} />
-                <StatCard title="Toplam Gelir" value={`₺${stats?.totalRevenue || '...'}`} />
+                <StatCard title="Toplam Yolculuk" value={stats?.totalRides || '...'} />
+                <StatCard title="Toplam Ciro" value={`₺${stats?.totalRevenue || '...'}`} />
             </div>
-        </>
+
+            {chartData && (
+                <div className="charts-container" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '2rem' }}>
+                    <div className="chart-box" style={{ background: '#1e1e1e', padding: '20px', borderRadius: '12px' }}>
+                        <h3 style={{ color: '#aaa', marginBottom: '20px' }}>Aylık Gelir (Son 6 Ay)</h3>
+                        <ResponsiveContainer width="100%" height={300}>
+                            <BarChart data={chartData.monthlyRevenue}>
+                                <CartesianGrid strokeDasharray="3 3" stroke="#333" />
+                                <XAxis dataKey="name" stroke="#888" />
+                                <YAxis stroke="#888" />
+                                <Tooltip contentStyle={{ backgroundColor: '#333', borderColor: '#444' }} />
+                                <Bar dataKey="uv" fill="#F7C948" name="Gelir (TL)" radius={[4, 4, 0, 0]} />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </div>
+
+                    <div className="chart-box" style={{ background: '#1e1e1e', padding: '20px', borderRadius: '12px' }}>
+                        <h3 style={{ color: '#aaa', marginBottom: '20px' }}>Kullanıcı Dağılımı</h3>
+                        <ResponsiveContainer width="100%" height={300}>
+                            <PieChart>
+                                <Pie
+                                    data={chartData.userDistribution}
+                                    cx="50%"
+                                    cy="50%"
+                                    innerRadius={60}
+                                    outerRadius={80}
+                                    fill="#8884d8"
+                                    paddingAngle={5}
+                                    dataKey="value"
+                                >
+                                    {chartData.userDistribution.map((entry, index) => (
+                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                    ))}
+                                </Pie>
+                                <Tooltip contentStyle={{ backgroundColor: '#333', borderColor: '#444' }} />
+                                <Legend />
+                            </PieChart>
+                        </ResponsiveContainer>
+                    </div>
+                </div>
+            )}
+        </div>
     );
 }
 
-// Tüm Sürücüler Sayfası Bileşeni
-function DriversPage({ token }) {
+function PendingDriversPage({ token }) {
     const [drivers, setDrivers] = useState([]);
     const [selectedDriverId, setSelectedDriverId] = useState(null);
-    
-    const fetchAllDrivers = useCallback(async () => {
+
+    const fetchPending = useCallback(async () => {
         try {
-            const response = await fetch(`${API_URL}/drivers`, {
-                headers: { 'x-auth-token': token },
-            });
-            const data = await response.json();
-            if (response.ok) {
-                setDrivers(data);
-            }
-        } catch (err) {
-            console.error('Tüm sürücüler alınamadı:', err);
-        }
+            const response = await fetch(`${API_URL}/drivers/pending`, { headers: { 'x-auth-token': token } });
+            if (response.ok) setDrivers(await response.json());
+        } catch (err) { console.error(err); }
     }, [token]);
 
-    useEffect(() => {
-        fetchAllDrivers();
-    }, [fetchAllDrivers]);
-    
-    const handleDeleteDriver = async (driverId) => {
-        if (!window.confirm(`Sürücü #${driverId} hesabını kalıcı olarak silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.`)) {
-            return;
-        }
+    useEffect(() => { fetchPending(); }, [fetchPending]);
+
+    const updateStatus = async (id, status) => {
+        if (!window.confirm(`İşlemi onaylıyor musunuz?`)) return;
         try {
-            const response = await fetch(`${API_URL}/drivers/${driverId}`, {
-                method: 'DELETE',
-                headers: { 'x-auth-token': token },
+            const response = await fetch(`${API_URL}/drivers/${id}/status`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json', 'x-auth-token': token },
+                body: JSON.stringify({ status })
             });
-            const data = await response.json();
-            alert(data.message);
             if (response.ok) {
-                fetchAllDrivers(); // Listeyi yenile
+                alert('İşlem başarılı');
+                fetchPending();
             }
         } catch (err) {
-            alert('Sürücü silinirken bir hata oluştu.');
+            alert('Hata oluştu');
         }
     };
-    
+
     return (
         <>
             {selectedDriverId && <DriverDetailModal driverId={selectedDriverId} token={token} onClose={() => setSelectedDriverId(null)} />}
@@ -300,218 +256,245 @@ function DriversPage({ token }) {
                     <table className="drivers-table">
                         <thead>
                             <tr>
-                                <th>ID</th>
                                 <th>Ad Soyad</th>
                                 <th>Email</th>
-                                <th>Telefon</th>
-                                <th>Durum</th>
+                                <th>Tarih</th>
                                 <th>İşlemler</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {drivers.map((driver) => (
+                            {drivers.map(driver => (
                                 <tr key={driver.id}>
-                                    <td>{driver.id}</td>
-                                    <td>{`${driver.ad || ''} ${driver.soyad || ''}`}</td>
+                                    <td>{driver.ad} {driver.soyad}</td>
                                     <td>{driver.email}</td>
-                                    <td>{driver.telefon_numarasi}</td>
-                                    <td><span className={`status-badge status-${driver.hesap_onay_durumu}`}>{driver.hesap_onay_durumu}</span></td>
+                                    <td>{driver.kayit_tarihi ? new Date(driver.kayit_tarihi).toLocaleDateString() : '-'}</td>
                                     <td className="actions">
-                                        <button onClick={() => setSelectedDriverId(driver.id)} className="details">Detaylar</button>
-                                        <button onClick={() => handleDeleteDriver(driver.id)} className="delete">Sil</button>
+                                        <button className="details" onClick={() => setSelectedDriverId(driver.id)}>İncele</button>
+                                        <button className="approve" onClick={() => updateStatus(driver.id, 'onaylandi')}>Onayla</button>
+                                        <button className="reject" onClick={() => updateStatus(driver.id, 'reddedildi')}>Reddet</button>
                                     </td>
                                 </tr>
                             ))}
                         </tbody>
                     </table>
-                ) : (
-                    <p>Sisteme kayıtlı sürücü bulunmuyor.</p>
-                )}
+                ) : <p style={{ color: '#999' }}>Onay bekleyen sürücü yok.</p>}
             </div>
         </>
     );
 }
 
-// Tüm Kullanıcılar Sayfası Bileşeni
+function DriversPage({ token }) {
+    const [drivers, setDrivers] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [selectedDriverId, setSelectedDriverId] = useState(null);
+
+    const fetchDrivers = useCallback(async () => {
+        setLoading(true);
+        try {
+            const response = await fetch(`${API_URL}/drivers`, { headers: { 'x-auth-token': token } });
+            if (!response.ok) throw new Error('Veri alınamadı');
+
+            const data = await response.json();
+            // Verinin array olduğundan emin olun
+            if (Array.isArray(data)) {
+                setDrivers(data);
+                setError(null);
+            } else {
+                throw new Error('Veri formatı hatalı');
+            }
+        } catch (err) {
+            console.error(err);
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
+    }, [token]);
+
+    useEffect(() => { fetchDrivers(); }, [fetchDrivers]);
+
+    const deleteDriver = async (id) => {
+        if (!window.confirm('Sürücüyü silmek istediğinize emin misiniz?')) return;
+        try {
+            const res = await fetch(`${API_URL}/drivers/${id}`, {
+                method: 'DELETE',
+                headers: { 'x-auth-token': token }
+            });
+            if (res.ok) fetchDrivers();
+        } catch (err) { alert('Hata'); }
+    }
+
+    if (loading) return <p>Yükleniyor...</p>;
+    if (error) return <p style={{ color: 'red' }}>Hata: {error}</p>;
+
+    return (
+        <>
+            {selectedDriverId && <DriverDetailModal driverId={selectedDriverId} token={token} onClose={() => setSelectedDriverId(null)} />}
+            <div className="table-container">
+                <table className="drivers-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Ad Soyad</th>
+                            <th>Telefon</th>
+                            <th>Durum</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {drivers.map(d => (
+                            <tr key={d.id}>
+                                <td>{d.id}</td>
+                                <td>{d.ad} {d.soyad}</td>
+                                <td>{d.telefon_numarasi}</td>
+                                <td>
+                                    <span className={`status-badge status-${d.hesap_onay_durumu || 'bilinmiyor'}`}>
+                                        {d.hesap_onay_durumu || 'Bilinmiyor'}
+                                    </span>
+                                </td>
+                                <td className="actions">
+                                    <button className="details" onClick={() => setSelectedDriverId(d.id)}>Detay</button>
+                                    <button className="delete" onClick={() => deleteDriver(d.id)}>Sil</button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        </>
+    );
+}
+
 function UsersPage({ token }) {
     const [users, setUsers] = useState([]);
     const [selectedUserId, setSelectedUserId] = useState(null);
 
-    const fetchAllUsers = useCallback(async () => {
+    const fetchUsers = useCallback(async () => {
         try {
-            const response = await fetch(`${API_URL}/users`, {
-                headers: { 'x-auth-token': token },
-            });
-            const data = await response.json();
-            if (response.ok) {
-                setUsers(data);
-            }
-        } catch (err) {
-            console.error('Tüm kullanıcılar alınamadı:', err);
-        }
+            const response = await fetch(`${API_URL}/users`, { headers: { 'x-auth-token': token } });
+            if (response.ok) setUsers(await response.json());
+        } catch (err) { console.error(err); }
     }, [token]);
-    
-    useEffect(() => {
-        fetchAllUsers();
-    }, [fetchAllUsers]);
 
-    const handleDeleteUser = async (userId) => {
-        if (!window.confirm(`Kullanıcı #${userId} hesabını kalıcı olarak silmek istediğinizden emin misiniz?`)) {
-            return;
-        }
+    useEffect(() => { fetchUsers(); }, [fetchUsers]);
+
+    const deleteUser = async (id) => {
+        if (!window.confirm('Kullanıcıyı silmek istediğinize emin misiniz?')) return;
         try {
-            const response = await fetch(`${API_URL}/users/${userId}`, {
+            const res = await fetch(`${API_URL}/users/${id}`, {
                 method: 'DELETE',
-                headers: { 'x-auth-token': token },
+                headers: { 'x-auth-token': token }
             });
-            const data = await response.json();
-            alert(data.message);
-            if (response.ok) {
-                fetchAllUsers(); // Listeyi yenile
-            }
-        } catch (err) {
-            alert('Kullanıcı silinirken bir hata oluştu.');
-        }
-    };
-    
+            if (res.ok) fetchUsers();
+        } catch (err) { alert('Hata'); }
+    }
+
     return (
         <>
             {selectedUserId && <UserDetailModal userId={selectedUserId} token={token} onClose={() => setSelectedUserId(null)} />}
             <div className="table-container">
-                {users.length > 0 ? (
-                    <table className="drivers-table">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Ad Soyad</th>
-                                <th>Email</th>
-                                <th>Telefon</th>
-                                <th>İşlemler</th>
+                <table className="drivers-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Ad Soyad</th>
+                            <th>Email</th>
+                            <th>Telefon</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {users.map(u => (
+                            <tr key={u.id}>
+                                <td>{u.id}</td>
+                                <td>{u.ad} {u.soyad}</td>
+                                <td>{u.email}</td>
+                                <td>{u.telefon_numarasi}</td>
+                                <td className="actions">
+                                    <button className="details" onClick={() => setSelectedUserId(u.id)}>Detay</button>
+                                    <button className="delete" onClick={() => deleteUser(u.id)}>Sil</button>
+                                </td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            {users.map((user) => (
-                                <tr key={user.id}>
-                                    <td>{user.id}</td>
-                                    <td>{`${user.ad || ''} ${user.soyad || ''}`}</td>
-                                    <td>{user.email}</td>
-                                    <td>{user.telefon_numarasi}</td>
-                                    <td className="actions">
-                                        <button onClick={() => setSelectedUserId(user.id)} className="details">Detaylar</button>
-                                        <button onClick={() => handleDeleteUser(user.id)} className="delete">Sil</button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                ) : (
-                    <p>Sisteme kayıtlı kullanıcı bulunmuyor.</p>
-                )}
+                        ))}
+                    </tbody>
+                </table>
             </div>
         </>
     );
 }
 
-// Sürücü Detaylarını Gösteren Modal Bileşeni
 function DriverDetailModal({ driverId, token, onClose }) {
     const [driver, setDriver] = useState(null);
-    const [loading, setLoading] = useState(true);
+
     useEffect(() => {
-        const fetchDriverDetails = async () => {
-            try {
-                const response = await fetch(`${API_URL}/drivers/${driverId}`, {
-                    headers: { 'x-auth-token': token },
-                });
-                const data = await response.json();
-                if (response.ok) {
-                    setDriver(data);
-                }
-            } catch (err) {
-                console.error('Sürücü detayı alınamadı:', err);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchDriverDetails();
+        fetch(`${API_URL}/drivers/${driverId}`, { headers: { 'x-auth-token': token } })
+            .then(res => res.json())
+            .then(setDriver)
+            .catch(console.error);
     }, [driverId, token]);
+
+    if (!driver) return null;
+
     return (
         <div className="modal-overlay" onClick={onClose}>
-            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                {loading ? <p>Yükleniyor...</p> : driver ? (
-                    <>
-                        <div className="modal-header">
-                            <h3>{`${driver.ad} ${driver.soyad}`} Detayları</h3>
-                            <button onClick={onClose} className="close-button">&times;</button>
-                        </div>
-                        <h4>Bilgiler</h4>
+            <div className="modal-content" onClick={e => e.stopPropagation()}>
+                <div className="modal-header">
+                    <h3>Sürücü Detayı: {driver.ad} {driver.soyad}</h3>
+                    <button className="close-button" onClick={onClose}>&times;</button>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+                    <div>
+                        <h4>Kimlik Bilgileri</h4>
                         <p><strong>Email:</strong> {driver.email}</p>
                         <p><strong>Telefon:</strong> {driver.telefon_numarasi}</p>
-                        <p><strong>Onay Durumu:</strong> <span className={`status-badge status-${driver.hesap_onay_durumu}`}>{driver.hesap_onay_durumu}</span></p>
-                        
-                        <h4>Yüklenen Belgeler</h4>
-                        {driver.documents && driver.documents.length > 0 ? (
-                            <ul className="document-list">
-                                {driver.documents.map(doc => (
-                                    <li key={doc.id}>
-                                        {doc.belge_tipi}: <a href={`http://localhost:3000${doc.dosya_url}`} target="_blank" rel="noopener noreferrer">Görüntüle</a>
-                                    </li>
-                                ))}
-                            </ul>
-                        ) : <p>Yüklenmiş belge bulunmuyor.</p>}
-                    </>
-                ) : <p>Sürücü bilgileri yüklenemedi.</p>}
+                        <p><strong>Durum:</strong> {driver.hesap_onay_durumu}</p>
+                    </div>
+                    <div>
+                        <h4>Belgeler</h4>
+                        {driver.documents && driver.documents.map(doc => (
+                            <div key={doc.id} style={{ marginBottom: '10px', background: '#333', padding: '10px', borderRadius: '5px' }}>
+                                <strong>{doc.belge_tipi}</strong>
+                                <br />
+                                <small>Belge önizlemesi (Mock)</small>
+                            </div>
+                        ))}
+                    </div>
+                </div>
             </div>
         </div>
     );
 }
 
-// Kullanıcı Detaylarını Gösteren Modal Bileşeni
 function UserDetailModal({ userId, token, onClose }) {
     const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const fetchUserDetails = async () => {
-            try {
-                const response = await fetch(`${API_URL}/users/${userId}/details`, { headers: { 'x-auth-token': token } });
-                if (response.ok) setUser(await response.json());
-            } catch (err) {
-                console.error('Kullanıcı detayı alınamadı:', err);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchUserDetails();
+        fetch(`${API_URL}/users/${userId}/details`, { headers: { 'x-auth-token': token } })
+            .then(res => res.json())
+            .then(setUser)
+            .catch(console.error);
     }, [userId, token]);
+
+    if (!user) return null;
 
     return (
         <div className="modal-overlay" onClick={onClose}>
-            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                {loading ? <p>Yükleniyor...</p> : user ? (
-                    <>
-                        <div className="modal-header">
-                            <h3>{`${user.ad} ${user.soyad}`} Detayları</h3>
-                            <button onClick={onClose} className="close-button">&times;</button>
-                        </div>
-                        <h4>Genel Bilgiler</h4>
-                        <p><strong>Email:</strong> {user.email}</p>
-                        <p><strong>Telefon:</strong> {user.telefon_numarasi}</p>
-                        
-                        <h4>Yolculuk İstatistikleri</h4>
-                        {user.stats ? (
-                           <ul className="stats-list">
-                               <li><strong>Toplam Tamamlanan Yolculuk:</strong> {user.stats.totalRides}</li>
-                               <li><strong>Toplam Kat Edilen Mesafe:</strong> {user.stats.totalDistanceKm} km</li>
-                           </ul>
-                        ) : <p>İstatistik bulunmuyor.</p>}
-                    </>
-                ) : <p>Kullanıcı bilgileri yüklenemedi.</p>}
+            <div className="modal-content" onClick={e => e.stopPropagation()}>
+                <div className="modal-header">
+                    <h3>Kullanıcı Detayı: {user.ad} {user.soyad}</h3>
+                    <button className="close-button" onClick={onClose}>&times;</button>
+                </div>
+                <p><strong>Email:</strong> {user.email}</p>
+                <p><strong>Telefon:</strong> {user.telefon_numarasi}</p>
+                <div style={{ marginTop: '20px', padding: '15px', background: '#222', borderRadius: '10px' }}>
+                    <h4>İstatistikler</h4>
+                    <p>Toplam {user.stats?.totalRides || 0} yolculuk</p>
+                </div>
             </div>
         </div>
     );
 }
 
-// İstatistik Kartı Bileşeni
 function StatCard({ title, value }) {
     return (
         <div className="stat-card">
@@ -522,4 +505,3 @@ function StatCard({ title, value }) {
 }
 
 export default App;
-

@@ -25,6 +25,7 @@ dependencies:
   uuid: ^4.4.0
   flutter_polyline_points: ^2.0.0
   socket_io_client: ^2.0.3+1
+  google_fonts: ^7.0.2
   
 dev_dependencies:
   flutter_test:

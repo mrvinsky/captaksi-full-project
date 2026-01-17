@@ -64,87 +64,104 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(32.0),
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SizedBox(height: 60.0),
+              // --- HERO HEADER ---
               Icon(
-                Icons.local_taxi,
-                size: 120,
-                color: Theme.of(context).colorScheme.primary,
+                Icons.local_taxi_rounded,
+                size: 80,
+                color: Theme.of(context).primaryColor,
               ),
-              const SizedBox(height: 16.0),
+              const SizedBox(height: 20),
               Text(
-                'Captaksi',
+                'Hoş Geldiniz',
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 38,
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.onBackground,
+                style: Theme.of(context).textTheme.displayLarge?.copyWith(
+                  color: Colors.white,
+                  letterSpacing: 1.2,
                 ),
               ),
-              const SizedBox(height: 48.0),
+              const SizedBox(height: 10),
+              Text(
+                'Yolculuğun en konforlu hali',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  color: Colors.white54,
+                ),
+              ),
+              const SizedBox(height: 50.0),
+
+              // --- FORM ---
               TextField(
                 controller: _emailController,
-                decoration: InputDecoration(
+                style: const TextStyle(color: Colors.white),
+                decoration: const InputDecoration(
                   labelText: 'Email',
-                  hintText: 'email@ornek.com',
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                  prefixIcon: const Icon(Icons.email),
-                  filled: true,
-                  fillColor: Colors.grey[100],
+                  hintText: 'ornek@email.com',
+                  prefixIcon: Icon(Icons.email_outlined),
                 ),
                 keyboardType: TextInputType.emailAddress,
               ),
-              const SizedBox(height: 16.0),
+              const SizedBox(height: 20.0),
               TextField(
                 controller: _passwordController,
-                decoration: InputDecoration(
+                style: const TextStyle(color: Colors.white),
+                decoration: const InputDecoration(
                   labelText: 'Şifre',
-                  hintText: 'Minimum 8 karakter',
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                  prefixIcon: const Icon(Icons.lock),
-                  filled: true,
-                  fillColor: Colors.grey[100],
+                  hintText: '••••••••',
+                  prefixIcon: Icon(Icons.lock_outline),
                 ),
                 obscureText: true,
               ),
-              const SizedBox(height: 32.0),
-              ElevatedButton(
-                onPressed: _isLoading ? null : _login,
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 55),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                  backgroundColor: Theme.of(context).colorScheme.primary,
-                  foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                  textStyle: const TextStyle(
-                      fontSize: 18, fontWeight: FontWeight.bold),
+              const SizedBox(height: 40.0),
+
+              // --- ACTION BUTTON ---
+              SizedBox(
+                height: 56,
+                child: ElevatedButton(
+                  onPressed: _isLoading ? null : _login,
+                  child: _isLoading
+                      ? const SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(color: Colors.black, strokeWidth: 2.5),
+                        )
+                      : Text(
+                          'GİRİŞ YAP',
+                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                 ),
-                child: _isLoading
-                    ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text('Giriş Yap'),
               ),
-              const SizedBox(height: 20.0),
+              const SizedBox(height: 24.0),
+
+              // --- FOOTER ---
               TextButton(
                 onPressed: () {
-                  // YENİ: Kayıt sayfasına yönlendirme
                   Navigator.push(
                     context,
-                    MaterialPageRoute(
-                        builder: (context) => const RegisterScreen()),
+                    MaterialPageRoute(builder: (context) => const RegisterScreen()),
                   );
                 },
-                child: Text(
-                  'Hesabın yok mu? Kayıt Ol',
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.secondary,
-                    fontSize: 16,
+                child: RichText(
+                  text: TextSpan(
+                    text: 'Hesabın yok mu? ',
+                    style: const TextStyle(color: Colors.white60, fontSize: 16),
+                    children: [
+                      TextSpan(
+                        text: 'Kayıt Ol',
+                        style: TextStyle(
+                          color: Theme.of(context).primaryColor,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),

@@ -16,6 +16,7 @@ const authDriverMiddleware = require('./middleware/authDriver');
 const userRoutes = require('./routes/userRoutes');
 const driverRoutes = require('./routes/driverRoutes');
 const rideRoutes = require('./routes/rideRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 
 const app = express();
 const server = http.createServer(app);
@@ -129,6 +130,7 @@ app.get('/api/vehicle-types', async (req, res) => {
 app.use('/api/users', userRoutes);
 app.use('/api/drivers', driverRoutes);
 app.use('/api/rides', rideRoutes);
+app.use('/api/admin', adminRoutes);
 
 // =======================
 // SERVER BAŞLAT

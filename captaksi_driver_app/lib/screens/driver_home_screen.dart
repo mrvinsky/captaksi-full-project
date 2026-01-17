@@ -304,13 +304,22 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
   Widget offlineView() {
     return Stack(
       children: [
-        // ----- ARKA PLAN (blurred dark map-like background) -----
+        // ----- ARKA PLAN (Modern Dark Gradient) -----
         Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
-              colors: [Color(0xFF0F0F0F), Color(0xFF1A1A1A)],
+              colors: [
+                Color(0xFF0F172A), // Deep Blue
+                Color(0xFF1E293B), // Slate 800
+              ],
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
+            ),
+          ),
+          child: Center(
+            child: Opacity(
+              opacity: 0.05,
+              child: Icon(Icons.map, size: 400, color: Colors.white),
             ),
           ),
         ),
@@ -321,15 +330,15 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
           right: 0,
           bottom: 0,
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 26),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
             decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+              color: Color(0xFF1E293B), // Card Color
+              borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black26,
-                  blurRadius: 12,
-                  offset: Offset(0, -3),
+                  color: Colors.black45,
+                  blurRadius: 20,
+                  offset: Offset(0, -5),
                 )
               ],
             ),
@@ -337,64 +346,63 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 // --- DURUM YAZISI ---
-                Text(
+                const Text(
                   "Şu anda çevrimdışısın",
                   style: TextStyle(
-                    color: Colors.grey.shade800,
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
 
-                const SizedBox(height: 6),
+                const SizedBox(height: 8),
 
-                Text(
-                  "Çalışmaya başlamak için butona dokun",
+                const Text(
+                  "Yolculuk almaya başlamak için aktife geç",
                   style: TextStyle(
-                    color: Colors.grey.shade600,
-                    fontSize: 15,
+                    color: Colors.white54,
+                    fontSize: 16,
                   ),
                 ),
 
-                const SizedBox(height: 25),
+                const SizedBox(height: 30),
 
                 // --- ONLINE BUTTON ---
                 SizedBox(
                   width: double.infinity,
-                  height: 58,
+                  height: 60,
                   child: ElevatedButton(
                     onPressed: isLoading ? null : toggleOnline,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green.shade600,
+                      backgroundColor: const Color(0xFF38BDF8), // Cyan/Blue
+                      foregroundColor: Colors.black,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      elevation: 3,
+                      elevation: 4,
+                      shadowColor: const Color(0xFF38BDF8).withOpacity(0.4),
                     ),
                     child: isLoading
                         ? const CircularProgressIndicator(
-                            color: Colors.white,
+                            color: Colors.black,
                           )
                         : Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: const [
-                              Icon(Icons.power_settings_new,
-                                  color: Colors.white),
-                              SizedBox(width: 10),
+                              Icon(Icons.power_settings_new),
+                              SizedBox(width: 12),
                               Text(
                                 "ÇALIŞMAYA BAŞLA",
                                 style: TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.white,
+                                  letterSpacing: 1,
                                 ),
                               ),
                             ],
                           ),
                   ),
                 ),
-
-                const SizedBox(height: 12),
               ],
             ),
           ),
@@ -625,9 +633,12 @@ Widget buildWaitingPanel() {
       appBar: AppBar(
         title: Text(
           isOnline ? "Durum: Aktif" : "Durum: Çevrimdışı",
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
         ),
-        backgroundColor:
-            isOnline ? Colors.green.shade700 : Colors.blue.shade700,
+        backgroundColor: isOnline 
+            ? const Color(0xFF10B981) // Emerald 500
+            : Colors.transparent, // Transparent for seamless look
+        elevation: isOnline ? 4 : 0,
         actions: [
           IconButton(
             icon: Icon(isOnline ? Icons.pause : Icons.play_arrow),

@@ -28,7 +28,8 @@ async function updateDriverStatus({ driverId, aktif, longitude, latitude }) {
   const query = `
     UPDATE drivers 
     SET aktif_mi = $1, 
-        anlik_konum = ST_SetSRID(ST_MakePoint($2, $3), 4326) 
+        longitude = $2,
+        latitude = $3 
     WHERE id = $4
   `;
   const values = [aktif, longitude, latitude, driverId];
@@ -44,7 +45,8 @@ async function findNearbyDrivers({ lat, lon }) {
       d.id, 
       d.ad, 
       d.puan_ortalamasi, 
-      ST_AsGeoJSON(d.anlik_konum) as konum, 
+      d.latitude,
+      d.longitude,
       v.tip_id as vehicle_type_id, 
       vt.tip_adi as vehicle_type_name
     FROM drivers d
@@ -52,9 +54,9 @@ async function findNearbyDrivers({ lat, lon }) {
     JOIN vehicle_types vt ON v.tip_id = vt.id
     WHERE 
       d.aktif_mi = true AND 
-      ST_DWithin(d.anlik_konum::geography, ST_MakePoint($1, $2)::geography, 5000)
+      (POW(d.longitude - $1, 2) + POW(d.latitude - $2, 2)) < 0.1 
     `,
-    [lon, lat] // lon, lat sırası korunuyor
+    [lon, lat]
   );
 
   return result.rows;

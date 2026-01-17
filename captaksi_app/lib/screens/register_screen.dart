@@ -101,8 +101,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text('Hesap Oluştur'),
+        title: Text('Hesap Oluştur', style: Theme.of(context).textTheme.titleLarge),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -110,58 +114,153 @@ class _RegisterScreenState extends State<RegisterScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SizedBox(height: 20),
+              // --- PROFILE PHOTO ---
               Center(
                 child: GestureDetector(
                   onTap: _pickProfileImage,
-                  child: CircleAvatar(
-                    radius: 60,
-                    backgroundColor: Colors.grey[200],
-                    backgroundImage: _profileImage != null ? FileImage(_profileImage!) : null,
-                    child: _profileImage == null
-                        ? Icon(Icons.add_a_photo, size: 50, color: Colors.grey[600])
-                        : null,
+                  child: Stack(
+                    children: [
+                      Container(
+                        width: 120,
+                        height: 120,
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.secondary,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Theme.of(context).primaryColor, width: 2),
+                          image: _profileImage != null
+                              ? DecorationImage(image: FileImage(_profileImage!), fit: BoxFit.cover)
+                              : null,
+                        ),
+                        child: _profileImage == null
+                            ? const Icon(Icons.person_add_rounded, size: 50, color: Colors.white54)
+                            : null,
+                      ),
+                      if (_profileImage != null)
+                        Positioned(
+                          bottom: 0,
+                          right: 0,
+                          child: CircleAvatar(
+                            radius: 18,
+                            backgroundColor: Theme.of(context).primaryColor,
+                            child: const Icon(Icons.edit, size: 18, color: Colors.black),
+                          ),
+                        ),
+                    ],
                   ),
                 ),
+              ),
+              const SizedBox(height: 30),
+
+              // --- FORM INPUTS ---
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _adController,
+                      style: const TextStyle(color: Colors.white),
+                      decoration: const InputDecoration(labelText: 'Ad', prefixIcon: Icon(Icons.person_outlined)),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: TextField(
+                      controller: _soyadController,
+                      style: const TextStyle(color: Colors.white),
+                      decoration: const InputDecoration(labelText: 'Soyad', prefixIcon: Icon(Icons.person_outlined)),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              
+              TextField(
+                controller: _emailController,
+                style: const TextStyle(color: Colors.white),
+                decoration: const InputDecoration(labelText: 'Email', prefixIcon: Icon(Icons.email_outlined)),
+                keyboardType: TextInputType.emailAddress,
+              ),
+              const SizedBox(height: 16),
+              
+              TextField(
+                controller: _telefonController,
+                style: const TextStyle(color: Colors.white),
+                decoration: const InputDecoration(labelText: 'Telefon', prefixIcon: Icon(Icons.phone_outlined)),
+                keyboardType: TextInputType.phone,
+              ),
+              const SizedBox(height: 16),
+
+              TextField(
+                controller: _passwordController,
+                style: const TextStyle(color: Colors.white),
+                decoration: const InputDecoration(labelText: 'Şifre', prefixIcon: Icon(Icons.lock_outline)),
+                obscureText: true,
               ),
               const SizedBox(height: 24),
-              TextField(controller: _adController, decoration: InputDecoration(labelText: 'Ad', border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)), prefixIcon: const Icon(Icons.person))),
-              const SizedBox(height: 16),
-              TextField(controller: _soyadController, decoration: InputDecoration(labelText: 'Soyad', border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)), prefixIcon: const Icon(Icons.person_outline))),
-              const SizedBox(height: 16),
-              TextField(controller: _telefonController, decoration: InputDecoration(labelText: 'Telefon Numarası', border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)), prefixIcon: const Icon(Icons.phone)), keyboardType: TextInputType.phone),
-              const SizedBox(height: 16),
-              TextField(controller: _emailController, decoration: InputDecoration(labelText: 'Email', border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)), prefixIcon: const Icon(Icons.email)), keyboardType: TextInputType.emailAddress),
-              const SizedBox(height: 16),
-              TextField(controller: _passwordController, decoration: InputDecoration(labelText: 'Şifre', border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)), prefixIcon: const Icon(Icons.lock)), obscureText: true),
-              const SizedBox(height: 16),
-              OutlinedButton.icon(
-                onPressed: _pickCriminalRecord,
-                icon: const Icon(Icons.picture_as_pdf),
-                label: Flexible(
-                  child: Text(
-                    _criminalRecordPdf == null
-                        ? 'Sabıka Kaydı Yükle (PDF)'
-                        : 'PDF Seçildi: ${_criminalRecordPdf!.path.split(Platform.pathSeparator).last}',
-                    overflow: TextOverflow.ellipsis,
+
+              // --- FILE UPLOAD ---
+              InkWell(
+                onTap: _pickCriminalRecord,
+                borderRadius: BorderRadius.circular(16),
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.secondary,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.white12),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.description_outlined,
+                        color: _criminalRecordPdf != null ? Colors.greenAccent : Colors.white54,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          _criminalRecordPdf != null
+                              ? 'Sabıka Kaydı Seçildi (Değiştir)'
+                              : 'Sabıka Kaydı Yükle (PDF)',
+                          style: TextStyle(
+                            color: _criminalRecordPdf != null ? Colors.white : Colors.white54,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                      if (_criminalRecordPdf != null) const Icon(Icons.check_circle, color: Colors.greenAccent),
+                    ],
                   ),
                 ),
-                style: OutlinedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 50),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                ),
               ),
-              const SizedBox(height: 32),
-              ElevatedButton(
-                onPressed: _isLoading ? null : _register,
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 55),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  backgroundColor: Theme.of(context).colorScheme.primary,
-                  foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                  textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              if (_criminalRecordPdf != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8, left: 12),
+                  child: Text(
+                    _criminalRecordPdf!.path.split(Platform.pathSeparator).last,
+                    style: const TextStyle(color: Colors.white38, fontSize: 12),
+                  ),
                 ),
-                child: _isLoading ? const CircularProgressIndicator(color: Colors.white) : const Text('Kayıt Ol'),
+                
+              const SizedBox(height: 40),
+
+              // --- REGISTER BUTTON ---
+              SizedBox(
+                height: 56,
+                child: ElevatedButton(
+                  onPressed: _isLoading ? null : _register,
+                  child: _isLoading
+                      ? const SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(color: Colors.black, strokeWidth: 2.5),
+                        )
+                      : Text(
+                          'KAYIT OL',
+                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                ),
               ),
             ],
           ),

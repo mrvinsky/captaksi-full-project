@@ -419,32 +419,54 @@ class _HomeScreenState extends State<HomeScreen> {
           // Sürücü aranırken arayüzü gizle
           if (!_isSelectingDestination && !_isFindingDriver) ...[
             Positioned(bottom: MediaQuery.of(context).size.height * 0.3 + 20, right: 16,
-              child: FloatingActionButton(onPressed: () => _getCurrentLocation(setOrigin: true), backgroundColor: Colors.white, child: const Icon(Icons.my_location),),),
+              child: FloatingActionButton(
+                onPressed: () => _getCurrentLocation(setOrigin: true),
+                backgroundColor: Theme.of(context).colorScheme.surface,
+                foregroundColor: Colors.white,
+                child: const Icon(Icons.my_location),
+              ),
+            ),
             Positioned(top: 100, left: 15, right: 15,
               child: Container(
                 padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(10), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10, offset: const Offset(0, 5),)],),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surface,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 10, offset: const Offset(0, 5))],
+                ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     TextField(
                       controller: _originController, readOnly: true,
                       onTap: () => _openAddressSearch(isOrigin: true),
-                      decoration: InputDecoration(hintText: "Nereden?", prefixIcon: Icon(Icons.my_location, color: Colors.green), border: InputBorder.none,),),
-                    const Divider(),
+                      style: const TextStyle(color: Colors.white),
+                      decoration: const InputDecoration(
+                        filled: false,
+                        hintText: "Nereden?", 
+                        hintStyle: TextStyle(color: Colors.white54),
+                        prefixIcon: Icon(Icons.my_location, color: Colors.greenAccent), 
+                        border: InputBorder.none,
+                      ),
+                    ),
+                    Divider(color: Colors.grey[700]), 
                     TextField(controller: _destinationController, readOnly: true,
                       onTap: () => _openAddressSearch(isOrigin: false),
+                      style: const TextStyle(color: Colors.white),
                       decoration: InputDecoration(
+                        filled: false,
                         hintText: "Nereye? (Arama veya Pin)",
-                        prefixIcon: Icon(Icons.location_on, color: Colors.red),
-                        suffixIcon: IconButton(tooltip: "Haritadan Seç", icon: const Icon(Icons.push_pin_outlined),
+                        hintStyle: const TextStyle(color: Colors.white54),
+                        prefixIcon: const Icon(Icons.location_on, color: Colors.redAccent),
+                        suffixIcon: IconButton(tooltip: "Haritadan Seç", icon: const Icon(Icons.push_pin_outlined, color: Colors.white70),
                           onPressed: () {
                              setState(() {
                                _isSelectingDestination = true;
                              });
                           },
                         ),
-                        border: InputBorder.none,),
+                        border: InputBorder.none,
+                      ),
                     ),
                   ],
                 ),
@@ -456,7 +478,11 @@ class _HomeScreenState extends State<HomeScreen> {
               maxChildSize: 0.6,
               builder: (BuildContext context, ScrollController scrollController) {
                 return Container(
-                  decoration: BoxDecoration(color: Colors.white, borderRadius: const BorderRadius.only(topLeft: Radius.circular(24.0), topRight: Radius.circular(24.0),), boxShadow: [BoxShadow(blurRadius: 10.0, color: Colors.grey.withOpacity(0.5),)],),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surface,
+                    borderRadius: const BorderRadius.only(topLeft: Radius.circular(24.0), topRight: Radius.circular(24.0)),
+                    boxShadow: [BoxShadow(blurRadius: 10.0, color: Colors.black.withOpacity(0.5))],
+                  ),
                   child: FutureBuilder<List<VehicleType>>(
                     future: _vehicleTypesFuture,
                     builder: (context, snapshot) {
@@ -464,12 +490,12 @@ class _HomeScreenState extends State<HomeScreen> {
                         return const Center(child: CircularProgressIndicator());
                       }
                       if (snapshot.hasError) {
-                        return Center(child: Text('Hata: ${snapshot.error}'));
+                        return Center(child: Text('Hata: ${snapshot.error}', style: const TextStyle(color: Colors.white)));
                       }
                       final vehicleTypes = snapshot.data!;
                       return Column(
                         children: [
-                           Padding(padding: const EdgeInsets.symmetric(vertical: 12.0), child: Container(width: 40, height: 5, decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(12),),),),
+                           Padding(padding: const EdgeInsets.symmetric(vertical: 12.0), child: Container(width: 40, height: 5, decoration: BoxDecoration(color: Colors.grey[600], borderRadius: BorderRadius.circular(12)),),),
                           
                           if (_routeDistance != null)
                             Padding(
@@ -479,7 +505,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                   final estimatedFare = _calculateFare(vehicleTypes);
                                   return Container(
                                     padding: const EdgeInsets.all(12),
-                                    decoration: BoxDecoration(color: Colors.blue.shade50, borderRadius: BorderRadius.circular(12)),
+                                    decoration: BoxDecoration(
+                                      color: Theme.of(context).colorScheme.secondary,
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(color: Colors.white10),
+                                    ),
                                     child: Row(
                                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                                       children: [
@@ -499,13 +529,14 @@ class _HomeScreenState extends State<HomeScreen> {
                               itemCount: vehicleTypes.length,
                               itemBuilder: (BuildContext context, int index) {
                                 final vehicle = vehicleTypes[index];
+                                final isSelected = _selectedVehicleIndex == index;
                                 return ListTile(
                                   onTap: () => setState(() => _selectedVehicleIndex = index),
-                                  tileColor: _selectedVehicleIndex == index ? Colors.amber.shade100 : null,
-                                  leading: const Icon(Icons.local_taxi, size: 40),
-                                  title: Text(vehicle.tipAdi, style: const TextStyle(fontWeight: FontWeight.bold),),
-                                  subtitle: Text(vehicle.aciklama),
-                                  trailing: Text('₺${vehicle.tabanUcret}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16,),),
+                                  tileColor: isSelected ? Theme.of(context).primaryColor.withOpacity(0.2) : null,
+                                  leading: Icon(Icons.local_taxi, size: 40, color: isSelected ? Theme.of(context).primaryColor : Colors.white70),
+                                  title: Text(vehicle.tipAdi, style: TextStyle(fontWeight: FontWeight.bold, color: isSelected ? Theme.of(context).primaryColor : Colors.white)),
+                                  subtitle: Text(vehicle.aciklama, style: const TextStyle(color: Colors.white54)),
+                                  trailing: Text('₺${vehicle.tabanUcret}', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: isSelected ? Theme.of(context).primaryColor : Colors.white)),
                                 );
                               },
                             ),
@@ -518,13 +549,13 @@ class _HomeScreenState extends State<HomeScreen> {
                                 onPressed: (_selectedVehicleIndex == -1 || _isFindingDriver) ? null : () => _requestRide(vehicleTypes),
                                 style: ElevatedButton.styleFrom(
                                   minimumSize: const Size(double.infinity, 55),
-                                  backgroundColor: Colors.black,
-                                  foregroundColor: Colors.white,
+                                  backgroundColor: Theme.of(context).primaryColor,
+                                  foregroundColor: Colors.black,
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                                 ),
                                 child: _isFindingDriver 
-                                    ? const CircularProgressIndicator(color: Colors.white) 
-                                    : const Text('Taksi Çağır', style: TextStyle(fontSize: 18)),
+                                    ? const CircularProgressIndicator(color: Colors.black) 
+                                    : const Text('TAKSİ ÇAĞIR', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                               ),
                             )
                         ],
@@ -539,26 +570,26 @@ class _HomeScreenState extends State<HomeScreen> {
           // YENİ: Sürücü Aranıyor Ekranı
           if (_isFindingDriver)
             Container(
-              color: Colors.black.withOpacity(0.7),
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const CircularProgressIndicator(color: Colors.white),
-                    const SizedBox(height: 20),
-                    const Text('Sürücü Aranıyor...', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 20),
-                    TextButton(
-                      onPressed: () {
-                        // TODO: Yolculuk talebini iptal etme API'sini çağır
-                        setState(() => _isFindingDriver = false);
-                      }, 
-                      child: const Text('İptal Et', style: TextStyle(color: Colors.white, fontSize: 16))
-                    )
-                  ],
-                ),
+            color: Colors.black.withOpacity(0.8),
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(color: Theme.of(context).primaryColor),
+                  const SizedBox(height: 20),
+                  const Text('Sürücü Aranıyor...', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 20),
+                  TextButton(
+                    onPressed: () {
+                      // TODO: Yolculuk talebini iptal etme API'sini çağır
+                      setState(() => _isFindingDriver = false);
+                    }, 
+                    child: Text('İptal Et', style: TextStyle(color: Theme.of(context).primaryColor, fontSize: 16))
+                  )
+                ],
               ),
-            )
+            ),
+          )
         ],
       ),
     );
@@ -568,9 +599,9 @@ class _HomeScreenState extends State<HomeScreen> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, color: Colors.blue.shade800),
+        Icon(icon, color: Colors.white70),
         const SizedBox(height: 4),
-        Text(text, style: TextStyle(fontWeight: isBold ? FontWeight.bold : FontWeight.normal, fontSize: 16)),
+        Text(text, style: TextStyle(color: Colors.white, fontWeight: isBold ? FontWeight.bold : FontWeight.normal, fontSize: 16)),
       ],
     );
   }

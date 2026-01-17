@@ -98,7 +98,7 @@ exports.getMyProfile = async (req, res) => {
       SELECT 
         COUNT(*) AS total_rides,
         COALESCE(SUM(gerceklesen_ucret), 0) AS total_spent,
-        COALESCE(SUM(ST_Distance(baslangic_konumu::geography, bitis_konumu::geography)) / 1000, 0) AS total_distance_km
+        0 AS total_distance_km
       FROM rides
       WHERE kullanici_id = $1 AND durum = 'tamamlandi'
       `,
