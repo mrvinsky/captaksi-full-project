@@ -63,6 +63,13 @@ node server.js
 
 ## 🔄 Son Değişiklikler (Changelog)
 
+*   **Driver App V2.0 (YENİ):**
+    *   **UI Redesign:** Modern "Deep Blue & Cyan" temasına geçildi. Altın/Siyah renkler kaldırıldı.
+    *   **Gelişmiş Kart Yapısı:** Yolculuk talepleri artık doğrudan kart üzerinden "Kabul Et" ve "Reddet" butonlarına sahip.
+    *   **Platform Desteği:** Android'in yanı sıra **macOS (Desktop Native)** ve **Web** desteği eklendi.
+*   **Backend Fixes:**
+    *   `/me/status` hatası (PostGIS uyumsuzluğu) standart enlem/boylam yapısına dönülerek giderildi.
+    *   **Socket.IO:** Yolculuk talebi oluşturulduğunda sürücülere bildirim gitmeme sorunu çözüldü (`join_driver` event mismatch & Missing emission).
 *   **Admin Panel V3.1:**
     *   "Onayla" butonu işlevsel hale getirildi (Backend entegrasyonu tamamlandı).
     *   Sürücü listeleme hataları giderildi.

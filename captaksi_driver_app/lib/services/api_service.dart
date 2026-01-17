@@ -1,14 +1,22 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
+
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  static const String _driverBaseUrl = 'http://10.0.2.2:3000/api/drivers';
-  static const String _rideBaseUrl = 'http://10.0.2.2:3000/api/rides';
+  static String get _baseUrlHost {
+    if (kIsWeb) return 'http://localhost:3000';
+    if (Platform.isAndroid) return 'http://10.0.2.2:3000';
+    return 'http://localhost:3000'; // iOS / Desktop default
+  }
+
+  static String get _driverBaseUrl => '$_baseUrlHost/api/drivers';
+  static String get _rideBaseUrl => '$_baseUrlHost/api/rides';
 
   // GOOGLE KEY
   static const String _googleApiKey = "BURAYA_GOOGLE_KEY_GELECEK";

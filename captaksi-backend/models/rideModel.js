@@ -2,13 +2,47 @@
 const db = require('../db');
 
 // İleride gerçek ride oluşturmayı buraya koyacağız
-async function createRidePlaceholder(data) {
-  // data: { kullanici_id, baslangic_konumu, bitis_konumu, arac_tipi, tahmini_ucret, ... }
-  // Şimdilik implement yok, sadece iskelet.
-  throw new Error("createRidePlaceholder henüz implement edilmedi.");
+// Yeni yolculuk talebi oluştur
+async function createRide({
+  kullaniciId,
+  baslangicLat,
+  baslangicLng,
+  bitisLat,
+  bitisLng,
+  baslangicAdres,
+  bitisAdres,
+  tahminiUcret
+}) {
+  const result = await db.query(
+    `
+    INSERT INTO rides (
+      kullanici_id, 
+      baslangic_lat, 
+      baslangic_lng, 
+      bitis_lat, 
+      bitis_lng, 
+      baslangic_adres_metni, 
+      bitis_adres_metni, 
+      gerceklesen_ucret,
+      durum
+    )
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'beklemede')
+    RETURNING *
+    `,
+    [
+      kullaniciId,
+      baslangicLat,
+      baslangicLng,
+      bitisLat,
+      bitisLng,
+      baslangicAdres,
+      bitisAdres,
+      tahminiUcret
+    ]
+  );
+  return result.rows[0];
 }
 
-// Örnek: bir kullanıcının aktif yolculuğunu getir (ileride lazım olabilir)
 async function findActiveRideByUserId(userId) {
   const result = await db.query(
     `
@@ -25,6 +59,6 @@ async function findActiveRideByUserId(userId) {
 }
 
 module.exports = {
-  createRidePlaceholder,
+  createRide,
   findActiveRideByUserId,
 };

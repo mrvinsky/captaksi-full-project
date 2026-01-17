@@ -508,70 +508,146 @@ Widget buildWaitingPanel() {
                         )
                       ],
                     ),
-                    child: InkWell(
-                      onTap: () => showRidePopup(ride),
-                      borderRadius: BorderRadius.circular(16),
-                      child: Row(
+                    child: Column(
                         children: [
-                          // ICON SECTION
-                          Container(
-                            width: 50,
-                            height: 50,
-                            decoration: BoxDecoration(
-                              color: Colors.blueAccent.withOpacity(0.15),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: const Icon(Icons.location_on_rounded,
-                                color: Colors.blueAccent, size: 30),
-                          ),
+                          Row(
+                            children: [
+                              // ICON SECTION
+                              Container(
+                                width: 50,
+                                height: 50,
+                                decoration: BoxDecoration(
+                                  color: Colors.blueAccent.withOpacity(0.15),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: const Icon(Icons.location_on_rounded,
+                                    color: Colors.blueAccent, size: 30),
+                              ),
 
-                          const SizedBox(width: 14),
+                              const SizedBox(width: 14),
 
-                          // TEXT SECTION
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  ride['baslangic_adres_metni'],
+                              // TEXT SECTION
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      ride['baslangic_adres_metni'],
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      ride['bitis_adres_metni'],
+                                      style: const TextStyle(
+                                        color: Colors.white54,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+
+                              // PRICE BADGE
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 10, vertical: 6),
+                                decoration: BoxDecoration(
+                                  color: Colors.green.shade700,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Text(
+                                  "₺${ride['gerceklesen_ucret']}",
                                   style: const TextStyle(
                                     color: Colors.white,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  ride['bitis_adres_metni'],
-                                  style: const TextStyle(
-                                    color: Colors.white54,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-
-                          // PRICE BADGE
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: Colors.green.shade700,
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Text(
-                              "₺${ride['gerceklesen_ucret']}",
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 15,
-                                fontWeight: FontWeight.bold,
                               ),
-                            ),
+                            ],
                           ),
+                          const SizedBox(height: 16),
+                          // ACTION BUTTONS
+                          Row(
+                            children: [
+                              Expanded(
+                                child: OutlinedButton(
+                                  onPressed: () {
+                                    setState(() => rideRequests.remove(ride));
+                                  },
+                                  style: OutlinedButton.styleFrom(
+                                    foregroundColor: Colors.redAccent,
+                                    side: const BorderSide(
+                                        color: Colors.redAccent),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                  child: const Text("Reddet"),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: ElevatedButton(
+                                  onPressed: () async {
+                                    try {
+                                      final res = await api
+                                          .acceptRide("${ride['id']}");
+
+                                      setState(() {
+                                        activeRide = res['ride'];
+                                        rideRequests.clear();
+                                        goingToPickup = true;
+                                      });
+
+                                      // Harita ve marker işlemleri
+                                      if (currentPosition != null) {
+                                        final driver = LatLng(
+                                            currentPosition!.latitude,
+                                            currentPosition!.longitude);
+                                        final passenger = parseCoord(
+                                            ride['baslangic_konumu']);
+
+                                        drawRoute(driver, passenger,
+                                            id: "toPickup");
+
+                                        markers.clear();
+                                        markers.add(Marker(
+                                          markerId: const MarkerId("pickup"),
+                                          position: passenger,
+                                          icon: BitmapDescriptor
+                                              .defaultMarkerWithHue(
+                                                  BitmapDescriptor.hueGreen),
+                                        ));
+                                      }
+                                    } catch (e) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        SnackBar(
+                                            content: Text(e.toString()),
+                                            backgroundColor: Colors.red),
+                                      );
+                                    }
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor:
+                                        Theme.of(context).primaryColor,
+                                    foregroundColor: Colors.black,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                  child: const Text("Kabul Et", style: TextStyle(fontWeight: FontWeight.bold)),
+                                ),
+                              ),
+                            ],
+                          )
                         ],
                       ),
-                    ),
                   );
                 }).toList()
               ],

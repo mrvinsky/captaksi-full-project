@@ -44,12 +44,24 @@ app.use(express.json());
 // =======================
 // SOCKET.IO
 // =======================
+// -----------------------
+// Io'yu dışarıya açalım (Controller'larda kullanmak için)
+app.set("socketio", io);
+
+// =======================
+// SOCKET.IO
+// =======================
 io.on('connection', (socket) => {
   console.log('Bir kullanıcı bağlandı:', socket.id);
 
-  // Sürücü odasına katıl
-  socket.on('join_driver_room', async (token) => {
+  // Sürücü odasına katıl (Client: "join_driver" gönderiyor)
+  socket.on('join_driver', async (data) => {
     try {
+      // Client { token: ... } yolluyor olabilir veya direkt token string
+      const token = (data && data.token) ? data.token : data;
+
+      if (!token) return;
+
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       if (!decoded.driver) return;
 
