@@ -2,23 +2,32 @@
 const db = require('../db');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { sendVerificationEmail } = require('../services/emailService');
 
 // =========================
 // REGISTER USER
 // =========================
 exports.registerUser = async (req, res) => {
   try {
-    const { ad, soyad, telefon_numarasi, email, sifre } = req.body;
+    const { ad, soyad, telefon_numarasi, email, sifre, fcm_token } = req.body;
 
     const salt = await bcrypt.genSalt(10);
     const sifre_hash = await bcrypt.hash(sifre, salt);
 
+    // 6 haneli doğrulama kodu
+    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // is_verified default FALSE (DB defaultu)
     const newUser = await db.query(
-      "INSERT INTO users (ad, soyad, telefon_numarasi, email, sifre_hash) VALUES ($1, $2, $3, $4, $5) RETURNING id",
-      [ad, soyad, telefon_numarasi, email, sifre_hash]
+      "INSERT INTO users (ad, soyad, telefon_numarasi, email, sifre_hash, fcm_token, verification_code) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id, is_verified",
+      [ad, soyad, telefon_numarasi, email, sifre_hash, fcm_token, verificationCode]
     );
 
     const newUserId = newUser.rows[0].id;
+    const isVerified = newUser.rows[0].is_verified;
+
+    // Email Gönder
+    await sendVerificationEmail(email, verificationCode);
 
     const payload = { user: { id: newUserId } };
     jwt.sign(
@@ -28,8 +37,9 @@ exports.registerUser = async (req, res) => {
       (err, token) => {
         if (err) throw err;
         res.status(201).json({
-          message: "Kullanıcı başarıyla oluşturuldu!",
-          token
+          message: "Kullanıcı başarıyla oluşturuldu! Lütfen emailinizi doğrulayın.",
+          token,
+          is_verified: isVerified
         });
       }
     );
@@ -51,7 +61,7 @@ exports.registerUser = async (req, res) => {
 // =========================
 exports.loginUser = async (req, res) => {
   try {
-    const { email, sifre } = req.body;
+    const { email, sifre, fcm_token } = req.body;
 
     const user = await db.query(
       "SELECT * FROM users WHERE email = $1",
@@ -67,6 +77,11 @@ exports.loginUser = async (req, res) => {
       return res.status(400).json({ message: "Hatalı kullanıcı bilgileri" });
     }
 
+    // FCM Token Güncelle
+    if (fcm_token) {
+      await db.query("UPDATE users SET fcm_token = $1 WHERE id = $2", [fcm_token, user.rows[0].id]);
+    }
+
     const payload = { user: { id: user.rows[0].id } };
     jwt.sign(
       payload,
@@ -74,7 +89,10 @@ exports.loginUser = async (req, res) => {
       { expiresIn: '5h' },
       (err, token) => {
         if (err) throw err;
-        res.json({ token });
+        res.json({
+          token,
+          is_verified: user.rows[0].is_verified
+        });
       }
     );
   } catch (err) {
@@ -98,7 +116,7 @@ exports.getMyProfile = async (req, res) => {
       SELECT 
         COUNT(*) AS total_rides,
         COALESCE(SUM(gerceklesen_ucret), 0) AS total_spent,
-        0 AS total_distance_km
+        COALESCE(SUM(mesafe_km), 0) AS total_distance_km
       FROM rides
       WHERE kullanici_id = $1 AND durum = 'tamamlandi'
       `,

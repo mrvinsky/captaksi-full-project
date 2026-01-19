@@ -13,7 +13,17 @@ import 'screens/earnings_screen.dart';
 import 'screens/security_screen.dart';
 import 'screens/help_screen.dart';
 
-void main() {
+import 'package:firebase_core/firebase_core.dart';
+import 'services/notification_service.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  try {
+    await Firebase.initializeApp();
+    await NotificationService().initialize();
+  } catch (e) {
+    debugPrint("Firebase başlatma hatası: $e");
+  }
   runApp(const CaptaksiDriverApp());
 }
 

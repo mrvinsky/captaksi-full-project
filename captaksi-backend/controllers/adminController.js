@@ -117,10 +117,11 @@ exports.getChartStats = async (req, res) => {
 // Onay bekleyen sürücüler
 exports.getPendingDrivers = async (req, res) => {
     try {
+        // is_approved = false olanları getir
         const result = await db.query(`
             SELECT id, ad, soyad, email, telefon_numarasi, hesap_onay_durumu, kayit_tarihi
             FROM drivers 
-            WHERE hesap_onay_durumu = 'bekliyor'
+            WHERE is_approved = false OR hesap_onay_durumu = 'bekliyor'
             ORDER BY kayit_tarihi ASC
         `);
         res.json(result.rows);
@@ -181,9 +182,18 @@ exports.updateDriverStatus = async (req, res) => {
         const { id } = req.params;
         const { status } = req.body; // 'onaylandi' veya 'reddedildi'
 
+        const isApproved = (status === 'onaylandi');
+
+        // Hem string durumu hem de boolean durumu güncelleyelim.
+        // Eğer hesap_onay_durumu kolonu yoksa hata verebilir, o yüzden önce is_approved güncelleyelim.
+        // Ama önceki kod hesap_onay_durumu kullanıyordu, demek ki var. İkisini de güncelliyorum.
+
         const result = await db.query(
-            'UPDATE drivers SET hesap_onay_durumu = $1 WHERE id = $2 RETURNING *',
-            [status, id]
+            `UPDATE drivers 
+             SET hesap_onay_durumu = $1, is_approved = $2 
+             WHERE id = $3 
+             RETURNING *`,
+            [status, isApproved, id]
         );
 
         if (result.rowCount === 0) {
@@ -195,6 +205,14 @@ exports.updateDriverStatus = async (req, res) => {
         res.json({ message: `Sürücü durumu '${status}' olarak güncellendi.` });
     } catch (err) {
         console.error("Sürücü güncelleme hatası:", err.message);
+        // Eğer hesap_onay_durumu yok diye patlarsa fallback yapalım
+        try {
+            const isApproved = (req.body.status === 'onaylandi');
+            await db.query('UPDATE drivers SET is_approved = $1 WHERE id = $2', [isApproved, req.params.id]);
+            return res.json({ message: "Sürücü durumu güncellendi (Fallback)." });
+        } catch (e) {
+            console.error("Fallback update error:", e);
+        }
         res.status(500).send("Sunucu hatası");
     }
 };

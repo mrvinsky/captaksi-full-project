@@ -5,11 +5,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CAPTAKSI – Yapılacaklar | Mr. Vinsky</title>
-
   <!-- Feather Icons -->
   <script src="https://unpkg.com/feather-icons"></script>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
-
   <style>
     :root {
       --bg-color: #1E1E1E;
@@ -212,107 +210,91 @@
 </head>
 
 <body>
-
   <header>
     <div class="brand-box">
       <img src="logo.svg" alt="Mr. Vinsky Logo" width="50" height="50">
       <span class="brand-title">Mr. Vinsky</span>
     </div>
   </header>
-
   <nav>
     <a href="index.html"><i data-feather="activity"></i> Durum</a>
     <a href="todo.html" class="active"><i data-feather="list"></i> Yapılacaklar</a>
   </nav>
-
   <div class="container">
-
     <!-- YAKLAŞAN GÖREVLER -->
     <div class="section">
       <h2><i data-feather="alert-circle"></i> Kritik Öncelikli (Yüksek)</h2>
-
       <div class="todo-item high-priority">
-        <i data-feather="server"></i>
-        <div>Production Server (DigitalOcean/AWS) Kurulumu</div>
-        <span class="badge bg-red">V1.0 Launch</span>
+        <i data-feather="credit-card"></i>
+        <div>Ödeme Sistemi (Stripe/Iyzico) Entegrasyonu</div>
+        <span class="badge bg-red">Backend + Mobile</span>
       </div>
-
       <div class="todo-item high-priority">
-        <i data-feather="shield"></i>
-        <div>SSL Sertifikası ve Domain Entegrasyonu</div>
-        <span class="badge bg-red">Güvenlik</span>
+        <i data-feather="clock"></i>
+        <div>Sürüş Geçmişi (Ride History) Ekranları</div>
+        <span class="badge bg-red">UI/UX</span>
       </div>
-
       <div class="todo-item high-priority">
-        <i data-feather="smartphone"></i>
-        <div>iOS Uygulama Testleri & TestFlight Yayınlama</div>
-        <span class="badge bg-red">Mobile</span>
+        <i data-feather="map-pin"></i>
+        <div>Canlı Konum Takibi İyileştirmesi (WebSocket)</div>
+        <span class="badge bg-red">Realtime</span>
       </div>
-
     </div>
-
     <!-- GELİŞTİRME SÜRECİ -->
     <div class="section">
       <h2><i data-feather="code"></i> Geliştirme Süreci (Orta Öncelik)</h2>
-
       <div class="todo-item medium-priority">
         <i data-feather="bell"></i>
         <div>Push Notification Servisi Entegrasyonu (OneSignal / FCM)</div>
         <span class="badge bg-yellow">Feature</span>
       </div>
-
       <div class="todo-item medium-priority">
-        <i data-feather="credit-card"></i>
-        <div>Ödeme Sistemi (Stripe/Iyzico) Entegrasyonu</div>
-        <span class="badge bg-yellow">Backend</span>
+        <i data-feather="briefcase"></i>
+        <div>Cüzdan (Wallet) ve Bakiye Yönetimi</div>
+        <span class="badge bg-yellow">Feature</span>
       </div>
-
       <div class="todo-item medium-priority">
-        <i data-feather="message-square"></i>
-        <div>Sürücü-Yolcu Arası Chat Sistemi</div>
-        <span class="badge bg-yellow">Socket.IO</span>
+        <i data-feather="layout"></i>
+        <div>Admin Paneli: Sürüş Geçmişi ve Detaylı Raporlar</div>
+        <span class="badge bg-yellow">Admin</span>
       </div>
     </div>
-
     <!-- TAMAMLANANLAR (Log) -->
     <div class="section">
       <h2><i data-feather="check-circle"></i> Son Tamamlananlar</h2>
-
+      <div class="todo-item low-priority completed">
+        <i data-feather="check"></i>
+        <div>Sürücü Kayıt ve Araç Bilgileri Ekleme</div>
+        <span class="badge bg-green">Done</span>
+      </div>
+      <div class="todo-item low-priority completed">
+        <i data-feather="check"></i>
+        <div>Admin Paneli Sürücü Onay Akışı Fix</div>
+        <span class="badge bg-green">Done</span>
+      </div>
+      <div class="todo-item low-priority completed">
+        <i data-feather="message-square"></i>
+        <div>Sürücü-Yolcu Arası Chat Sistemi</div>
+        <span class="badge bg-green">Done</span>
+      </div>
       <div class="todo-item low-priority completed">
         <i data-feather="check"></i>
         <div>UI Redesign (Midnight Taxi Theme)</div>
         <span class="badge bg-green">Done</span>
       </div>
-
-      <div class="todo-item low-priority completed">
-        <i data-feather="check"></i>
-        <div>Backend PostGIS Kaldırılması & Optimizasyon</div>
-        <span class="badge bg-green">Done</span>
-      </div>
-
       <div class="todo-item low-priority completed">
         <i data-feather="check"></i>
         <div>Admin Paneli Kurulumu (React)</div>
         <span class="badge bg-green">Done</span>
       </div>
-
-      <div class="todo-item low-priority completed">
-        <i data-feather="check"></i>
-        <div>Yolculuk Oluşturma Sorunu (Fix 501)</div>
-        <span class="badge bg-green">Done</span>
-      </div>
     </div>
-
   </div>
-
   <footer>
     © 2026 <span>Mr. Vinsky</span> | CAPTAKSI Proje Süreci
   </footer>
-
   <script>
     feather.replace();
   </script>
-
 </body>
 
 </html>

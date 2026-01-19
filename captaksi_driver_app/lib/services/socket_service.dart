@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
@@ -21,6 +22,12 @@ class SocketService {
   /// Yeni yolculuk taleplerini dışarıya ileten stream.
   Stream<Map<String, dynamic>> get rideRequests =>
       _rideRequestController.stream;
+  
+  final StreamController<Map<String, dynamic>> _messageController =
+      StreamController<Map<String, dynamic>>.broadcast();
+
+  /// Gelen chat mesajlarını dinlemek için stream.
+  Stream<Map<String, dynamic>> get messages => _messageController.stream;
 
   bool get isConnected => _socket != null && _socket!.connected;
 
@@ -32,8 +39,11 @@ class SocketService {
       return;
     }
 
-    // Emülatörde backend: 10.0.2.2
-    const String socketUrl = 'http://10.0.2.2:3000';
+    // Platforma göre dinamik URL
+    String socketUrl = 'http://localhost:3000';
+    if (!kIsWeb && Platform.isAndroid) {
+      socketUrl = 'http://10.0.2.2:3000';
+    }
 
     if (_socket != null && _socket!.connected) {
       debugPrint('Socket zaten bağlı.');
@@ -85,6 +95,15 @@ class SocketService {
       }
     });
 
+    _socket!.on('receive_message', (dynamic data) {
+      debugPrint('Yeni mesaj geldi: $data');
+      if (data is Map<String, dynamic>) {
+         _messageController.add(data);
+      } else if (data is Map) {
+         _messageController.add(Map<String, dynamic>.from(data));
+      }
+    });
+
     _socket!.connect();
   }
 
@@ -94,13 +113,29 @@ class SocketService {
     _socket!.emit(event, data);
   }
 
+  /// Mesaj gönderme fonksiyonu.
+  /// [receiverId]: Mesajın gönderileceği kişinin ID'si (integer olmalı).
+  /// [message]: Gönderilecek metin.
+  void sendMessage({required int receiverId, required String message}) {
+    if (_socket == null || !_socket!.connected) return;
+
+    // Backend: socket.on('send_message', (data) => ...)
+    // data: { receiverId, receiverType, message }
+    _socket!.emit('send_message', <String, dynamic>{
+      'receiverId': receiverId,
+      'receiverType': 'user', // Sürücü -> Yolcuya atıyor
+      'message': message,
+    });
+  }
+
   void _clearSocketListeners() {
     if (_socket == null) return;
     _socket!
       ..off('new_ride_request')
       ..off('connect')
       ..off('disconnect')
-      ..off('error');
+      ..off('error')
+      ..off('receive_message');
   }
 
   void disconnect() {
@@ -112,6 +147,7 @@ class SocketService {
   void dispose() {
     disconnect();
     _rideRequestController.close();
+    _messageController.close();
     _apiService.dispose();
   }
 }

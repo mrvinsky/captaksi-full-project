@@ -2,38 +2,79 @@
 const db = require('../db');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { sendVerificationEmail } = require('../services/emailService');
 
 // ---------------- REGISTER ----------------
 exports.registerDriver = async (req, res) => {
   try {
-    const { ad, soyad, telefon_numarasi, email, sifre } = req.body;
+    const { ad, soyad, telefon_numarasi, email, sifre, fcm_token, plaka, marka, model, renk } = req.body;
+    // req.body içinden düz alanlar okunuyor. Multipart olduğu için vehicle objesi olarak gelmeyebilir.
+
+    // Email kontrolü
+    const existingDriver = await db.query("SELECT id FROM drivers WHERE email=$1", [email]);
+    if (existingDriver.rows.length > 0) {
+      return res.status(400).json({ message: "Bu email adresi zaten kayıtlı." });
+    }
 
     const salt = await bcrypt.genSalt(10);
     const sifre_hash = await bcrypt.hash(sifre, salt);
 
+    // 6 haneli kod
+    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Transaction Başlat
+    await db.query('BEGIN');
+
     const newDriver = await db.query(
-      "INSERT INTO drivers (ad, soyad, telefon_numarasi, email, sifre_hash) VALUES ($1,$2,$3,$4,$5) RETURNING id",
-      [ad, soyad, telefon_numarasi, email, sifre_hash]
+      "INSERT INTO drivers (ad, soyad, telefon_numarasi, email, sifre_hash, fcm_token, verification_code) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING id, is_verified, is_approved",
+      [ad, soyad, telefon_numarasi, email, sifre_hash, fcm_token, verificationCode]
     );
 
-    const payload = { driver: { id: newDriver.rows[0].id } };
+    const driverId = newDriver.rows[0].id;
+
+    // Araç Ekleme
+    // Araç Ekleme
+    // Varsayılan tip_id=1 (Taksi)
+    const vehicleType = 1;
+
+    // Araç da zorunlu olsun mu? Evet.
+    if (plaka) {
+      await db.query(
+        "INSERT INTO vehicles (surucu_id, tip_id, plaka, marka, model, renk) VALUES ($1, $2, $3, $4, $5, $6)",
+        [driverId, vehicleType, plaka, marka, model, renk]
+      );
+    }
+
+    // Transaction Bitiş
+    await db.query('COMMIT');
+
+    // Email gönder
+    await sendVerificationEmail(email, verificationCode);
+
+    const payload = { driver: { id: driverId } };
     const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "5h" });
 
     res.status(201).json({
-      message: "Sürücü oluşturuldu",
+      message: "Sürücü oluşturuldu! Lütfen emailinizi doğrulayın.",
       token,
-      id: newDriver.rows[0].id
+      id: driverId,
+      is_verified: newDriver.rows[0].is_verified,
+      is_approved: newDriver.rows[0].is_approved || false
     });
   } catch (err) {
+    await db.query('ROLLBACK');
     console.log(err);
-    res.status(500).json({ message: "Sunucu hatası" });
+    if (err.code === '23505') { // Unique constraint violation için yedek kontrol
+      return res.status(400).json({ message: "Bu email veya telefon zaten kayıtlı." });
+    }
+    res.status(500).json({ message: "Sunucu hatası: " + err.message });
   }
 };
 
 // ---------------- LOGIN ----------------
 exports.loginDriver = async (req, res) => {
   try {
-    const { email, sifre } = req.body;
+    const { email, sifre, fcm_token } = req.body;
 
     const driver = await db.query("SELECT * FROM drivers WHERE email=$1", [email]);
     if (driver.rows.length === 0)
@@ -43,10 +84,19 @@ exports.loginDriver = async (req, res) => {
     if (!isMatch)
       return res.status(400).json({ message: "Geçersiz giriş" });
 
+    // FCM Token Güncelle
+    if (fcm_token) {
+      await db.query("UPDATE drivers SET fcm_token = $1 WHERE id = $2", [fcm_token, driver.rows[0].id]);
+    }
+
     const payload = { driver: { id: driver.rows[0].id } };
     const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "5h" });
 
-    res.json({ token });
+    res.json({
+      token,
+      is_verified: driver.rows[0].is_verified,
+      is_approved: driver.rows[0].is_approved // [YENİ]
+    });
   } catch (err) {
     res.status(500).json({ message: "Sunucu hatası" });
   }
@@ -80,7 +130,7 @@ exports.getDriverProfile = async (req, res) => {
     const id = req.driver.id;
 
     const result = await db.query(
-      "SELECT id, ad, soyad, email, telefon_numarasi, aktif_mi FROM drivers WHERE id=$1",
+      "SELECT id, ad, soyad, email, telefon_numarasi, aktif_mi, is_approved FROM drivers WHERE id=$1",
       [id]
     );
 

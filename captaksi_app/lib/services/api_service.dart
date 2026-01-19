@@ -34,12 +34,16 @@ class ApiService {
   }
 
   // --- KULLANICI GİRİŞ & KAYIT ---
-  Future<String> loginUser(String email, String password) async {
+  Future<String> loginUser(String email, String password, {String? fcmToken}) async {
     final url = Uri.parse('$_baseUrl/users/login');
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json; charset=UTF-8'},
-      body: jsonEncode({'email': email, 'sifre': password}),
+      body: jsonEncode({
+        'email': email, 
+        'sifre': password,
+        'fcm_token': fcmToken // [YENİ]
+      }),
     );
     if (response.statusCode == 200) {
       final responseData = jsonDecode(response.body);
@@ -56,6 +60,7 @@ class ApiService {
     required String telefonNumarasi,
     required String email,
     required String password,
+    String? fcmToken, // [YENİ]
     File? profileImage,
     File? criminalRecordPdf,
   }) async {
@@ -66,6 +71,7 @@ class ApiService {
     request.fields['telefon_numarasi'] = telefonNumarasi;
     request.fields['email'] = email;
     request.fields['sifre'] = password;
+    if (fcmToken != null) request.fields['fcm_token'] = fcmToken; // [YENİ]
 
     if (profileImage != null) {
       request.files.add(await http.MultipartFile.fromPath('profileImage', profileImage.path));
@@ -225,6 +231,25 @@ class ApiService {
     } else {
       final responseData = jsonDecode(response.body);
       throw Exception(responseData['message'] ?? 'Puanlama yapılamadı.');
+    }
+  }
+
+  // --- İPTAL ETME ---
+  Future<void> cancelRide(String rideId) async {
+    final token = await getToken();
+    final url = Uri.parse('$_baseUrl/rides/$rideId/cancel-by-user');
+
+    final response = await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+        'x-auth-token': token ?? ''
+      },
+    );
+
+    if (response.statusCode != 200) {
+      final responseData = jsonDecode(response.body);
+      throw Exception(responseData['message'] ?? 'İptal edilemedi.');
     }
   }
 

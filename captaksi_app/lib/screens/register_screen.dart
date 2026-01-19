@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:captaksi_app/services/api_service.dart';
+import 'package:captaksi_app/services/notification_service.dart'; // [YENİ]
+import 'package:captaksi_app/screens/verification_screen.dart'; // [YENİ]
 import 'package:captaksi_app/screens/home_screen.dart';
 import 'package:captaksi_app/screens/login_screen.dart'; // Geri dönmek için eklendi
 
@@ -51,6 +53,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
     setState(() => _isLoading = true);
 
     try {
+      // [YENİ] FCM Token al
+      final fcmToken = await NotificationService().getToken();
+
       // 1. Tek bir API çağrısı ile hem kayıt ol hem de token al
       final token = await ApiService().registerUser(
         ad: _adController.text,
@@ -58,6 +63,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         telefonNumarasi: _telefonController.text,
         email: _emailController.text,
         password: _passwordController.text,
+        fcmToken: fcmToken, // [YENİ]
         profileImage: _profileImage,
         criminalRecordPdf: _criminalRecordPdf,
       );
@@ -65,11 +71,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
       // 2. Alınan token'ı güvenli hafızaya kaydet
       await ApiService.storeToken(token);
 
-      // 3. Ana sayfaya yönlendir
+      // 3. Doğrulama Sayfasına yönlendir (HomeScreen yerine)
       if (mounted) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const HomeScreen()),
+          MaterialPageRoute(
+            builder: (context) => VerificationScreen(
+              email: _emailController.text,
+              token: token,
+            ),
+          ),
         );
       }
     } catch (e) {

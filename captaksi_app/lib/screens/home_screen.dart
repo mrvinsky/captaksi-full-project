@@ -5,6 +5,7 @@ import 'package:captaksi_app/models/vehicle_type_model.dart';
 import 'package:captaksi_app/services/api_service.dart';
 import 'package:captaksi_app/services/socket_service.dart'; // YENİ: Yolcu Socket Servisi
 import 'package:captaksi_app/screens/rating_screen.dart'; // YENİ: Puanlama Ekranı
+import 'package:captaksi_app/screens/chat_screen.dart'; // YENİ: Chat Ekranı
 import 'package:flutter/material.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -41,11 +42,16 @@ class _HomeScreenState extends State<HomeScreen> {
   String? _routeDuration;
   int? _routeDistanceValue;
   bool _isFindingDriver = false;
+  Map<String, dynamic>? _acceptedRide; // [YENİ] Kabul edilen yolculuk bilgileri
 
   // YENİ: Yolcu Socket Servisi
   final SocketService _socketService = SocketService();
   StreamSubscription? _rideFinishedSubscription;
   StreamSubscription? _rideAcceptedSubscription; // Sürücü kabul ettiğinde
+  StreamSubscription? _driverArrivedSubscription; // Sürücü kapıda
+  StreamSubscription? _rideStartedSubscription; // Yolculuk başladı
+  StreamSubscription? _rideCancelledSubscription; // Yolculuk iptal edildi (Sürücü tarafından)
+  String _rideStatusText = ""; // UI'da göstermek için durum metni
 
   static const CameraPosition _kInitialPosition = CameraPosition(
     target: LatLng(39.9334, 32.8597),
@@ -71,13 +77,67 @@ class _HomeScreenState extends State<HomeScreen> {
       }
     });
 
-    // TODO: Sürücü kabul etti sinyalini dinle
-    // _rideAcceptedSubscription = _socketService.rideAcceptedStream.listen((ride) {
-    //   print("HomeScreen: Sürücü talebi kabul etti!");
-    //   if (mounted) {
-    //     // "Sürücü aranıyor" ekranını kapatıp "Sürücü geliyor" ekranını aç
-    //   }
-    // });
+    // Sürücü kabul etti sinyalini dinle
+    _rideAcceptedSubscription = _socketService.rideAcceptedStream.listen((data) {
+      print("HomeScreen: Sürücü talebi kabul etti! -> $data");
+      if (mounted) {
+        ScaffoldMessenger.of(context).clearSnackBars();
+        setState(() {
+          _isFindingDriver = false;
+          _acceptedRide = data;
+          _rideStatusText = "Sürücü Geliyor";
+        });
+        
+        // Çift Rota Çizimi
+        try {
+            final driverLat = double.parse(data['driver']['latitude'].toString());
+            final driverLng = double.parse(data['driver']['longitude'].toString());
+            final driverPos = LatLng(driverLat, driverLng);
+            
+            // Origin & Dest should be available from existing state or ride data
+            // _originPosition and _destinationPosition are set during request
+            if (_originPosition != null && _destinationPosition != null) {
+                _drawDualRoutes(driverPos, _originPosition!, _destinationPosition!);
+            }
+        } catch (e) {
+            print("Rota çizimi için koordinat hatası: $e");
+        }
+      }
+    });
+
+    // Sürücü Kapıda
+    _driverArrivedSubscription = _socketService.driverArrivedStream.listen((data) {
+        if (mounted) {
+            setState(() => _rideStatusText = "Sürücü Kapıda!");
+            ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text("🚖 Sürücünüz Kapıda!"), backgroundColor: Colors.green, duration: Duration(seconds: 5)),
+            );
+        }
+    });
+
+    // Yolculuk Başladı
+    _rideStartedSubscription = _socketService.rideStartedStream.listen((data) {
+        if (mounted) {
+            setState(() {
+                _rideStatusText = "Yolculuk Başladı";
+                // Mavi rotayı (Sürücü->Yolcu) sil, Kırmızı (Yolcu->Hedef) kalsın
+                _polylines.removeWhere((p) => p.polylineId.value == 'driver_to_pickup');
+            });
+            ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text("🚀 Yolculuk Başladı! İyi yolculuklar."), backgroundColor: Colors.blue),
+            );
+        }
+    });
+
+    // Yolculuk İptal Edildi (Sürücü Tarafından)
+    _rideCancelledSubscription = _socketService.rideCancelledStream.listen((data) {
+        if (mounted) {
+            _resetToInitialState();
+            ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text("⚠️ ${data['message'] ?? 'Yolculuk iptal edildi.'}"), backgroundColor: Colors.red, duration: const Duration(seconds: 5)),
+            );
+        }
+    });
   }
   
   @override
@@ -89,6 +149,9 @@ class _HomeScreenState extends State<HomeScreen> {
     _socketService.dispose();
     _rideFinishedSubscription?.cancel();
     _rideAcceptedSubscription?.cancel();
+    _driverArrivedSubscription?.cancel();
+    _rideStartedSubscription?.cancel();
+    _rideCancelledSubscription?.cancel();
     super.dispose();
   }
 
@@ -104,6 +167,8 @@ class _HomeScreenState extends State<HomeScreen> {
       _routeDistanceValue = null;
       _selectedVehicleIndex = -1;
       _isFindingDriver = false; // Sürücü arama durumunu sıfırla
+      _acceptedRide = null; // Kabul edilen yolculuğu sıfırla
+      _rideStatusText = "";
     });
 
     // Puanlama ekranını bir modal sayfa olarak aç
@@ -223,6 +288,51 @@ class _HomeScreenState extends State<HomeScreen> {
     _setDestination(position);
   }
 
+  // Yardımcı Metod: UI Sıfırlama
+  void _resetToInitialState() {
+      setState(() {
+          _polylines.clear();
+          _markers.removeWhere((m) => m.markerId.value == 'destination_pin');
+          _destinationController.clear();
+          _routeDistance = null;
+          _routeDuration = null;
+          _routeDistanceValue = null;
+          _selectedVehicleIndex = -1;
+          _isFindingDriver = false;
+          _acceptedRide = null;
+          _rideStatusText = "";
+          _driverMarkers.clear(); // Eski sürücü markerlarını temizle
+      });
+      _fetchNearbyDrivers(); // Tekrar yakındaki sürücüleri getir
+  }
+
+  // [YENİ] Yolculuğu İptal Et (Kullanıcı Tarafından)
+  Future<void> _cancelRide() async {
+      if (_acceptedRide == null) return;
+      
+      final confirm = await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+              title: const Text("Yolculuğu İptal Et"),
+              content: const Text("Yolculuğu iptal etmek istediğinize emin misiniz?"),
+              actions: [
+                  TextButton(onPressed: () => Navigator.pop(context, false), child: const Text("Vazgeç")),
+                  TextButton(onPressed: () => Navigator.pop(context, true), child: const Text("Evet, İptal Et", style: TextStyle(color: Colors.red))),
+              ],
+          )
+      );
+
+      if (confirm == true) {
+          try {
+              await _apiService.cancelRide(_acceptedRide!['ride']['id'].toString());
+              _resetToInitialState();
+              if(mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Yolculuk iptal edildi.")));
+          } catch (e) {
+              if(mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("İptal Hatası: $e")));
+          }
+      }
+  }
+
   Future<void> _updateAddressFromCoordinates(LatLng position, {bool isOrigin = false}) async {
      try {
         final address = await _apiService.getAddressFromCoordinates(
@@ -285,6 +395,80 @@ class _HomeScreenState extends State<HomeScreen> {
     } catch(e) {
       print("Rota çizilirken hata: $e");
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Rota çizilemedi: ${e.toString()}'), backgroundColor: Colors.red,));
+    }
+  }
+
+  // [YENİ] Çift Rota Çizimi (Mavi: Driver->Pickup, Kırmızı: Pickup->Dest)
+  Future<void> _drawDualRoutes(LatLng driverLoc, LatLng pickupLoc, LatLng destLoc) async {
+    setState(() => _polylines.clear());
+
+    // 1. Driver -> Pickup (Blue)
+    try {
+        final route1 = await _apiService.getDirections(driverLoc, pickupLoc);
+        final coordinates1 = PolylinePoints().decodePolyline(route1['polyline_points']);
+        final points1 = coordinates1.map((p) => LatLng(p.latitude, p.longitude)).toList();
+        
+        setState(() {
+            _polylines.add(Polyline(
+                polylineId: const PolylineId('driver_to_pickup'),
+                color: Colors.blueAccent,
+                width: 5,
+                patterns: [PatternItem.dash(10), PatternItem.gap(5)], // Dashed line for approach
+                points: points1
+            ));
+        });
+    } catch (e) {
+        print("Driver->Pickup rotası çizilemedi (Fallback düz çizgi): $e");
+        setState(() {
+             _polylines.add(Polyline(
+                polylineId: const PolylineId('driver_to_pickup'),
+                color: Colors.blueAccent.withOpacity(0.5),
+                width: 5,
+                points: [driverLoc, pickupLoc]
+            ));
+        });
+    }
+
+    // 2. Pickup -> Destination (Red)
+    try {
+        final route2 = await _apiService.getDirections(pickupLoc, destLoc);
+        final coordinates2 = PolylinePoints().decodePolyline(route2['polyline_points']);
+        final points2 = coordinates2.map((p) => LatLng(p.latitude, p.longitude)).toList();
+        
+        setState(() {
+            _polylines.add(Polyline(
+                polylineId: const PolylineId('pickup_to_dest'),
+                color: Colors.redAccent,
+                width: 6,
+                points: points2
+            ));
+        });
+        
+        // Zoom to fit all
+         _mapController?.animateCamera(CameraUpdate.newLatLngBounds(
+            LatLngBounds(
+                southwest: LatLng(
+                    [driverLoc.latitude, pickupLoc.latitude, destLoc.latitude].reduce((a, b) => a < b ? a : b),
+                    [driverLoc.longitude, pickupLoc.longitude, destLoc.longitude].reduce((a, b) => a < b ? a : b),
+                ),
+                northeast: LatLng(
+                    [driverLoc.latitude, pickupLoc.latitude, destLoc.latitude].reduce((a, b) => a > b ? a : b),
+                    [driverLoc.longitude, pickupLoc.longitude, destLoc.longitude].reduce((a, b) => a > b ? a : b),
+                ),
+            ),
+            60.0,
+        ));
+
+    } catch (e) {
+         print("Pickup->Dest rotası çizilemedi (Fallback düz çizgi): $e");
+         setState(() {
+             _polylines.add(Polyline(
+                polylineId: const PolylineId('pickup_to_dest'),
+                color: Colors.redAccent.withOpacity(0.5),
+                width: 6,
+                points: [pickupLoc, destLoc]
+            ));
+        });
     }
   }
 
@@ -583,13 +767,82 @@ class _HomeScreenState extends State<HomeScreen> {
                     onPressed: () {
                       // TODO: Yolculuk talebini iptal etme API'sini çağır
                       setState(() => _isFindingDriver = false);
-                    }, 
+                    },
                     child: Text('İptal Et', style: TextStyle(color: Theme.of(context).primaryColor, fontSize: 16))
                   )
                 ],
               ),
             ),
-          )
+          ),
+
+          // [YENİ] Sürücü Geliyor Paneli
+          if (_acceptedRide != null)
+            Positioned(
+              left: 0, right: 0, bottom: 0,
+              child: Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surface,
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                  boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.5), blurRadius: 10)],
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(_rideStatusText.isNotEmpty ? _rideStatusText : "Sürücü Yolda!", style: const TextStyle(color: Colors.greenAccent, fontSize: 18, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 16),
+                    ListTile(
+                      leading: const CircleAvatar(backgroundColor: Colors.grey, child: Icon(Icons.person, color: Colors.white)),
+                      title: Text("${_acceptedRide!['driver']['ad']} ${_acceptedRide!['driver']['soyad']}", style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                      subtitle: Text("Araç: ${_acceptedRide!['vehicle']['plaka']} • ${_acceptedRide!['vehicle']['marka']}", style: const TextStyle(color: Colors.white70)),
+                      trailing: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(color: Colors.amber, borderRadius: BorderRadius.circular(8)),
+                        child: Text("${_acceptedRide!['driver']['puan_ortalamasi'] ?? '5.0'}", style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    // CHAT BUTONU
+                    SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: OutlinedButton.icon(
+                        icon: const Icon(Icons.chat_bubble_outline),
+                        label: const Text("SÜRÜCÜYE MESAJ"),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.white,
+                          side: const BorderSide(color: Colors.white),
+                        ),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => ChatScreen(
+                                receiverId: _acceptedRide!['driver']['id'],
+                                receiverName: "${_acceptedRide!['driver']['ad']} ${_acceptedRide!['driver']['soyad']}",
+                                socketService: _socketService,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    
+                    const SizedBox(height: 10),
+                    // İPTAL BUTONU
+                     SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: TextButton.icon(
+                        icon: const Icon(Icons.cancel, color: Colors.redAccent),
+                        label: const Text("YOLCULUĞU İPTAL ET", style: TextStyle(color: Colors.redAccent)),
+                        onPressed: _rideStatusText == "Yolculuk Başladı" ? null : _cancelRide, // Yolculuk başladıysa iptal edilemez (şimdilik)
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
         ],
       ),
     );

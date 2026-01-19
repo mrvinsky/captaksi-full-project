@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
+import '../services/notification_service.dart'; // [YENİ]
 import 'driver_home_screen.dart';
-import 'register_screen.dart'; // RegisterScreen'i import ediyoruz
+import 'register_screen.dart';
+import 'pending_approval_screen.dart'; // [YENİ]
+
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -22,16 +25,30 @@ class _LoginScreenState extends State<LoginScreen> {
     
     setState(() => _isLoading = true);
     try {
-      final token = await _apiService.loginDriver(
+      // [YENİ]: FCM Token al
+      final fcmToken = await NotificationService().getToken();
+
+      final response = await _apiService.loginDriver(
         _emailController.text,
         _passwordController.text,
+        fcmToken: fcmToken,
       );
-      await ApiService.storeToken(token);
+      // Token store işlemi ApiService içinde yapılıyor zaten.
+      
+      final bool isApproved = response['is_approved'] == true;
+
       if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const DriverHomeScreen()),
-        );
+        if (!isApproved) {
+           Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const PendingApprovalScreen()),
+           );
+        } else {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const DriverHomeScreen()),
+          );
+        }
       }
     } catch (e) {
       if (mounted) {

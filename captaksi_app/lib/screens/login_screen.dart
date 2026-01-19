@@ -1,6 +1,7 @@
 import 'package:captaksi_app/screens/home_screen.dart';
 import 'package:captaksi_app/screens/register_screen.dart'; // Yeni ekranımızı import ettik
 import 'package:captaksi_app/services/api_service.dart';
+import 'package:captaksi_app/services/notification_service.dart'; // [YENİ]
 import 'package:flutter/material.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -26,7 +27,10 @@ class _LoginScreenState extends State<LoginScreen> {
       final email = _emailController.text;
       final password = _passwordController.text;
 
-      final token = await ApiService().loginUser(email, password);
+      // [YENİ]: FCM Token al
+      final fcmToken = await NotificationService().getToken();
+
+      final token = await ApiService().loginUser(email, password, fcmToken: fcmToken);
       await ApiService.storeToken(token);
 
       if (mounted) {

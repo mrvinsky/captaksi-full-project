@@ -80,3 +80,21 @@ PASSWORD: driver123
 PHONE: 5551916903
 TOKEN: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkcml2ZXIiOnsiaWQiOjF9LCJpYXQiOjE3Njg2MzE5MTcsImV4cCI6MTc2ODY0OTkxN30.4VjO4mjRkCP3lDNhZdbMRyHNPiNxjLPuMnHL_iV-HmE
 --------------------------------------------------
+
+--------------------------------------------------
+USER TYPE: RIDER (Test Automation)
+DATE: 2026-01-17T14:39:15.731Z
+EMAIL: test_1768660755457@example.com
+PASSWORD: password123
+PHONE: 5550755457
+TOKEN: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoxMn0sImlhdCI6MTc2ODY2MDc1NSwiZXhwIjoxNzY4Njc4NzU1fQ.T5HWSvhpBTeV518iwOSL6yzR6U22skrZm0M7mSUgF24
+--------------------------------------------------
+
+--------------------------------------------------
+USER TYPE: DRIVER (Test Automation)
+DATE: 2026-01-17T14:41:37.985Z
+EMAIL: driver_1768660897695@example.com
+PASSWORD: driver123
+PHONE: 5550897695
+TOKEN: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkcml2ZXIiOnsiaWQiOjJ9LCJpYXQiOjE3Njg2NjA4OTcsImV4cCI6MTc2ODY3ODg5N30.EOK7HTYjTYm9Bp-8z9oG6JNcpz6sFTBHwJ0NG4W5z3E
+--------------------------------------------------

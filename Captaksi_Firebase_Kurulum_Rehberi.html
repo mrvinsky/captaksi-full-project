@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Captaksi Firebase Kurulum Rehberi</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px;
+            background-color: #f9f9f9;
+        }
+
+        .container {
+            background-color: white;
+            padding: 50px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #d32f2f;
+            border-bottom: 2px solid #d32f2f;
+            padding-bottom: 10px;
+            text-align: center;
+        }
+
+        h2 {
+            color: #1976d2;
+            margin-top: 30px;
+        }
+
+        .step {
+            background-color: #e3f2fd;
+            border-left: 5px solid #1976d2;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .code-block {
+            background-color: #263238;
+            color: #eceff1;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+
+        .note {
+            background-color: #fff3e0;
+            border-left: 5px solid #ff9800;
+            padding: 15px;
+            font-style: italic;
+        }
+
+        .path {
+            font-weight: bold;
+            color: #d84315;
+        }
+
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 0.9em;
+            color: #777;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Captaksi Firebase Kurulum Rehberi 🚕🔥</h1>
+        <p>Merhaba Agacım! Bu rehber, Captaksi projesinin bildirim sistemini (Push Notification) ayağa kaldırmak için
+            yapman gereken Firebase ayarlarını "adım adım" anlatır.</p>
+
+        <div class="step">
+            <h2>1. Adım: Firebase'e Giriş</h2>
+            <ol>
+                <li><a href="https://console.firebase.google.com/" target="_blank">console.firebase.google.com</a>
+                    adresine git.</li>
+                <li>Google hesabınla (Gmail) giriş yap.</li>
+            </ol>
+        </div>
+
+        <div class="step">
+            <h2>2. Adım: Proje Oluşturma</h2>
+            <ol>
+                <li>Ortadaki <strong>"Proje oluştur" (Create a project)</strong> butonuna tıkla.</li>
+                <li>Proje adına <strong>Captaksi</strong> yaz.</li>
+                <li>"Devam" (Continue) butonuna bas.</li>
+                <li>"Google Analytics" sorarsa <strong>kapat</strong> (Şu an gerek yok).</li>
+                <li><strong>"Proje oluştur"</strong> butonuna bas ve dolmasını bekle. Dolunca "Devam" de.</li>
+            </ol>
+        </div>
+
+        <div class="step">
+            <h2>3. Adım: Yolcu Uygulamasını Ekleme (Rider)</h2>
+            <p>Karşına boş bir panel geldi. Ortada yuvarlak ikonlar var (iOS, Android, Web).</p>
+            <ol>
+                <li><strong>Android robotuna</strong> (simgesine) tıkla.</li>
+                <li><strong>Android paket adı</strong> soran yere şunu kopyala yapıştır:
+                    <div class="code-block">com.example.captaksi_app</div>
+                </li>
+                <li>Başka hiçbir şeyi doldurma, direkt <strong>"Uygulamayı kaydet" (Register app)</strong> butonuna bas.
+                </li>
+                <li>Karşına <strong>google-services.json indir</strong> butonu çıkacak. Bas indir.</li>
+                <li>İndirdiğin bu dosyayı aşağıdaki klasörün içine at:
+                    <div class="code-block">/Users/mrvinsky/Desktop/captaksi-full-project/captaksi_app/android/app/
+                    </div>
+                </li>
+                <li>Firebase ekranında "İleri" -> "İleri" -> "Konsola geç" diyerek bitir.</li>
+            </ol>
+        </div>
+
+        <div class="step">
+            <h2>4. Adım: Sürücü Uygulamasını Ekleme (Driver)</h2>
+            <p>Yolcuyu hallettik, şimdi sıra sürücüde. Yine ana ekrandasın.</p>
+            <ol>
+                <li><strong>"+ Uygulama Ekle" (Add app)</strong> butonuna bas.</li>
+                <li>Yine <strong>Android robotuna</strong> tıkla.</li>
+                <li>Bu sefer paket adına şunu yaz:
+                    <div class="code-block">com.example.captaksi_driver_app</div>
+                </li>
+                <li><strong>"Uygulamayı kaydet"</strong> de.</li>
+                <li>Yine <strong>google-services.json indir</strong> butonu çıkacak. İndir.
+                    <div class="note">⚠️ Dikkat: İsim <code>google-services(1).json</code> gibi inebilir, adını mutlaka
+                        <strong>google-services.json</strong> olarak düzelt.</div>
+                </li>
+                <li>Bu dosyayı da aşağıdaki klasörün içine at:
+                    <div class="code-block">
+                        /Users/mrvinsky/Desktop/captaksi-full-project/captaksi_driver_app/android/app/</div>
+                </li>
+            </ol>
+        </div>
+
+        <div class="step">
+            <h2>🏁 BİTTİ!</h2>
+            <p>Eğer iki dosya da yerindeyse işlem tamam:</p>
+            <ul>
+                <li>✅ <code>captaksi_app/android/app/google-services.json</code></li>
+                <li>✅ <code>captaksi_driver_app/android/app/google-services.json</code></li>
+            </ul>
+            <p>Artık uygulamaları çalıştırabilirsin! 🚀</p>
+        </div>
+
+        <div class="footer">
+            Hazırlayan: Antigravity (Senin Yapay Zeka Asistanın) 🤖
+        </div>
+    </div>
+</body>
+
+</html>

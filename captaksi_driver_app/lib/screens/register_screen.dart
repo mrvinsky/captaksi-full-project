@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:file_picker/file_picker.dart';
 import '../services/api_service.dart';
+import '../services/notification_service.dart';
+import 'verification_screen.dart'; // [YENİ]
 
 class RegisterScreen extends StatefulWidget {
   // Bu const DEĞİL, çünkü StatefulWidget
@@ -18,6 +20,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _telefonController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  
+  // [YENİ] Araç Bilgileri
+  final _plakaController = TextEditingController();
+  final _markaController = TextEditingController();
+  final _modelController = TextEditingController();
+  final _renkController = TextEditingController();
+
   final ApiService _apiService = ApiService();
   bool _isLoading = false;
 
@@ -48,25 +57,47 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   Future<void> _register() async {
+    // Validasyon
+    if (_plakaController.text.isEmpty || _markaController.text.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Lütfen araç bilgilerini giriniz.')));
+        return;
+    }
+
     setState(() => _isLoading = true);
     try {
+      final fcmToken = await NotificationService().getToken();
+
       await _apiService.registerDriver(
         ad: _adController.text,
         soyad: _soyadController.text,
         telefonNumarasi: _telefonController.text,
         email: _emailController.text,
         password: _passwordController.text,
+        fcmToken: fcmToken,
         profileImage: _profileImage,
         criminalRecordPdf: _criminalRecordPdf,
+        // [YENİ] Araç
+        plaka: _plakaController.text,
+        marka: _markaController.text,
+        model: _modelController.text,
+        renk: _renkController.text,
       );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Kayıt başarılı! Onay için admin ile iletişime geçin.'),
+            content: Text('Kayıt başarılı! Lütfen hesabınızı doğrulayın.'),
             backgroundColor: Colors.green,
           ),
         );
-        Navigator.pop(context); // Login ekranına geri dön
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => VerificationScreen(
+              email: _emailController.text,
+              token: "TOKEN_YOK",
+            ),
+          ),
+        );
       }
     } catch (e) {
       if (mounted) {
@@ -91,6 +122,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
     _telefonController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    _plakaController.dispose();
+    _markaController.dispose();
+    _modelController.dispose();
+    _renkController.dispose();
     super.dispose();
   }
 
@@ -115,6 +150,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
               TextField(controller: _passwordController, decoration: const InputDecoration(labelText: 'Şifre'), obscureText: true),
               const SizedBox(height: 24),
               
+              Text('Araç Bilgileri', style: Theme.of(context).textTheme.titleMedium),
+              const SizedBox(height: 12),
+              TextField(controller: _plakaController, decoration: const InputDecoration(labelText: 'Plaka (34 AB 123)')),
+              const SizedBox(height: 12),
+              TextField(controller: _markaController, decoration: const InputDecoration(labelText: 'Marka (Fiat)')),
+              const SizedBox(height: 12),
+              TextField(controller: _modelController, decoration: const InputDecoration(labelText: 'Model (Egea)')),
+              const SizedBox(height: 12),
+              TextField(controller: _renkController, decoration: const InputDecoration(labelText: 'Renk (Sarı)')),
+              const SizedBox(height: 24),
+
               Text('Belgeler (Zorunlu)', style: Theme.of(context).textTheme.titleMedium),
               const SizedBox(height: 12),
               
@@ -138,7 +184,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
                 child: _isLoading
                     ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text('Kayıt Ol'),
+                    : const Text('Kayıt Ol ve Aracı Ekle'),
               ),
             ],
           ),

@@ -1,0 +1,655 @@
+Launching lib/main.dart on sdk gphone64 arm64 in debug mode...
+Running Gradle task 'assembleDebug'...                          
+lib/screens/home_screen.dart:128:6: Error: Expected a class member, but got ')'.
+    });
+     ^
+lib/screens/home_screen.dart:128:7: Error: Expected a class member, but got ';'.
+    });
+      ^
+lib/screens/home_screen.dart:131:5: Error: Variables must be declared using the keywords 'const', 'final', 'var' or a type name.
+Try adding the name of the type of the variable or the keyword 'var'.
+    _rideCancelledSubscription = _socketService.rideCancelledStream.listen((data) {
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:859:1: Error: Expected a declaration, but got '}'.
+}
+^
+lib/screens/home_screen.dart:131:5: Error: '_rideCancelledSubscription' is already declared in this scope.
+    _rideCancelledSubscription = _socketService.rideCancelledStream.listen((data) {
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:53:23: Context: Previous declaration of '_rideCancelledSubscription'.
+  StreamSubscription? _rideCancelledSubscription; // Yolculuk iptal edildi (Sürücü tarafından)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:25:7: Error: The non-abstract class '_HomeScreenState' is missing implementations for these members:
+ - State.build
+Try to either
+ - provide an implementation,
+ - inherit an implementation from a superclass or mixin,
+ - mark the class as abstract, or
+ - provide a 'noSuchMethod' implementation.
+class _HomeScreenState extends State<HomeScreen> {
+      ^^^^^^^^^^^^^^^^
+/opt/homebrew/share/flutter/packages/flutter/lib/src/widgets/framework.dart:1461:10: Context: 'State.build' is defined here.
+  Widget build(BuildContext context);
+         ^^^^^
+lib/screens/home_screen.dart:131:34: Error: Can't access 'this' in a field initializer to read '_socketService'.
+    _rideCancelledSubscription = _socketService.rideCancelledStream.listen((data) {
+                                 ^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:132:13: Error: Undefined name 'mounted'.
+        if (mounted) {
+            ^^^^^^^
+lib/screens/home_screen.dart:134:34: Error: Undefined name 'context'.
+            ScaffoldMessenger.of(context).showSnackBar(
+                                 ^^^^^^^
+lib/screens/home_screen.dart:143:5: Error: Undefined name '_driverFetchTimer'.
+    _driverFetchTimer?.cancel();
+    ^^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:144:5: Error: Undefined name '_destinationController'.
+    _destinationController.dispose();
+    ^^^^^^^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:145:5: Error: Undefined name '_originController'.
+    _originController.dispose();
+    ^^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:147:5: Error: Undefined name '_socketService'.
+    _socketService.dispose();
+    ^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:148:5: Error: Undefined name '_rideFinishedSubscription'.
+    _rideFinishedSubscription?.cancel();
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:149:5: Error: Undefined name '_rideAcceptedSubscription'.
+    _rideAcceptedSubscription?.cancel();
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:150:5: Error: Undefined name '_driverArrivedSubscription'.
+    _driverArrivedSubscription?.cancel();
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:151:5: Error: Undefined name '_rideStartedSubscription'.
+    _rideStartedSubscription?.cancel();
+    ^^^^^^^^^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:152:5: Error: Undefined name '_rideCancelledSubscription'.
+    _rideCancelledSubscription?.cancel();
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:153:5: Error: Expected identifier, but got 'super'.
+    super.dispose();
+    ^^^^^
+lib/screens/home_screen.dart:160:7: Error: Undefined name '_polylines'.
+      _polylines.clear();
+      ^^^^^^^^^^
+lib/screens/home_screen.dart:161:7: Error: Undefined name '_markers'.
+      _markers.removeWhere((m) => m.markerId.value == 'destination_pin');
+      ^^^^^^^^
+lib/screens/home_screen.dart:162:7: Error: Undefined name '_destinationController'.
+      _destinationController.clear();
+      ^^^^^^^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:163:7: Error: Setter not found: '_routeDistance'.
+      _routeDistance = null;
+      ^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:164:7: Error: Setter not found: '_routeDuration'.
+      _routeDuration = null;
+      ^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:165:7: Error: Setter not found: '_routeDistanceValue'.
+      _routeDistanceValue = null;
+      ^^^^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:166:7: Error: Setter not found: '_selectedVehicleIndex'.
+      _selectedVehicleIndex = -1;
+      ^^^^^^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:167:7: Error: Setter not found: '_isFindingDriver'.
+      _isFindingDriver = false; // Sürücü arama durumunu sıfırla
+      ^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:168:7: Error: Setter not found: '_acceptedRide'.
+      _acceptedRide = null; // Kabul edilen yolculuğu sıfırla
+      ^^^^^^^^^^^^^
+lib/screens/home_screen.dart:169:7: Error: Setter not found: '_rideStatusText'.
+      _rideStatusText = "";
+      ^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:159:5: Error: Method not found: 'setState'.
+    setState(() {
+    ^^^^^^^^
+lib/screens/home_screen.dart:174:7: Error: Undefined name 'context'.
+      context,
+      ^^^^^^^
+lib/screens/home_screen.dart:183:5: Error: Setter not found: '_taxiIcon'.
+    _taxiIcon = await _getTaxiIconFromIconData(Icons.local_taxi, Colors.amber[700]!, 130);
+    ^^^^^^^^^
+lib/screens/home_screen.dart:211:10: Error: Undefined name 'mounted'.
+      if(mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Konum servisleri kapalı. Lütfen açın.')));
+         ^^^^^^^
+lib/screens/home_screen.dart:211:40: Error: Undefined name 'context'.
+      if(mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Konum servisleri kapalı. Lütfen açın.')));
+                                       ^^^^^^^
+lib/screens/home_screen.dart:218:12: Error: Undefined name 'mounted'.
+        if(mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Konum izni verilmedi.')));
+           ^^^^^^^
+lib/screens/home_screen.dart:218:42: Error: Undefined name 'context'.
+        if(mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Konum izni verilmedi.')));
+                                         ^^^^^^^
+lib/screens/home_screen.dart:223:10: Error: Undefined name 'mounted'.
+      if(mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Konum izinleri kalıcı olarak reddedildi, ayarları manuel olarak açmalısınız.')));
+         ^^^^^^^
+lib/screens/home_screen.dart:223:40: Error: Undefined name 'context'.
+      if(mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Konum izinleri kalıcı olarak reddedildi, ayarları manuel olarak açmalısınız.')));
+                                       ^^^^^^^
+lib/screens/home_screen.dart:230:9: Error: Setter not found: '_currentPosition'.
+        _currentPosition = position;
+        ^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:232:12: Error: Setter not found: '_originPosition'.
+           _originPosition = currentLatLng;
+           ^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:234:12: Error: Undefined name '_markers'.
+           _markers.removeWhere((m) => m.markerId.value == 'origin_pin');
+           ^^^^^^^^
+lib/screens/home_screen.dart:235:12: Error: Undefined name '_markers'.
+           _markers.add(Marker(markerId: const MarkerId('origin_pin'), position: currentLatLng, icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen)));
+           ^^^^^^^^
+lib/screens/home_screen.dart:229:7: Error: Method not found: 'setState'.
+      setState(() {
+      ^^^^^^^^
+lib/screens/home_screen.dart:245:9: Error: Undefined name '_currentPosition'.
+    if (_currentPosition == null || !mounted || _isFindingDriver) return;
+        ^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:245:38: Error: Undefined name 'mounted'.
+    if (_currentPosition == null || !mounted || _isFindingDriver) return;
+                                     ^^^^^^^
+lib/screens/home_screen.dart:245:49: Error: Undefined name '_isFindingDriver'.
+    if (_currentPosition == null || !mounted || _isFindingDriver) return;
+                                                ^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:247:65: Error: Undefined name '_currentPosition'.
+      List<Driver> drivers = await _apiService.getNearbyDrivers(_currentPosition!);
+                                                                ^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:247:36: Error: Undefined name '_apiService'.
+      List<Driver> drivers = await _apiService.getNearbyDrivers(_currentPosition!);
+                                   ^^^^^^^^^^^
+lib/screens/home_screen.dart:249:9: Error: Undefined name '_driverMarkers'.
+        _driverMarkers.clear();
+        ^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:251:139: Error: Undefined name '_taxiIcon'.
+          _driverMarkers.add(Marker(markerId: MarkerId('driver_${driver.id}'), position: LatLng(driver.latitude, driver.longitude), icon: _taxiIcon, infoWindow: InfoWindow(title: driver.ad, snippet: 'Puan: ${driver.puanOrtalamasi}'),),);
+                                                                                          ^^^^^^^^^
+lib/screens/home_screen.dart:251:11: Error: Undefined name '_driverMarkers'.
+          _driverMarkers.add(Marker(markerId: MarkerId('driver_${driver.id}'), position: LatLng(driver.latitude, driver.longitude), icon: _taxiIcon, infoWindow: InfoWindow(title: driver.ad, snippet: 'Puan: ${driver.puanOrtalamasi}'),),);
+          ^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:248:7: Error: Method not found: 'setState'.
+      setState(() {
+      ^^^^^^^^
+lib/screens/home_screen.dart:262:7: Error: Undefined name '_markers'.
+      _markers.clear();
+      ^^^^^^^^
+lib/screens/home_screen.dart:263:11: Error: Undefined name '_isSelectingDestination'.
+      if (_isSelectingDestination) {
+          ^^^^^^^^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:264:32: Error: Undefined name '_markers'.
+        final destinationPin = _markers.where((m) => m.markerId.value == 'destination_pin').firstOrNull;
+                               ^^^^^^^^
+lib/screens/home_screen.dart:265:37: Error: Undefined name '_markers'.
+        if (destinationPin != null) _markers.add(destinationPin);
+                                    ^^^^^^^^
+lib/screens/home_screen.dart:267:25: Error: Undefined name '_driverMarkers'.
+        _markers.addAll(_driverMarkers);
+                        ^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:267:9: Error: Undefined name '_markers'.
+        _markers.addAll(_driverMarkers);
+        ^^^^^^^^
+lib/screens/home_screen.dart:268:32: Error: Undefined name '_markers'.
+        final destinationPin = _markers.where((m) => m.markerId.value == 'destination_pin').firstOrNull;
+                               ^^^^^^^^
+lib/screens/home_screen.dart:269:37: Error: Undefined name '_markers'.
+        if (destinationPin != null) _markers.add(destinationPin);
+                                    ^^^^^^^^
+lib/screens/home_screen.dart:261:5: Error: Method not found: 'setState'.
+    setState(() {
+    ^^^^^^^^
+lib/screens/home_screen.dart:277:11: Error: Undefined name '_isSelectingDestination'.
+      if(!_isSelectingDestination && !_isFindingDriver) {
+          ^^^^^^^^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:277:39: Error: Undefined name '_isFindingDriver'.
+      if(!_isSelectingDestination && !_isFindingDriver) {
+                                      ^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:276:5: Error: Setter not found: '_driverFetchTimer'.
+    _driverFetchTimer = Timer.periodic(const Duration(seconds: 15), (timer) {
+    ^^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:284:9: Error: Undefined name '_isFindingDriver'.
+    if (_isFindingDriver) return; // Sürücü aranırken haritaya dokunmayı engelle
+        ^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:285:10: Error: Undefined name '_isSelectingDestination'.
+    if (!_isSelectingDestination) return;
+         ^^^^^^^^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:292:11: Error: Undefined name '_polylines'.
+          _polylines.clear();
+          ^^^^^^^^^^
+lib/screens/home_screen.dart:293:11: Error: Undefined name '_markers'.
+          _markers.removeWhere((m) => m.markerId.value == 'destination_pin');
+          ^^^^^^^^
+lib/screens/home_screen.dart:294:11: Error: Undefined name '_destinationController'.
+          _destinationController.clear();
+          ^^^^^^^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:295:11: Error: Setter not found: '_routeDistance'.
+          _routeDistance = null;
+          ^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:296:11: Error: Setter not found: '_routeDuration'.
+          _routeDuration = null;
+          ^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:297:11: Error: Setter not found: '_routeDistanceValue'.
+          _routeDistanceValue = null;
+          ^^^^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:298:11: Error: Setter not found: '_selectedVehicleIndex'.
+          _selectedVehicleIndex = -1;
+          ^^^^^^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:299:11: Error: Setter not found: '_isFindingDriver'.
+          _isFindingDriver = false;
+          ^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:300:11: Error: Setter not found: '_acceptedRide'.
+          _acceptedRide = null;
+          ^^^^^^^^^^^^^
+lib/screens/home_screen.dart:301:11: Error: Setter not found: '_rideStatusText'.
+          _rideStatusText = "";
+          ^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:302:11: Error: Undefined name '_driverMarkers'.
+          _driverMarkers.clear(); // Eski sürücü markerlarını temizle
+          ^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:291:7: Error: Method not found: 'setState'.
+      setState(() {
+      ^^^^^^^^
+lib/screens/home_screen.dart:309:11: Error: Undefined name '_acceptedRide'.
+      if (_acceptedRide == null) return;
+          ^^^^^^^^^^^^^
+lib/screens/home_screen.dart:312:20: Error: Undefined name 'context'.
+          context: context,
+                   ^^^^^^^
+lib/screens/home_screen.dart:325:44: Error: Undefined name '_acceptedRide'.
+              await _apiService.cancelRide(_acceptedRide!['ride']['id'].toString());
+                                           ^^^^^^^^^^^^^
+lib/screens/home_screen.dart:325:21: Error: Undefined name '_apiService'.
+              await _apiService.cancelRide(_acceptedRide!['ride']['id'].toString());
+                    ^^^^^^^^^^^
+lib/screens/home_screen.dart:327:18: Error: Undefined name 'mounted'.
+              if(mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Yolculuk iptal edildi.")));
+                 ^^^^^^^
+lib/screens/home_screen.dart:327:48: Error: Undefined name 'context'.
+              if(mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Yolculuk iptal edildi.")));
+                                               ^^^^^^^
+lib/screens/home_screen.dart:329:18: Error: Undefined name 'mounted'.
+              if(mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("İptal Hatası: $e")));
+                 ^^^^^^^
+lib/screens/home_screen.dart:329:48: Error: Undefined name 'context'.
+              if(mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("İptal Hatası: $e")));
+                                               ^^^^^^^
+lib/screens/home_screen.dart:336:31: Error: Undefined name '_apiService'.
+        final address = await _apiService.getAddressFromCoordinates(
+                              ^^^^^^^^^^^
+lib/screens/home_screen.dart:340:13: Error: Undefined name 'mounted'.
+        if (mounted) {
+            ^^^^^^^
+lib/screens/home_screen.dart:343:15: Error: Undefined name '_originController'.
+              _originController.text = address;
+              ^^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:341:11: Error: Method not found: 'setState'.
+          setState(() {
+          ^^^^^^^^
+lib/screens/home_screen.dart:353:27: Error: Undefined name '_apiService'.
+    final address = await _apiService.getAddressFromCoordinates(position.latitude, position.longitude);
+                          ^^^^^^^^^^^
+lib/screens/home_screen.dart:355:7: Error: Undefined name '_destinationController'.
+      _destinationController.text = address;
+      ^^^^^^^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:356:7: Error: Setter not found: '_destinationPosition'.
+      _destinationPosition = position;
+      ^^^^^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:357:7: Error: Undefined name '_markers'.
+      _markers.removeWhere((m) => m.markerId.value == 'destination_pin');
+      ^^^^^^^^
+lib/screens/home_screen.dart:358:7: Error: Undefined name '_markers'.
+      _markers.add(Marker(markerId: const MarkerId('destination_pin'), position: position, icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed), infoWindow: InfoWindow(title: "Hedef", snippet: address)),);
+      ^^^^^^^^
+lib/screens/home_screen.dart:359:7: Error: Setter not found: '_isSelectingDestination'.
+      _isSelectingDestination = false;
+      ^^^^^^^^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:354:5: Error: Method not found: 'setState'.
+    setState(() {
+    ^^^^^^^^
+lib/screens/home_screen.dart:362:10: Error: Undefined name '_originPosition'.
+     if (_originPosition != null) {
+         ^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:363:20: Error: Undefined name '_originPosition'.
+        _drawRoute(_originPosition!, position);
+                   ^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:369:31: Error: Undefined name '_apiService'.
+      final routeInfo = await _apiService.getDirections(origin, destination);
+                              ^^^^^^^^^^^
+lib/screens/home_screen.dart:376:9: Error: Undefined name '_polylines'.
+        _polylines.clear();
+        ^^^^^^^^^^
+lib/screens/home_screen.dart:377:9: Error: Undefined name '_polylines'.
+        _polylines.add(Polyline(polylineId: const PolylineId('route'), color: Colors.blueAccent, width: 6, points: polylinePoints,));
+        ^^^^^^^^^^
+lib/screens/home_screen.dart:378:9: Error: Setter not found: '_routeDistance'.
+        _routeDistance = routeInfo['distance'];
+        ^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:379:9: Error: Setter not found: '_routeDuration'.
+        _routeDuration = routeInfo['duration'];
+        ^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:380:9: Error: Setter not found: '_routeDistanceValue'.
+        _routeDistanceValue = routeInfo['distance_value'];
+        ^^^^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:375:7: Error: Method not found: 'setState'.
+      setState(() {
+      ^^^^^^^^
+lib/screens/home_screen.dart:383:7: Error: Undefined name '_mapController'.
+      _mapController?.animateCamera(CameraUpdate.newLatLngBounds(LatLngBounds(
+      ^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:395:11: Error: Undefined name 'mounted'.
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Rota çizilemedi: ${e.toString()}'), backgroundColor: Colors.red,));
+          ^^^^^^^
+lib/screens/home_screen.dart:395:41: Error: Undefined name 'context'.
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Rota çizilemedi: ${e.toString()}'), backgroundColor: Colors.red,));
+                                        ^^^^^^^
+lib/screens/home_screen.dart:401:20: Error: Undefined name '_polylines'.
+    setState(() => _polylines.clear());
+                   ^^^^^^^^^^
+lib/screens/home_screen.dart:401:5: Error: Method not found: 'setState'.
+    setState(() => _polylines.clear());
+    ^^^^^^^^
+lib/screens/home_screen.dart:405:30: Error: Undefined name '_apiService'.
+        final route1 = await _apiService.getDirections(driverLoc, pickupLoc);
+                             ^^^^^^^^^^^
+lib/screens/home_screen.dart:410:13: Error: Undefined name '_polylines'.
+            _polylines.add(Polyline(
+            ^^^^^^^^^^
+lib/screens/home_screen.dart:409:9: Error: Method not found: 'setState'.
+        setState(() {
+        ^^^^^^^^
+lib/screens/home_screen.dart:421:14: Error: Undefined name '_polylines'.
+             _polylines.add(Polyline(
+             ^^^^^^^^^^
+lib/screens/home_screen.dart:420:9: Error: Method not found: 'setState'.
+        setState(() {
+        ^^^^^^^^
+lib/screens/home_screen.dart:432:30: Error: Undefined name '_apiService'.
+        final route2 = await _apiService.getDirections(pickupLoc, destLoc);
+                             ^^^^^^^^^^^
+lib/screens/home_screen.dart:437:13: Error: Undefined name '_polylines'.
+            _polylines.add(Polyline(
+            ^^^^^^^^^^
+lib/screens/home_screen.dart:436:9: Error: Method not found: 'setState'.
+        setState(() {
+        ^^^^^^^^
+lib/screens/home_screen.dart:446:10: Error: Undefined name '_mapController'.
+         _mapController?.animateCamera(CameraUpdate.newLatLngBounds(
+         ^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:463:14: Error: Undefined name '_polylines'.
+             _polylines.add(Polyline(
+             ^^^^^^^^^^
+lib/screens/home_screen.dart:462:10: Error: Method not found: 'setState'.
+         setState(() {
+         ^^^^^^^^
+lib/screens/home_screen.dart:474:9: Error: Undefined name '_mapController'.
+    if (_mapController != null && _currentPosition != null) {
+        ^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:474:35: Error: Undefined name '_currentPosition'.
+    if (_mapController != null && _currentPosition != null) {
+                                  ^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:475:7: Error: Undefined name '_mapController'.
+      _mapController!.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(target: LatLng(_currentPosition!.latitude, _currentPosition!.longitude), zoom: 15.0,),),);
+      ^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:475:98: Error: Undefined name '_currentPosition'.
+      _mapController!.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(target: LatLng(_currentPosition!.latitude, _currentPosition!.longitude), zoom: 15.0,),),);
+                                                                                          ^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:475:126: Error: Undefined name '_currentPosition'.
+      _mapController!.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(target: LatLng(_currentPosition!.latitude, _currentPosition!.longitude), zoom: 15.0,),),);
+                                                                                          ^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:480:9: Error: Undefined name '_isFindingDriver'.
+    if (_isFindingDriver) return; // Sürücü aranırken adres değiştirmeyi engelle
+        ^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:483:7: Error: Undefined name 'context'.
+      context,
+      ^^^^^^^
+lib/screens/home_screen.dart:495:11: Error: Undefined name '_originController'.
+          _originController.text = address;
+          ^^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:496:11: Error: Setter not found: '_originPosition'.
+          _originPosition = newPosition;
+          ^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:497:11: Error: Undefined name '_markers'.
+          _markers.removeWhere((m) => m.markerId.value == 'origin_pin');
+          ^^^^^^^^
+lib/screens/home_screen.dart:498:11: Error: Undefined name '_markers'.
+          _markers.add(Marker(markerId: const MarkerId('origin_pin'), position: newPosition, icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen)));
+          ^^^^^^^^
+lib/screens/home_screen.dart:500:11: Error: Undefined name '_destinationController'.
+          _destinationController.text = address;
+          ^^^^^^^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:501:11: Error: Setter not found: '_destinationPosition'.
+          _destinationPosition = newPosition;
+          ^^^^^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:502:11: Error: Undefined name '_markers'.
+          _markers.removeWhere((m) => m.markerId.value == 'destination_pin');
+          ^^^^^^^^
+lib/screens/home_screen.dart:503:11: Error: Undefined name '_markers'.
+          _markers.add(Marker(markerId: const MarkerId('destination_pin'), position: newPosition, icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed)));
+          ^^^^^^^^
+lib/screens/home_screen.dart:493:7: Error: Method not found: 'setState'.
+      setState(() {
+      ^^^^^^^^
+lib/screens/home_screen.dart:507:11: Error: Undefined name '_originPosition'.
+      if (_originPosition != null && _destinationPosition != null) {
+          ^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:507:38: Error: Undefined name '_destinationPosition'.
+      if (_originPosition != null && _destinationPosition != null) {
+                                     ^^^^^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:508:20: Error: Undefined name '_originPosition'.
+        _drawRoute(_originPosition!, _destinationPosition!);
+                   ^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:508:38: Error: Undefined name '_destinationPosition'.
+        _drawRoute(_originPosition!, _destinationPosition!);
+                                     ^^^^^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:510:7: Error: Undefined name '_mapController'.
+      _mapController?.animateCamera(CameraUpdate.newLatLngZoom(newPosition, 15));
+      ^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:515:9: Error: Undefined name '_selectedVehicleIndex'.
+    if (_selectedVehicleIndex != -1 && _routeDistanceValue != null) {
+        ^^^^^^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:515:40: Error: Undefined name '_routeDistanceValue'.
+    if (_selectedVehicleIndex != -1 && _routeDistanceValue != null) {
+                                       ^^^^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:516:44: Error: Undefined name '_selectedVehicleIndex'.
+      final selectedVehicle = vehicleTypes[_selectedVehicleIndex];
+                                           ^^^^^^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:518:30: Error: Undefined name '_routeDistanceValue'.
+        final distanceInKm = _routeDistanceValue! / 1000.0;
+                             ^^^^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:529:9: Error: Undefined name '_originPosition'.
+    if (_originPosition == null || _destinationPosition == null || _selectedVehicleIndex == -1) {
+        ^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:529:36: Error: Undefined name '_destinationPosition'.
+    if (_originPosition == null || _destinationPosition == null || _selectedVehicleIndex == -1) {
+                                   ^^^^^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:529:68: Error: Undefined name '_selectedVehicleIndex'.
+    if (_originPosition == null || _destinationPosition == null || _selectedVehicleIndex == -1) {
+                                                                   ^^^^^^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:530:28: Error: Undefined name 'context'.
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Lütfen başlangıç, hedef ve araç tipi seçin.'), backgroundColor: Colors.orange,));
+                           ^^^^^^^
+lib/screens/home_screen.dart:534:20: Error: Setter not found: '_isFindingDriver'.
+    setState(() => _isFindingDriver = true);
+                   ^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:534:5: Error: Method not found: 'setState'.
+    setState(() => _isFindingDriver = true);
+    ^^^^^^^^
+lib/screens/home_screen.dart:537:44: Error: Undefined name '_selectedVehicleIndex'.
+      final selectedVehicle = vehicleTypes[_selectedVehicleIndex];
+                                           ^^^^^^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:541:17: Error: Undefined name '_originPosition'.
+        origin: _originPosition!,
+                ^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:542:22: Error: Undefined name '_destinationPosition'.
+        destination: _destinationPosition!,
+                     ^^^^^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:543:24: Error: Undefined name '_originController'.
+        originAddress: _originController.text,
+                       ^^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:544:29: Error: Undefined name '_destinationController'.
+        destinationAddress: _destinationController.text,
+                            ^^^^^^^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:540:28: Error: Undefined name '_apiService'.
+      final result = await _apiService.createRide(
+                           ^^^^^^^^^^^
+lib/screens/home_screen.dart:552:28: Error: Undefined name 'context'.
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                           ^^^^^^^
+lib/screens/home_screen.dart:559:11: Error: Undefined name 'mounted'.
+      if (mounted) {
+          ^^^^^^^
+lib/screens/home_screen.dart:560:30: Error: Undefined name 'context'.
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString()), backgroundColor: Colors.red,));
+                             ^^^^^^^
+lib/screens/home_screen.dart:562:22: Error: Setter not found: '_isFindingDriver'.
+      setState(() => _isFindingDriver = false);
+                     ^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:562:7: Error: Method not found: 'setState'.
+      setState(() => _isFindingDriver = false);
+      ^^^^^^^^
+lib/screens/home_screen.dart:571:16: Error: Undefined name '_isSelectingDestination'.
+      appBar: (_isSelectingDestination || _isFindingDriver) ? null : AppBar(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:571:43: Error: Undefined name '_isFindingDriver'.
+      appBar: (_isSelectingDestination || _isFindingDriver) ? null : AppBar(
+                                          ^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:577:19: Error: Undefined name 'mounted'.
+              if (mounted) {
+                  ^^^^^^^
+lib/screens/home_screen.dart:584:36: Error: Undefined name '_kInitialPosition'.
+            initialCameraPosition: _kInitialPosition,
+                                   ^^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:585:63: Error: Setter not found: '_mapController'.
+            onMapCreated: (GoogleMapController controller) => _mapController = controller,
+                                                              ^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:589:22: Error: Undefined name '_markers'.
+            markers: _markers,
+                     ^^^^^^^^
+lib/screens/home_screen.dart:590:24: Error: Undefined name '_polylines'.
+            polylines: _polylines,
+                       ^^^^^^^^^^
+lib/screens/home_screen.dart:594:15: Error: Undefined name '_isSelectingDestination'.
+          if (_isSelectingDestination) ...[
+              ^^^^^^^^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:597:21: Error: Setter not found: '_isSelectingDestination'.
+                    _isSelectingDestination = false;
+                    ^^^^^^^^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:596:153: Error: Method not found: 'setState'.
+              child: CircleAvatar(backgroundColor: Colors.white, child: IconButton(icon: const Icon(Icons.close, color: Colors.black), onPressed: () => setState(() {
+                                                                                          ^^^^^^^^
+lib/screens/home_screen.dart:602:16: Error: Undefined name '_isSelectingDestination'.
+          if (!_isSelectingDestination && !_isFindingDriver) ...[
+               ^^^^^^^^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:602:44: Error: Undefined name '_isFindingDriver'.
+          if (!_isSelectingDestination && !_isFindingDriver) ...[
+                                           ^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:623:35: Error: Undefined name '_originController'.
+                      controller: _originController, readOnly: true,
+                                  ^^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:635:43: Error: Undefined name '_destinationController'.
+                    TextField(controller: _destinationController, readOnly: true,
+                                          ^^^^^^^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:646:32: Error: Setter not found: '_isSelectingDestination'.
+                               _isSelectingDestination = true;
+                               ^^^^^^^^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:645:30: Error: Method not found: 'setState'.
+                             setState(() {
+                             ^^^^^^^^
+lib/screens/home_screen.dart:669:29: Error: Undefined name '_vehicleTypesFuture'.
+                    future: _vehicleTypesFuture,
+                            ^^^^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:682:31: Error: Undefined name '_routeDistance'.
+                          if (_routeDistance != null)
+                              ^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:698:75: Error: Undefined name '_routeDistance'.
+                                        _infoColumn(Icons.directions_car, _routeDistance ?? '-'),
+                                                                          ^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:699:66: Error: Undefined name '_routeDuration'.
+                                        _infoColumn(Icons.timer, _routeDuration ?? '-'),
+                                                                 ^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:714:52: Error: Undefined name '_selectedVehicleIndex'.
+                                final isSelected = _selectedVehicleIndex == index;
+                                                   ^^^^^^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:716:63: Error: Setter not found: '_selectedVehicleIndex'.
+                                  onTap: () => setState(() => _selectedVehicleIndex = index),
+                                                              ^^^^^^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:716:48: Error: Method not found: 'setState'.
+                                  onTap: () => setState(() => _selectedVehicleIndex = index),
+                                               ^^^^^^^^
+lib/screens/home_screen.dart:727:31: Error: Undefined name '_destinationPosition'.
+                          if (_destinationPosition != null)
+                              ^^^^^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:731:45: Error: Undefined name '_selectedVehicleIndex'.
+                                onPressed: (_selectedVehicleIndex == -1 || _isFindingDriver) ? null : () => _requestRide(vehicleTypes),
+                                            ^^^^^^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:731:76: Error: Undefined name '_isFindingDriver'.
+                                onPressed: (_selectedVehicleIndex == -1 || _isFindingDriver) ? null : () => _requestRide(vehicleTypes),
+                                                                           ^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:738:40: Error: Undefined name '_isFindingDriver'.
+                                child: _isFindingDriver 
+                                       ^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:753:15: Error: Undefined name '_isFindingDriver'.
+          if (_isFindingDriver)
+              ^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:767:38: Error: Setter not found: '_isFindingDriver'.
+                      setState(() => _isFindingDriver = false);
+                                     ^^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:767:23: Error: Method not found: 'setState'.
+                      setState(() => _isFindingDriver = false);
+                      ^^^^^^^^
+lib/screens/home_screen.dart:777:15: Error: Undefined name '_acceptedRide'.
+          if (_acceptedRide != null)
+              ^^^^^^^^^^^^^
+lib/screens/home_screen.dart:790:26: Error: Undefined name '_rideStatusText'.
+                    Text(_rideStatusText.isNotEmpty ? _rideStatusText : "Sürücü Yolda!", style: const TextStyle(color: Colors.greenAccent, fontSize: 18, fontWeight: FontWeight.bold)),
+                         ^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:790:55: Error: Undefined name '_rideStatusText'.
+                    Text(_rideStatusText.isNotEmpty ? _rideStatusText : "Sürücü Yolda!", style: const TextStyle(color: Colors.greenAccent, fontSize: 18, fontWeight: FontWeight.bold)),
+                                                      ^^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:794:38: Error: Undefined name '_acceptedRide'.
+                      title: Text("${_acceptedRide!['driver']['ad']} ${_acceptedRide!['driver']['soyad']}", style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                                     ^^^^^^^^^^^^^
+lib/screens/home_screen.dart:794:72: Error: Undefined name '_acceptedRide'.
+                      title: Text("${_acceptedRide!['driver']['ad']} ${_acceptedRide!['driver']['soyad']}", style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                                                                       ^^^^^^^^^^^^^
+lib/screens/home_screen.dart:795:47: Error: Undefined name '_acceptedRide'.
+                      subtitle: Text("Araç: ${_acceptedRide!['vehicle']['plaka']} • ${_acceptedRide!['vehicle']['marka']}", style: const TextStyle(color: Colors.white70)),
+                                              ^^^^^^^^^^^^^
+lib/screens/home_screen.dart:795:87: Error: Undefined name '_acceptedRide'.
+                      subtitle: Text("Araç: ${_acceptedRide!['vehicle']['plaka']} • ${_acceptedRide!['vehicle']['marka']}", style: const TextStyle(color: Colors.white70)),
+                                                                                      ^^^^^^^^^^^^^
+lib/screens/home_screen.dart:799:40: Error: Undefined name '_acceptedRide'.
+                        child: Text("${_acceptedRide!['driver']['puan_ortalamasi'] ?? '5.0'}", style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+                                       ^^^^^^^^^^^^^
+lib/screens/home_screen.dart:819:45: Error: Undefined name '_acceptedRide'.
+                                receiverId: _acceptedRide!['driver']['id'],
+                                            ^^^^^^^^^^^^^
+lib/screens/home_screen.dart:820:50: Error: Undefined name '_acceptedRide'.
+                                receiverName: "${_acceptedRide!['driver']['ad']} ${_acceptedRide!['driver']['soyad']}",
+                                                 ^^^^^^^^^^^^^
+lib/screens/home_screen.dart:820:84: Error: Undefined name '_acceptedRide'.
+                                receiverName: "${_acceptedRide!['driver']['ad']} ${_acceptedRide!['driver']['soyad']}",
+                                                                                   ^^^^^^^^^^^^^
+lib/screens/home_screen.dart:821:48: Error: Undefined name '_socketService'.
+                                socketService: _socketService,
+                                               ^^^^^^^^^^^^^^
+lib/screens/home_screen.dart:837:36: Error: Undefined name '_rideStatusText'.
+                        onPressed: _rideStatusText == "Yolculuk Başladı" ? null : _cancelRide, // Yolculuk başladıysa iptal edilemez (şimdilik)
+                                   ^^^^^^^^^^^^^^^
+Target kernel_snapshot_program failed: Exception
+
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:compileFlutterBuildDebug'.
+> Process 'command '/opt/homebrew/share/flutter/bin/flutter'' finished with non-zero exit value 1
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 2s
+Running Gradle task 'assembleDebug'...                              3,0s
+I/flutter ( 6209): Sürücüler çekilirken hata: Exception: Sunucuya bağlanılamadı.
+Error: Gradle task assembleDebug failed with exit code 1

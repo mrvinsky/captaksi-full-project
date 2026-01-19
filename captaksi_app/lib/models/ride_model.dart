@@ -3,7 +3,7 @@ class Ride {
   final String? bitisAdresMetni;
   final String? gerceklesenUcret;
   final String durum;
-  final int? rating; // Puan null olabilir
+  final num? rating; // Changed to num to handle int/double/string parsing
 
   Ride({
     required this.id,
@@ -15,11 +15,11 @@ class Ride {
 
   factory Ride.fromJson(Map<String, dynamic> json) {
     return Ride(
-      id: json['id'],
+      id: json['id'].toString(), // Safely convert int to String
       bitisAdresMetni: json['bitis_adres_metni'],
       gerceklesenUcret: json['gerceklesen_ucret'],
       durum: json['durum'],
-      rating: json['rating'],
+      rating: json['rating'] != null ? num.tryParse(json['rating'].toString()) : null,
     );
   }
 }

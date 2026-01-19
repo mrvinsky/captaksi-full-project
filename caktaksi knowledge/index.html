@@ -5,12 +5,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CAPTAKSI – Proje Durumu | Mr. Vinsky</title>
-
   <!-- Feather Icons -->
   <script src="https://unpkg.com/feather-icons"></script>
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
-
   <style>
     :root {
       --bg-color: #1E1E1E;
@@ -225,21 +223,17 @@
 </head>
 
 <body>
-
   <header>
     <div class="brand-box">
       <img src="logo.svg" alt="Mr. Vinsky Logo" width="50" height="50">
       <span class="brand-title">Mr. Vinsky</span>
     </div>
   </header>
-
   <nav>
     <a href="index.html" class="active"><i data-feather="activity"></i> Durum</a>
     <a href="todo.html"><i data-feather="list"></i> Yapılacaklar</a>
   </nav>
-
   <div class="container">
-
     <!-- PROJE ÖZETİ -->
     <div class="section">
       <h2><i data-feather="info"></i> Proje Özeti</h2>
@@ -248,105 +242,93 @@
         Son güncelleme ile <strong>"Midnight Taxi"</strong> konseptine geçildi, <strong>PostGIS</strong> bağımlılığı
         kaldırıldı ve <strong>Yolculuk Algoritması</strong> yenilendi.</p>
     </div>
-
     <!-- UYGULAMA DURUMU -->
     <div class="section">
       <h2><i data-feather="smartphone"></i> Uygulama Durumu</h2>
-
       <div class="progress-circles">
-        <div class="circle-box">
-          <div class="circle" style="background: conic-gradient(#FFD600 350deg, rgba(255,255,255,0.05) 0deg);">
-            <span>98%</span>
-          </div>
-          <p>Yolcu Uygulaması<br><small>(Midnight UI)</small></p>
+        <div class="circle" style="background: conic-gradient(#FFD600 356deg, rgba(255,255,255,0.05) 0deg);">
+          <span>99%</span>
         </div>
-
-        <div class="circle-box">
-          <div class="circle" style="background: conic-gradient(#00E5FF 340deg, rgba(255,255,255,0.05) 0deg);">
-            <span style="color:#00E5FF">95%</span>
-          </div>
-          <p>Sürücü Uygulaması<br><small>(Web + Desktop)</small></p>
+        <p>Yolcu Uygulaması<br><small>(Midnight UI)</small></p>
+      </div>
+      <div class="circle-box">
+        <div class="circle" style="background: conic-gradient(#00E5FF 340deg, rgba(255,255,255,0.05) 0deg);">
+          <span style="color:#00E5FF">95%</span>
         </div>
-
-        <div class="circle-box">
-          <div class="circle" style="background: conic-gradient(#FF3D00 324deg, rgba(255,255,255,0.05) 0deg);">
-            <span style="color:#FF3D00">90%</span>
-          </div>
-          <p>Admin Paneli<br><small>(React Dashboard)</small></p>
+        <p>Sürücü Uygulaması<br><small>(Web + Desktop)</small></p>
+      </div>
+      <div class="circle-box">
+        <div class="circle" style="background: conic-gradient(#FF3D00 324deg, rgba(255,255,255,0.05) 0deg);">
+          <span style="color:#FF3D00">90%</span>
         </div>
+        <p>Admin Paneli<br><small>(React Dashboard)</small></p>
       </div>
     </div>
-
-    <!-- BACKEND DURUMU -->
-    <div class="section">
-      <h2><i data-feather="server"></i> Backend & Altyapı</h2>
-
-      <div class="progress-circles">
-        <div class="circle-box">
-          <div class="circle" style="background: conic-gradient(#76FF03 360deg, rgba(255,255,255,0.05) 0deg);">
-            <span style="color:#76FF03">100%</span>
-          </div>
-          <p>REST API</p>
-        </div>
-
-        <div class="circle-box">
-          <div class="circle" style="background: conic-gradient(#FFD600 330deg, rgba(255,255,255,0.05) 0deg);">
-            <span>92%</span>
-          </div>
-          <p>Socket.IO</p>
-        </div>
-
-        <div class="circle-box">
-          <div class="circle" style="background: conic-gradient(#D500F9 300deg, rgba(255,255,255,0.05) 0deg);">
-            <span style="color:#D500F9">85%</span>
-          </div>
-          <p>Raporlama</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- VISUAL TIMELINE -->
-    <div class="section">
-      <h2><i data-feather="git-branch"></i> Son Güncellemeler</h2>
-
-      <div class="timeline">
-
-        <div class="tl-item">
-          <h4>✔ UI Redesign - Midnight Taxi</h4>
-          <p>Tüm mobil arayüz "Koyu Tema" ve "Sarı Akcent" ile yenilendi. Google Fonts eklendi.</p>
-        </div>
-
-        <div class="tl-item">
-          <h4>✔ Backend - PostGIS Removal</h4>
-          <p>Karmaşık PostGIS kurulumu yerine standart Latitude/Longitude sistemine geçildi. Kurulum kolaylaştı.</p>
-        </div>
-
-        <div class="tl-item">
-          <h4>✔ Admin Panel - V3.0</h4>
-          <p>React tabanlı yönetim paneli eklendi. Sürücü onayı, kullanıcı takibi ve gelir grafikleri aktif.</p>
-        </div>
-
-        <div class="tl-item">
-          <h4>✔ Driver App - Multiplatform</h4>
-          <p>Sürücü uygulaması artık macOS ve Web üzerinde de çalışıyor.</p>
-        </div>
-
-        <div class="tl-item">
-          <h4>✔ Fix - Ride Request</h4>
-          <p>Yolculuk oluşturma hatası (501) backend fonksiyonu yazılarak giderildi. Socket entegrasyonu yapıldı.</p>
-        </div>
-
-      </div>
-    </div>
-
   </div>
-
+  <!-- BACKEND DURUMU -->
+  <div class="section">
+    <h2><i data-feather="server"></i> Backend & Altyapı</h2>
+    <div class="progress-circles">
+      <div class="circle-box">
+        <div class="circle" style="background: conic-gradient(#76FF03 360deg, rgba(255,255,255,0.05) 0deg);">
+          <span style="color:#76FF03">100%</span>
+        </div>
+        <p>REST API</p>
+      </div>
+      <div class="circle-box">
+        <div class="circle" style="background: conic-gradient(#FFD600 330deg, rgba(255,255,255,0.05) 0deg);">
+          <span>92%</span>
+        </div>
+        <p>Socket.IO</p>
+      </div>
+      <div class="circle-box">
+        <div class="circle" style="background: conic-gradient(#D500F9 300deg, rgba(255,255,255,0.05) 0deg);">
+          <span style="color:#D500F9">85%</span>
+        </div>
+        <p>Raporlama</p>
+      </div>
+    </div>
+  </div>
+  <!-- VISUAL TIMELINE -->
+  <div class="section">
+    <h2><i data-feather="git-branch"></i> Son Güncellemeler</h2>
+    <div class="timeline">
+      <div class="tl-item">
+        <h4>✔ Driver Registration & Approval Flow</h4>
+        <p>Sürücü kayıt ekranına araç bilgileri eklendi. Admin paneli onay mekanizması düzeltildi. Uçtan uca kayıt
+          başarılı.</p>
+      </div>
+      <div class="tl-item">
+        <h4>✔ Ride Flow Verification</h4>
+        <p>Yolculuk isteği -> Sürücü Kabulü akışı uçtan uca test edildi ve doğrulandı.</p>
+      </div>
+      <div class="tl-item">
+        <h4>✔ Android Emulator Verification</h4>
+        <p>Rider App'in Android Emülatör üzerinde sorunsuz çalıştığı doğrulandı (API 36).</p>
+      </div>
+      <div class="tl-item">
+        <h4>✔ UI Redesign - Midnight Taxi</h4>
+        <p>Tüm mobil arayüz "Koyu Tema" ve "Sarı Akcent" ile yenilendi. Google Fonts eklendi.</p>
+      </div>
+      <div class="tl-item">
+        <h4>✔ Backend - PostGIS Removal</h4>
+        <p>Karmaşık PostGIS kurulumu yerine standart Latitude/Longitude sistemine geçildi. Kurulum kolaylaştı.</p>
+      </div>
+      <div class="tl-item">
+        <h4>✔ Admin Panel - V3.0</h4>
+        <p>React tabanlı yönetim paneli eklendi. Sürücü onayı, kullanıcı takibi ve gelir grafikleri aktif.</p>
+      </div>
+      <div class="tl-item">
+        <h4>✔ Driver App - Multiplatform</h4>
+        <p>Sürücü uygulaması artık macOS ve Web üzerinde de çalışıyor.</p>
+      </div>
+    </div>
+  </div>
+  </div>
   <footer>
     © 2026 <span>Mr. Vinsky</span> | CAPTAKSI Proje Süreci
   </footer>
-
   <script>feather.replace();</script>
-
 </body>
 
 </html>

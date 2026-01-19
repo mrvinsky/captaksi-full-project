@@ -11,7 +11,8 @@ async function createRide({
   bitisLng,
   baslangicAdres,
   bitisAdres,
-  tahminiUcret
+  tahminiUcret,
+  mesafeKm
 }) {
   const result = await db.query(
     `
@@ -24,9 +25,10 @@ async function createRide({
       baslangic_adres_metni, 
       bitis_adres_metni, 
       gerceklesen_ucret,
-      durum
+      durum,
+      mesafe_km
     )
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'beklemede')
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'beklemede', $9)
     RETURNING *
     `,
     [
@@ -37,7 +39,8 @@ async function createRide({
       bitisLng,
       baslangicAdres,
       bitisAdres,
-      tahminiUcret
+      tahminiUcret,
+      mesafeKm
     ]
   );
   return result.rows[0];

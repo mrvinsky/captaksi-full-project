@@ -78,6 +78,11 @@ io.on('connection', (socket) => {
       socket.join(roomName);
 
       console.log(`Sürücü ${driverId}, "${roomName}" odasına katıldı.`);
+
+      // [YENİ] Sürücüye özel oda (Chat için)
+      const driverRoom = `driver_${driverId}`;
+      socket.join(driverRoom);
+      console.log(`Sürücü ${driverId}, "${driverRoom}" özel odasına da katıldı.`);
     } catch (err) {
       console.log(`Socket ${socket.id} (Sürücü) token hatası: ${err.message}`);
     }
@@ -96,6 +101,32 @@ io.on('connection', (socket) => {
       console.log(`Yolcu ${userId}, "${roomName}" odasına katıldı.`);
     } catch (err) {
       console.log(`Socket ${socket.id} (Yolcu) token hatası: ${err.message}`);
+    }
+  });
+
+
+
+  // [YENİ] Mesaj Gönderme
+  socket.on('send_message', (data) => {
+    // data: { receiverId, receiverType ('user'|'driver'), message }
+    try {
+      const { receiverId, receiverType, message } = data;
+      if (!receiverId || !message) return;
+
+      const targetRoom = receiverType === 'user'
+        ? `user_${receiverId}`
+        : `driver_${receiverId}`;
+
+      // Mesajı hedef odaya ilet
+      io.to(targetRoom).emit('receive_message', {
+        message: message,
+        senderSocketId: socket.id,
+        timestamp: new Date().toISOString()
+      });
+
+      console.log(`Mesaj iletildi -> ${targetRoom}: "${message}"`);
+    } catch (err) {
+      console.log("Mesaj gönderme hatası:", err.message);
     }
   });
 
@@ -147,7 +178,7 @@ app.use('/api/admin', adminRoutes);
 // =======================
 // SERVER BAŞLAT
 // =======================
-server.listen(PORT, () => {
-  console.log(`🚖 captaksi sunucusu ${PORT} portunda çalışıyor...`);
+server.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚖 captaksi sunucusu ${PORT} portunda çalışıyor (0.0.0.0)...`);
 });
 app.use("/api/vehicles", require("./routes/vehicleRoutes"));

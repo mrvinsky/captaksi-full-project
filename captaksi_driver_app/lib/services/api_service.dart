@@ -19,7 +19,7 @@ class ApiService {
   static String get _rideBaseUrl => '$_baseUrlHost/api/rides';
 
   // GOOGLE KEY
-  static const String _googleApiKey = "BURAYA_GOOGLE_KEY_GELECEK";
+  static const String _googleApiKey = "AIzaSyBh_TTuFpUAbM0yw3lrzq4PYTPBv_R9ivA";
 
   // <<< BURASI ÖNEMLİ: typo düzeltildi >>>
   static const FlutterSecureStorage _storage = FlutterSecureStorage();
@@ -61,7 +61,7 @@ class ApiService {
 
   // ---------------- AUTH ----------------
 
-  Future<String> loginDriver(String email, String password) async {
+  Future<Map<String, dynamic>> loginDriver(String email, String password, {String? fcmToken}) async {
     final url = _buildUri(_driverBaseUrl, "/login");
 
     final res = await _client.post(
@@ -70,6 +70,7 @@ class ApiService {
       body: jsonEncode({
         "email": email,
         "sifre": password,
+        "fcm_token": fcmToken
       }),
     );
 
@@ -79,7 +80,7 @@ class ApiService {
       if (token == null) throw Exception("Token alınamadı.");
 
       await storeToken(token);
-      return token;
+      return body; // Tüm body'i dön (is_verified, is_approved dahil)
     }
 
     throw _buildException(res);
@@ -91,6 +92,12 @@ class ApiService {
     required String telefonNumarasi,
     required String email,
     required String password,
+    // [YENİ]
+    required String plaka,
+    required String marka,
+    String? model,
+    String? renk,
+    String? fcmToken,
     File? profileImage,
     File? criminalRecordPdf,
   }) async {
@@ -101,7 +108,13 @@ class ApiService {
       ..fields["soyad"] = soyad
       ..fields["telefon_numarasi"] = telefonNumarasi
       ..fields["email"] = email
-      ..fields["sifre"] = password;
+      ..fields["sifre"] = password
+      ..fields["plaka"] = plaka
+      ..fields["marka"] = marka
+      ..fields["model"] = model ?? ""
+      ..fields["renk"] = renk ?? "";
+      
+    if (fcmToken != null) req.fields['fcm_token'] = fcmToken;
 
     if (profileImage != null) {
       req.files.add(
@@ -121,6 +134,10 @@ class ApiService {
 
     if (res.statusCode == 201) {
       final body = jsonDecode(res.body);
+      // [FIX] Kayıt sonrası otomatik login için token'ı kaydet
+      if (body["token"] != null) {
+        await storeToken(body["token"]);
+      }
       return body["message"] ?? "Kayıt başarılı.";
     }
 
@@ -165,25 +182,57 @@ class ApiService {
     throw _buildException(res);
   }
 
+  Future<Map<String, dynamic>> notifyArrival(String id) async {
+    final token = await getToken();
+    if (token == null) throw Exception("Giriş gerekli.");
+
+    final url = _buildUri(_rideBaseUrl, "/$id/notify-arrival");
+
+    // Backend POST bekliyor
+    final res = await _client.post(url, headers: _jsonHeaders(token));
+
+    if (res.statusCode == 200) return jsonDecode(res.body);
+    throw _buildException(res);
+  }
+
   Future<Map<String, dynamic>> startRide(String id) async {
     final token = await getToken();
     if (token == null) throw Exception("Giriş gerekli.");
 
     final url = _buildUri(_rideBaseUrl, "/$id/start");
 
-    final res = await _client.patch(url, headers: _jsonHeaders(token));
+    // Backend POST bekliyor
+    final res = await _client.post(url, headers: _jsonHeaders(token));
     if (res.statusCode == 200) return jsonDecode(res.body);
 
     throw _buildException(res);
   }
 
-  Future<Map<String, dynamic>> finishRide(String id) async {
+  Future<Map<String, dynamic>> completeRide(String id) async {
     final token = await getToken();
     if (token == null) throw Exception("Giriş gerekli.");
 
-    final url = _buildUri(_rideBaseUrl, "/$id/finish");
+    final url = _buildUri(_rideBaseUrl, "/$id/complete");
 
-    final res = await _client.patch(url, headers: _jsonHeaders(token));
+    // Backend POST bekliyor
+    final res = await _client.post(url, headers: _jsonHeaders(token));
+    if (res.statusCode == 200) return jsonDecode(res.body);
+
+    throw _buildException(res);
+  }
+
+  Future<Map<String, dynamic>> ratePassenger(String id, double rating, String comment) async {
+    final token = await getToken();
+    if (token == null) throw Exception("Giriş gerekli.");
+
+    final url = _buildUri(_rideBaseUrl, "/$id/rate-passenger");
+
+    final body = jsonEncode({
+      "rating": rating,
+      "comment": comment
+    });
+
+    final res = await _client.post(url, headers: _jsonHeaders(token), body: body);
     if (res.statusCode == 200) return jsonDecode(res.body);
 
     throw _buildException(res);
