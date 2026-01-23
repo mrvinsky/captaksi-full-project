@@ -155,16 +155,11 @@ exports.getDriverDetails = async (req, res) => {
         if (driver.rows.length === 0) return res.status(404).json({ message: 'Sürücü bulunamadı' });
 
         // Sürücü belgelerini ve varsa araç bilgisini de çekebiliriz
-        // Şimdilik sadece sürücü bilgisi dönüyoruz, ileride JOIN eklenebilir.
-        // Mock belge verisi ekleyelim, gerçek tabloda varsa oradan çekilmeli.
+        // Sürücü belgelerini çek
+        const documents = await db.query('SELECT id, belge_tipi, dosya_url, yuklenme_tarihi, onay_durumu FROM documents WHERE surucu_id = $1', [id]);
 
         const driverData = driver.rows[0];
-
-        // Mock belgeler (Gerçek tablolarınız varsa burayı güncelleyin)
-        driverData.documents = [
-            { id: 1, belge_tipi: 'EHLİYET', dosya_url: '/uploads/mock_ehliyet.jpg' },
-            { id: 2, belge_tipi: 'RUHSAT', dosya_url: '/uploads/mock_ruhsat.jpg' }
-        ];
+        driverData.documents = documents.rows;
 
         res.json(driverData);
     } catch (err) {
@@ -256,11 +251,15 @@ exports.getUserDetails = async (req, res) => {
             FROM rides WHERE kullanici_id = $1 AND durum = 'tamamlandi'
         `, [id]);
 
+        // Kullanıcı belgelerini çek
+        const documents = await db.query('SELECT id, belge_tipi, dosya_url, yuklenme_tarihi, onay_durumu FROM documents WHERE kullanici_id = $1', [id]);
+
         const userData = user.rows[0];
         userData.stats = {
             totalRides: stats.rows[0].totalrides,
-            totalDistanceKm: 0 // Veritabanında mesafe takibi varsa buraya eklenmeli
+            totalDistanceKm: 0
         };
+        userData.documents = documents.rows;
 
         res.json(userData);
     } catch (err) {

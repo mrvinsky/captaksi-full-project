@@ -2,26 +2,25 @@ const express = require('express');
 const router = express.Router();
 const adminController = require('../controllers/adminController');
 
-// Basit bir middleware ile admin yetkisi kontrolü eklenebilir
-// Şimdilik direkt geçiş veriyoruz veya controller içinde basit kontrol yapıyoruz.
+const authAdmin = require('../middleware/authAdmin');
 
-// Giriş
+// Giriş (Public)
 router.post('/login', adminController.loginAdmin);
 
-// Dashboard
-router.get('/stats', adminController.getStats);
-router.get('/stats/charts', adminController.getChartStats);
+// Dashboard (Protected)
+router.get('/stats', authAdmin, adminController.getStats);
+router.get('/stats/charts', authAdmin, adminController.getChartStats);
 
-// Sürücüler
-router.get('/drivers', adminController.getAllDrivers);
-router.get('/drivers/pending', adminController.getPendingDrivers);
-router.get('/drivers/:id', adminController.getDriverDetails); // Detay
-router.patch('/drivers/:id/status', adminController.updateDriverStatus); // Onay/Ret
-router.delete('/drivers/:id', adminController.deleteDriver);
+// Sürücüler (Protected)
+router.get('/drivers', authAdmin, adminController.getAllDrivers);
+router.get('/drivers/pending', authAdmin, adminController.getPendingDrivers);
+router.get('/drivers/:id', authAdmin, adminController.getDriverDetails); // Detay
+router.patch('/drivers/:id/status', authAdmin, adminController.updateDriverStatus); // Onay/Ret
+router.delete('/drivers/:id', authAdmin, adminController.deleteDriver);
 
-// Kullanıcılar
-router.get('/users', adminController.getAllUsers);
-router.get('/users/:id/details', adminController.getUserDetails);
-router.delete('/users/:id', adminController.deleteUser);
+// Kullanıcılar (Protected)
+router.get('/users', authAdmin, adminController.getAllUsers);
+router.get('/users/:id/details', authAdmin, adminController.getUserDetails);
+router.delete('/users/:id', authAdmin, adminController.deleteUser);
 
 module.exports = router;

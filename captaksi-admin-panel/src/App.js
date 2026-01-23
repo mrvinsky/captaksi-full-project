@@ -221,6 +221,7 @@ function DashboardHome({ token }) {
 function PendingDriversPage({ token }) {
     const [drivers, setDrivers] = useState([]);
     const [selectedDriverId, setSelectedDriverId] = useState(null);
+    const [searchTerm, setSearchTerm] = useState('');
 
     const fetchPending = useCallback(async () => {
         try {
@@ -248,11 +249,25 @@ function PendingDriversPage({ token }) {
         }
     };
 
+    const filteredDrivers = drivers.filter(d =>
+        (d.ad + ' ' + d.soyad).toLowerCase().includes(searchTerm.toLowerCase()) ||
+        d.email.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
     return (
         <>
             {selectedDriverId && <DriverDetailModal driverId={selectedDriverId} token={token} onClose={() => setSelectedDriverId(null)} />}
             <div className="table-container">
-                {drivers.length > 0 ? (
+                <div className="table-header-actiupns" style={{ marginBottom: '1rem' }}>
+                    <input
+                        type="text"
+                        placeholder="İsim veya E-posta ara..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="search-input"
+                    />
+                </div>
+                {filteredDrivers.length > 0 ? (
                     <table className="drivers-table">
                         <thead>
                             <tr>
@@ -263,7 +278,7 @@ function PendingDriversPage({ token }) {
                             </tr>
                         </thead>
                         <tbody>
-                            {drivers.map(driver => (
+                            {filteredDrivers.map(driver => (
                                 <tr key={driver.id}>
                                     <td>{driver.ad} {driver.soyad}</td>
                                     <td>{driver.email}</td>
@@ -288,6 +303,7 @@ function DriversPage({ token }) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [selectedDriverId, setSelectedDriverId] = useState(null);
+    const [searchTerm, setSearchTerm] = useState('');
 
     const fetchDrivers = useCallback(async () => {
         setLoading(true);
@@ -327,10 +343,24 @@ function DriversPage({ token }) {
     if (loading) return <p>Yükleniyor...</p>;
     if (error) return <p style={{ color: 'red' }}>Hata: {error}</p>;
 
+    const filteredDrivers = drivers.filter(d =>
+        (d.ad + ' ' + d.soyad).toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (d.telefon_numarasi && d.telefon_numarasi.includes(searchTerm))
+    );
+
     return (
         <>
             {selectedDriverId && <DriverDetailModal driverId={selectedDriverId} token={token} onClose={() => setSelectedDriverId(null)} />}
             <div className="table-container">
+                <div className="table-header-actiupns" style={{ marginBottom: '1rem' }}>
+                    <input
+                        type="text"
+                        placeholder="İsim veya Telefon ara..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="search-input"
+                    />
+                </div>
                 <table className="drivers-table">
                     <thead>
                         <tr>
@@ -342,7 +372,7 @@ function DriversPage({ token }) {
                         </tr>
                     </thead>
                     <tbody>
-                        {drivers.map(d => (
+                        {filteredDrivers.map(d => (
                             <tr key={d.id}>
                                 <td>{d.id}</td>
                                 <td>{d.ad} {d.soyad}</td>
@@ -368,6 +398,7 @@ function DriversPage({ token }) {
 function UsersPage({ token }) {
     const [users, setUsers] = useState([]);
     const [selectedUserId, setSelectedUserId] = useState(null);
+    const [searchTerm, setSearchTerm] = useState('');
 
     const fetchUsers = useCallback(async () => {
         try {
@@ -389,10 +420,25 @@ function UsersPage({ token }) {
         } catch (err) { alert('Hata'); }
     }
 
+    const filteredUsers = users.filter(u =>
+        (u.ad + ' ' + u.soyad).toLowerCase().includes(searchTerm.toLowerCase()) ||
+        u.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (u.telefon_numarasi && u.telefon_numarasi.includes(searchTerm))
+    );
+
     return (
         <>
             {selectedUserId && <UserDetailModal userId={selectedUserId} token={token} onClose={() => setSelectedUserId(null)} />}
             <div className="table-container">
+                <div className="table-header-actiupns" style={{ marginBottom: '1rem' }}>
+                    <input
+                        type="text"
+                        placeholder="İsim, E-posta veya Telefon ara..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="search-input"
+                    />
+                </div>
                 <table className="drivers-table">
                     <thead>
                         <tr>
@@ -404,7 +450,7 @@ function UsersPage({ token }) {
                         </tr>
                     </thead>
                     <tbody>
-                        {users.map(u => (
+                        {filteredUsers.map(u => (
                             <tr key={u.id}>
                                 <td>{u.id}</td>
                                 <td>{u.ad} {u.soyad}</td>
@@ -451,13 +497,34 @@ function DriverDetailModal({ driverId, token, onClose }) {
                     </div>
                     <div>
                         <h4>Belgeler</h4>
-                        {driver.documents && driver.documents.map(doc => (
-                            <div key={doc.id} style={{ marginBottom: '10px', background: '#333', padding: '10px', borderRadius: '5px' }}>
-                                <strong>{doc.belge_tipi}</strong>
-                                <br />
-                                <small>Belge önizlemesi (Mock)</small>
-                            </div>
-                        ))}
+                        {driver.documents && driver.documents.length > 0 ? (
+                            driver.documents.map(doc => (
+                                <div key={doc.id} style={{ marginBottom: '10px', background: '#333', padding: '10px', borderRadius: '5px' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <strong>{doc.belge_tipi}</strong>
+                                        <a
+                                            href={`http://localhost:3000${doc.dosya_url}`}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            style={{
+                                                background: '#F7C948',
+                                                color: '#000',
+                                                padding: '5px 10px',
+                                                borderRadius: '5px',
+                                                textDecoration: 'none',
+                                                fontWeight: 'bold',
+                                                fontSize: '0.9rem'
+                                            }}
+                                        >
+                                            Görüntüle
+                                        </a>
+                                    </div>
+                                    <div style={{ marginTop: '5px', fontSize: '0.8rem', color: '#ccc' }}>
+                                        <span className={`status-badge status-${doc.onay_durumu || 'bekliyor'}`}>{doc.onay_durumu || 'Bekliyor'}</span>
+                                    </div>
+                                </div>
+                            ))
+                        ) : <p>Yüklenmiş belge yok.</p>}
                     </div>
                 </div>
             </div>
@@ -484,11 +551,46 @@ function UserDetailModal({ userId, token, onClose }) {
                     <h3>Kullanıcı Detayı: {user.ad} {user.soyad}</h3>
                     <button className="close-button" onClick={onClose}>&times;</button>
                 </div>
-                <p><strong>Email:</strong> {user.email}</p>
-                <p><strong>Telefon:</strong> {user.telefon_numarasi}</p>
-                <div style={{ marginTop: '20px', padding: '15px', background: '#222', borderRadius: '10px' }}>
-                    <h4>İstatistikler</h4>
-                    <p>Toplam {user.stats?.totalRides || 0} yolculuk</p>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+                    <div>
+                        <p><strong>Email:</strong> {user.email}</p>
+                        <p><strong>Telefon:</strong> {user.telefon_numarasi}</p>
+                        <div style={{ marginTop: '20px', padding: '15px', background: '#222', borderRadius: '10px' }}>
+                            <h4>İstatistikler</h4>
+                            <p>Toplam {user.stats?.totalRides || 0} yolculuk</p>
+                        </div>
+                    </div>
+                    <div>
+                        <h4>Belgeler</h4>
+                        {user.documents && user.documents.length > 0 ? (
+                            user.documents.map(doc => (
+                                <div key={doc.id} style={{ marginBottom: '10px', background: '#333', padding: '10px', borderRadius: '5px' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <strong>{doc.belge_tipi}</strong>
+                                        <a
+                                            href={`http://localhost:3000${doc.dosya_url}`}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            style={{
+                                                background: '#F7C948',
+                                                color: '#000',
+                                                padding: '5px 10px',
+                                                borderRadius: '5px',
+                                                textDecoration: 'none',
+                                                fontWeight: 'bold',
+                                                fontSize: '0.9rem'
+                                            }}
+                                        >
+                                            Görüntüle
+                                        </a>
+                                    </div>
+                                    <div style={{ marginTop: '5px', fontSize: '0.8rem', color: '#ccc' }}>
+                                        Durum: {doc.onay_durumu || 'Bekliyor'}
+                                    </div>
+                                </div>
+                            ))
+                        ) : <p>Yüklenmiş belge yok.</p>}
+                    </div>
                 </div>
             </div>
         </div>
