@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="sr" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nikola & Marija - Dubina Sećanja</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500&display=swap"
+        rel="stylesheet">
+    <style>
+        /* Hide scrollbar for clean cinematic look */
+        ::-webkit-scrollbar {
+            width: 0px;
+            background: transparent;
+        }
+
+        body {
+            cursor: none;
+            /* Hide default cursor for immersion, can be removed if not desired */
+        }
+
+        /* Custom Cursor */
+        .custom-cursor {
+            width: 20px;
+            height: 20px;
+            border: 1px solid white;
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            mix-blend-mode: difference;
+            transition: transform 0.2s ease;
+        }
+
+        .custom-cursor.hovered {
+            transform: scale(2.5);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Smooth reveal animation */
+        .reveal-on-scroll {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 1s ease-out;
+        }
+
+        .reveal-on-scroll.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .gold-seal-spin {
+            animation: spin-slow 10s linear infinite;
+        }
+
+        @keyframes spin-slow {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        serif: ['"Playfair Display"', 'serif'],
+                        sans: ['"Inter"', 'sans-serif'],
+                    },
+                    colors: {
+                        'omni-gold': '#C5A059',
+                        'omni-dark': '#0a0a0a',
+                    },
+                    aspectRatio: {
+                        'portrait': '3/4',
+                        'landscape': '4/3',
+                        'cinematic': '21/9',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-omni-dark text-white font-sans antialiased selection:bg-omni-gold/30 cursor-default">
+    <!-- Custom Cursor Element -->
+    <div id="cursor" class="custom-cursor hidden md:block"></div>
+
+    <!-- 1. HERO VIDEO LOOP -->
+    <section class="relative h-screen w-full overflow-hidden">
+        <video autoplay loop muted playsinline class="absolute inset-0 w-full h-full object-cover opacity-80">
+            <!-- Placeholder video: Replace with Anıtkabir or Meeting video -->
+            <source src="./public/videos/dance.mp4" type="video/mp4">
+        </video>
+        <div class="absolute inset-0 bg-black/40 z-10"></div>
+
+        <div class="absolute inset-0 z-20 flex flex-col items-center justify-center text-center p-4">
+            <h1 class="text-5xl md:text-7xl lg:text-9xl font-serif italic text-white/90 mb-4 tracking-tighter opacity-0 animate-fade-in-up"
+                style="animation: fadeInUp 1.5s ease-out forwards 0.5s;">
+                Nikola & Marija
+            </h1>
+            <p class="text-sm md:text-base text-white/70 tracking-[0.3em] uppercase opacity-0"
+                style="animation: fadeInUp 1.5s ease-out forwards 1s;">
+                Dubina Sećanja
+            </p>
+        </div>
+
+        <!-- Scroll Indicator -->
+        <div class="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 animate-bounce text-white/50">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M19 14l-7 7m0 0l-7-7m7 7V3">
+                </path>
+            </svg>
+        </div>
+    </section>
+
+    <!-- 2. ANKARA DAYS (4 Photos, B&W Portrait) -->
+    <section class="py-24 px-4 md:px-12 max-w-7xl mx-auto">
+        <div class="mb-16 text-center reveal-on-scroll">
+            <h2 class="text-3xl md:text-4xl font-serif italic text-white/90">Ankara</h2>
+            <div class="w-12 h-px bg-omni-gold mx-auto mt-4"></div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <!-- Photo 1 -->
+            <div class="group relative aspect-[9/16] overflow-hidden cursor-pointer" onclick="openLightbox(this)">
+                <img src="./public/images/first.jpeg"
+                    class="w-full h-full object-cover grayscale contrast-125 transition-all duration-700 group-hover:scale-105 group-hover:grayscale-0">
+                <div
+                    class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-black/40 backdrop-blur-[2px]">
+                    <p class="font-serif italic text-xl text-white text-center px-4">"Dan kada se svet promenio."</p>
+                </div>
+            </div>
+            <!-- Photo 2 -->
+            <div class="group relative aspect-[9/16] overflow-hidden cursor-pointer mt-0 md:mt-12"
+                onclick="openLightbox(this)">
+                <img src="./public/images/second.jpeg"
+                    class="w-full h-full object-cover grayscale contrast-125 transition-all duration-700 group-hover:scale-105 group-hover:grayscale-0">
+                <div
+                    class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-black/40 backdrop-blur-[2px]">
+                    <p class="font-serif italic text-xl text-white text-center px-4">"Prvi pogledi."</p>
+                </div>
+            </div>
+            <!-- Photo 3 -->
+            <div class="group relative aspect-[9/16] overflow-hidden cursor-pointer" onclick="openLightbox(this)">
+                <img src="./public/images/third.jpeg"
+                    class="w-full h-full object-cover grayscale contrast-125 transition-all duration-700 group-hover:scale-105 group-hover:grayscale-0">
+                <div
+                    class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-black/40 backdrop-blur-[2px]">
+                    <p class="font-serif italic text-xl text-white text-center px-4">"Izgubljeni u vremenu."</p>
+                </div>
+            </div>
+            <!-- Photo 4 -->
+            <div class="group relative aspect-[9/16] overflow-hidden cursor-pointer mt-0 md:mt-12"
+                onclick="openLightbox(this)">
+                <img src="./public/images/laura.jpeg"
+                    class="w-full h-full object-cover grayscale contrast-125 transition-all duration-700 group-hover:scale-105 group-hover:grayscale-0">
+                <div
+                    class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-black/40 backdrop-blur-[2px]">
+                    <p class="font-serif italic text-xl text-white text-center px-4">"Tvoj mir u mojoj oluji."</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3. TRANSITION VIDEO -->
+    <section class="relative h-[60vh] md:h-[80vh] w-full overflow-hidden my-12 reveal-on-scroll">
+        <video autoplay loop muted playsinline class="absolute inset-0 w-full h-full object-cover">
+            <!-- Placeholder: Travel/Change video ending 3 years, Marija's eyes -->
+            <source src="./public/videos/dance.mp4" type="video/mp4">
+        </video>
+        <div class="absolute inset-0 bg-gradient-to-r from-omni-dark via-transparent to-omni-dark z-10"></div>
+        <div class="absolute inset-0 flex items-center justify-center z-20">
+            <h2 class="text-4xl md:text-6xl font-serif italic text-white/80 drop-shadow-2xl">3 Godine...</h2>
+        </div>
+    </section>
+
+    <!-- 4. BELGRADE YEARS (8 Photos BENTO GRID) -->
+    <section class="py-24 px-4 md:px-12 max-w-7xl mx-auto">
+        <div class="mb-16 text-center reveal-on-scroll">
+            <h2 class="text-3xl md:text-4xl font-serif italic text-white/90">Beograd</h2>
+            <div class="w-12 h-px bg-omni-gold mx-auto mt-4"></div>
+        </div>
+
+        <!-- BENTO GRID LAYOUT -->
+        <div class="grid grid-cols-1 md:grid-cols-3 md:grid-rows-3 gap-4 h-auto md:h-[1200px]">
+            <!-- Large Focus Item -->
+            <div class="md:col-span-2 md:row-span-2 group relative overflow-hidden rounded-sm cursor-pointer reveal-on-scroll"
+                onclick="openLightbox(this)">
+                <img src="./public/images/second.jpeg"
+                    class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+                <div
+                    class="absolute top-0 w-full p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-b from-black/60 to-transparent">
+                    <p class="font-serif italic text-lg text-white">"Naš dom."</p>
+                </div>
+            </div>
+
+            <!-- Tall Side Item -->
+            <div class="md:col-span-1 md:row-span-2 group relative overflow-hidden rounded-sm cursor-pointer reveal-on-scroll"
+                onclick="openLightbox(this)">
+                <img src="./public/images/first.jpeg"
+                    class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+                <div
+                    class="absolute bottom-0 w-full p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-t from-black/60 to-transparent">
+                    <p class="font-serif italic text-lg text-white">"Jutarnja kafa."</p>
+                </div>
+            </div>
+
+            <!-- Small Square 1 -->
+            <div class="group relative overflow-hidden rounded-sm cursor-pointer reveal-on-scroll"
+                onclick="openLightbox(this)">
+                <img src="./public/images/third.jpeg"
+                    class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+            </div>
+
+            <!-- Wide Bottom Item -->
+            <div class="md:col-span-2 group relative overflow-hidden rounded-sm cursor-pointer reveal-on-scroll"
+                onclick="openLightbox(this)">
+                <img src="./public/images/laura.jpeg"
+                    class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+                <div
+                    class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-black/40">
+                    <p class="font-serif italic text-xl text-white">"Sreća."</p>
+                </div>
+            </div>
+
+            <!-- Small Square 2 -->
+            <div class="group relative overflow-hidden rounded-sm cursor-pointer reveal-on-scroll"
+                onclick="openLightbox(this)">
+                <img src="./public/images/second.jpeg"
+                    class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+            </div>
+
+            <!-- Small Square 2 -->
+            <div class="group relative overflow-hidden rounded-sm cursor-pointer reveal-on-scroll"
+                onclick="openLightbox(this)">
+                <img src="./public/images/first.jpeg"
+                    class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+            </div>
+
+            <!-- Small Square 2 -->
+            <div class="group relative overflow-hidden rounded-sm cursor-pointer reveal-on-scroll"
+                onclick="openLightbox(this)">
+                <img src="./public/images/third.jpeg"
+                    class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+            </div>
+
+        </div>
+    </section>
+
+    <!-- 5. FINAL PROPOSAL -->
+    <section
+        class="h-screen w-full flex flex-col items-center justify-center bg-white text-omni-dark relative overflow-hidden">
+        <!-- Huge whitespace emphasized by minimal content -->
+
+        <div class="text-center z-10 p-8 reveal-on-scroll">
+            <h2 class="text-4xl md:text-6xl font-serif italic mb-12 leading-tight">
+                Marija,<br>da li želiš da tvoj sledeći<br>korak bude pored mene,<br>zauvek?
+            </h2>
+
+            <!-- Button Wrapper -->
+            <div class="relative inline-block h-32 w-32 flex items-center justify-center">
+                <button id="proposal-btn" onclick="revealSeal()"
+                    class="px-12 py-4 bg-omni-dark text-white font-serif tracking-widest text-lg hover:bg-omni-gold hover:text-omni-dark transition-all duration-500 rounded-sm shadow-xl z-20 relative">
+                    DA
+                </button>
+
+                <!-- Hidden Gold Seal -->
+                <div id="gold-seal"
+                    class="absolute inset-0 z-10 opacity-0 pointer-events-none transition-all duration-1000 scale-50">
+                    <!-- Simple CSS Seal Representation or SVG -->
+                    <svg class="w-full h-full text-omni-gold drop-shadow-lg gold-seal-spin" viewBox="0 0 100 100"
+                        fill="currentColor">
+                        <path d="M50 0 L61 35 L98 35 L68 57 L79 91 L50 70 L21 91 L32 57 L2 35 L39 35 Z M50 20 L50 20"
+                            fill="#C5A059" fill-opacity="0.2" />
+                        <path d="M50 8 L58 32 L83 32 L63 48 L71 72 L50 58 L29 72 L37 48 L17 32 L42 32 Z"
+                            fill="#C5A059" />
+                        <circle cx="50" cy="50" r="25" fill="#f8fafc" />
+                        <text x="50" y="55" font-family="serif" font-size="12" text-anchor="middle"
+                            fill="#C5A059">OG</text>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Subtle Particles/Texture in background for whitespace depth -->
+        <div
+            class="absolute inset-0 opacity-5 bg-[url('https://www.transparenttextures.com/patterns/cream-paper.png')]">
+        </div>
+    </section>
+
+    <!-- LIGHTBOX OVERLAY -->
+    <div id="lightbox"
+        class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md hidden flex items-center justify-center cursor-pointer transition-opacity duration-500 opacity-0"
+        onclick="closeLightbox()">
+        <img id="lightbox-img" src="" class="max-w-[90vw] max-h-[90vh] object-contain shadow-2xl rounded-sm">
+    </div>
+
+    <style>
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+
+    <script>
+        // Custom Cursor Logic
+        const cursor = document.getElementById('cursor');
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+        });
+
+        const hoverables = document.querySelectorAll('a, button, .cursor-pointer');
+        hoverables.forEach(el => {
+            el.addEventListener('mouseenter', () => cursor.classList.add('hovered'));
+            el.addEventListener('mouseleave', () => cursor.classList.remove('hovered'));
+        });
+
+        // Scroll Reveal
+        const observerOptions = {
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.reveal-on-scroll').forEach(el => observer.observe(el));
+
+        // Lightbox
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImg = document.getElementById('lightbox-img');
+
+        function openLightbox(element) {
+            const img = element.querySelector('img');
+            lightboxImg.src = img.src;
+            lightbox.classList.remove('hidden');
+            requestAnimationFrame(() => {
+                lightbox.classList.remove('opacity-0');
+            });
+        }
+
+        function closeLightbox() {
+            lightbox.classList.add('opacity-0');
+            setTimeout(() => {
+                lightbox.classList.add('hidden');
+            }, 500); // Match transition duration
+        }
+
+        // Proposal Reveal
+        function revealSeal() {
+            const btn = document.getElementById('proposal-btn');
+            const seal = document.getElementById('gold-seal');
+
+            // Fade out button
+            btn.style.opacity = '0';
+            btn.style.pointerEvents = 'none';
+
+            // Show Seal
+            setTimeout(() => {
+                seal.classList.remove('opacity-0', 'scale-50');
+                seal.classList.add('opacity-100', 'scale-125'); // Scale up slightly
+            }, 500);
+        }
+    </script>
+</body>
+
+</html>

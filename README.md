@@ -61,6 +61,29 @@ node server.js
 
 ---
 
+## ⚠️ Önemli Not: Test Ortamı ve Konfigürasyon
+
+**Sürücü Uygulaması (Driver App)** şu anda **fiziksel bir cihazda** test edilmek üzere yapılandırılmıştır. 
+API ve Socket bağlantıları için bilgisayarınızın yerel IP adresini kullanır (örn: `10.71.98.18`).
+
+### 📱 Simülatörde Test Etmek İsteyenler İçin:
+Eğer uygulamayı Android Emulator veya iOS Simulator üzerinde denemek istiyorsanız, bağlantı ayarlarını değiştirmeniz gerekir:
+
+1.  **Android Emulator için:**
+    *   `lib/services/api_service.dart` ve `lib/services/socket_service.dart` dosyalarını açın.
+    *   IP adresini `10.0.2.2` olarak değiştirin (Bu, emülatörün "localhost" adresidir).
+    *   Örnek: `baseUrl = 'http://10.0.2.2:3000/api';`
+
+2.  **iOS Simulator için:**
+    *   Aynı dosyalarda IP adresini `localhost` veya `127.0.0.1` olarak değiştirin.
+
+3.  **Fiziksel Cihaz (Mevcut Ayar):**
+    *   Bilgisayarınızın ve telefonunuzun aynı Wi-Fi ağında olduğundan emin olun.
+    *   Bilgisayarınızın yerel IP adresini (Terminalde `ipconfig` veya `ifconfig` ile) öğrenin.
+    *   Kodlardaki IP adresini bu adresle güncelleyin.
+
+---
+
 ## 🔄 Son Değişiklikler (Changelog)
 
 *   **User App V2.1 (YENİ - Midnight Taxi Update):**

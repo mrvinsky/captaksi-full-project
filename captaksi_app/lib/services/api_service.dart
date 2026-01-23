@@ -14,6 +14,8 @@ import '../models/ride_model.dart';
 
 class ApiService {
   // 🌍 YOLCU API'sinin temel URL'si
+  // 🌍 YOLCU API'sinin temel URL'si
+  // Fiziksel Cihaz / LAN Testi için IP:
   static const String _baseUrl = 'http://10.0.2.2:3000/api';
   static const _storage = FlutterSecureStorage();
 

@@ -40,10 +40,8 @@ class SocketService {
     }
 
     // Platforma göre dinamik URL
-    String socketUrl = 'http://localhost:3000';
-    if (!kIsWeb && Platform.isAndroid) {
-      socketUrl = 'http://10.0.2.2:3000';
-    }
+    // Fiziksel cihaz testi için Local IP
+    String socketUrl = 'http://10.71.98.113:3000';
 
     if (_socket != null && _socket!.connected) {
       debugPrint('Socket zaten bağlı.');

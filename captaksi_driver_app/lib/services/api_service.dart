@@ -10,9 +10,9 @@ import 'package:http/http.dart' as http;
 
 class ApiService {
   static String get _baseUrlHost {
-    if (kIsWeb) return 'http://localhost:3000';
-    if (Platform.isAndroid) return 'http://10.0.2.2:3000';
-    return 'http://localhost:3000'; // iOS / Desktop default
+    // Fiziksel cihaz testi için Local IP
+    const String localIp = '10.71.98.113';
+    return 'http://$localIp:3000';
   }
 
   static String get _driverBaseUrl => '$_baseUrlHost/api/drivers';

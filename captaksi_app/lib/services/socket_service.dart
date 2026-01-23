@@ -42,10 +42,8 @@ class SocketService {
     }
 
     // Backend sunucumuzun adresi
-    String socketUrl = 'http://localhost:3000';
-    if (Platform.isAndroid) {
-      socketUrl = 'http://10.0.2.2:3000';
-    }
+    // Fiziksel Cihaz / LAN Testi için IP:
+    String socketUrl = 'http://10.0.2.2:3000';
 
     _socket = IO.io(socketUrl, <String, dynamic>{
       'transports': ['websocket'],
