@@ -110,4 +110,4 @@ Eğer uygulamayı Android Emulator veya iOS Simulator üzerinde denemek istiyors
 *   **Backend:** `/api/admin` rotaları eklendi. Admin yetkilendirmesi (JWT) entegre edildi.
 
 ---
-*Geliştirici: Antigravity Agent*
+*Geliştirici: Mr. Vinsky *
