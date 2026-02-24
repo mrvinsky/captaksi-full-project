@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 // EKRANLAR
 import 'screens/splash_screen.dart';
@@ -37,33 +38,44 @@ class CaptaksiDriverApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
 
       theme: ThemeData(
-        brightness: Brightness.dark,
-        scaffoldBackgroundColor: const Color(0xFF0F172A), // Slate 900 (Deep Blue)
-        primaryColor: const Color(0xFF38BDF8), // Sky 400 (Cyan/Blue)
-        cardColor: const Color(0xFF1E293B), // Slate 800
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF38BDF8),
-          brightness: Brightness.dark,
-          primary: const Color(0xFF38BDF8),
-          secondary: const Color(0xFF0EA5E9),
-          surface: const Color(0xFF1E293B),
-          background: const Color(0xFF0F172A),
-        ),
         useMaterial3: true,
-        fontFamily: 'Roboto', // Modern font if available, or default
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFF0F172A),
-          elevation: 0,
-          centerTitle: true,
+        brightness: Brightness.dark,
+        scaffoldBackgroundColor: const Color(0xFF13131D), // Deep Navy
+        primaryColor: Colors.amber,
+        colorScheme: const ColorScheme.dark(
+          primary: Colors.amber,
+          onPrimary: Colors.black,
+          secondary: Color(0xFF1E1E2C),
+          onSecondary: Colors.white,
+          surface: Color(0xFF1E1E2C),
+          onSurface: Colors.white,
+          error: Color(0xFFFF5252),
+          outline: Colors.white12,
+        ),
+        textTheme: GoogleFonts.outfitTextTheme(ThemeData.dark().textTheme).copyWith(
+          displayLarge: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: -0.5),
+          titleLarge: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white),
+          bodyLarge: const TextStyle(fontSize: 16, color: Colors.white70),
+        ),
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: const Color(0xFF1E1E2C),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide.none),
+          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide.all(color: Colors.white.withOpacity(0.05))),
+          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: const BorderSide(color: Colors.amber, width: 1.5)),
+          hintStyle: const TextStyle(color: Colors.white24, fontSize: 14),
+          prefixIconColor: Colors.amber.withOpacity(0.7),
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF38BDF8),
-            foregroundColor: Colors.black, // Text color on button
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+            backgroundColor: Colors.amber,
+            foregroundColor: Colors.black,
+            elevation: 8,
+            shadowColor: Colors.amber.withOpacity(0.3),
+            textStyle: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+            padding: const EdgeInsets.symmetric(vertical: 18),
           ),
         ),
       ),

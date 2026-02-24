@@ -5,7 +5,7 @@ import {
 } from 'recharts';
 import './App.css';
 
-const API_URL = 'http://localhost:3000/api/admin';
+const API_URL = `http://${window.location.hostname}:3000/api/admin`;
 const COLORS = ['#F7C948', '#333'];
 
 function App() {
@@ -116,6 +116,15 @@ function Dashboard({ token, onLogout }) {
                         <li className={activePage === 'users' ? 'active' : ''} onClick={() => navigateTo('users')}>
                             👥 Kullanıcılar
                         </li>
+                        <li className={activePage === 'rides' ? 'active' : ''} onClick={() => navigateTo('rides')}>
+                            🛣️ Yolculuklar
+                        </li>
+                        <li className={activePage === 'settings' ? 'active' : ''} onClick={() => navigateTo('settings')}>
+                            ⚙️ Sistem Ayarları
+                        </li>
+                        <li className={activePage === 'reports' ? 'active' : ''} onClick={() => navigateTo('reports')}>
+                            💵 Finans & Raporlar
+                        </li>
                     </ul>
                 </nav>
                 <button onClick={onLogout} className="logout-button">🚪 Çıkış Yap</button>
@@ -133,6 +142,9 @@ function Dashboard({ token, onLogout }) {
                         {activePage === 'pendingDrivers' && `Onay Bekleyen Başvurular`}
                         {activePage === 'drivers' && `Tüm Sürücüler`}
                         {activePage === 'users' && `Tüm Kullanıcılar`}
+                        {activePage === 'rides' && `Tüm Yolculuklar`}
+                        {activePage === 'settings' && `Sistem Ayarları`}
+                        {activePage === 'reports' && `Finans & Raporlar`}
                     </h2>
                 </div>
 
@@ -140,6 +152,9 @@ function Dashboard({ token, onLogout }) {
                 {activePage === 'pendingDrivers' && <PendingDriversPage token={token} />}
                 {activePage === 'drivers' && <DriversPage token={token} />}
                 {activePage === 'users' && <UsersPage token={token} />}
+                {activePage === 'rides' && <RidesPage token={token} />}
+                {activePage === 'settings' && <SettingsPage token={token} />}
+                {activePage === 'reports' && <ReportsPage token={token} />}
             </main>
         </div>
     );
@@ -383,8 +398,12 @@ function DriversPage({ token }) {
                                     </span>
                                 </td>
                                 <td className="actions">
-                                    <button className="details" onClick={() => setSelectedDriverId(d.id)}>Detay</button>
-                                    <button className="delete" onClick={() => deleteDriver(d.id)}>Sil</button>
+                                    <button className="details-btn" onClick={() => setSelectedDriverId(d.id)}>
+                                        <span className="icon">🚕</span> Detay
+                                    </button>
+                                    <button className="delete-btn" onClick={() => deleteDriver(d.id)}>
+                                        <span className="icon">🗑️</span> Sil
+                                    </button>
                                 </td>
                             </tr>
                         ))}
@@ -457,8 +476,12 @@ function UsersPage({ token }) {
                                 <td>{u.email}</td>
                                 <td>{u.telefon_numarasi}</td>
                                 <td className="actions">
-                                    <button className="details" onClick={() => setSelectedUserId(u.id)}>Detay</button>
-                                    <button className="delete" onClick={() => deleteUser(u.id)}>Sil</button>
+                                    <button className="details-btn" onClick={() => setSelectedUserId(u.id)}>
+                                        <span className="icon">👤</span> Detay
+                                    </button>
+                                    <button className="delete-btn" onClick={() => deleteUser(u.id)}>
+                                        <span className="icon">🗑️</span> Sil
+                                    </button>
                                 </td>
                             </tr>
                         ))}
@@ -534,64 +557,86 @@ function DriverDetailModal({ driverId, token, onClose }) {
 
 function UserDetailModal({ userId, token, onClose }) {
     const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        setLoading(true);
         fetch(`${API_URL}/users/${userId}/details`, { headers: { 'x-auth-token': token } })
             .then(res => res.json())
-            .then(setUser)
-            .catch(console.error);
+            .then(data => {
+                setUser(data);
+                setLoading(false);
+            })
+            .catch(err => {
+                console.error(err);
+                setLoading(false);
+            });
     }, [userId, token]);
 
-    if (!user) return null;
+    if (!user && !loading) return null;
 
     return (
         <div className="modal-overlay" onClick={onClose}>
-            <div className="modal-content" onClick={e => e.stopPropagation()}>
-                <div className="modal-header">
-                    <h3>Kullanıcı Detayı: {user.ad} {user.soyad}</h3>
-                    <button className="close-button" onClick={onClose}>&times;</button>
-                </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
-                    <div>
-                        <p><strong>Email:</strong> {user.email}</p>
-                        <p><strong>Telefon:</strong> {user.telefon_numarasi}</p>
-                        <div style={{ marginTop: '20px', padding: '15px', background: '#222', borderRadius: '10px' }}>
-                            <h4>İstatistikler</h4>
-                            <p>Toplam {user.stats?.totalRides || 0} yolculuk</p>
-                        </div>
+            <div className="modal-content user-modal" onClick={e => e.stopPropagation()}>
+                {loading ? (
+                    <div className="loading-spinner-container">
+                        <div className="spinner"></div>
+                        <p>Yükleniyor...</p>
                     </div>
-                    <div>
-                        <h4>Belgeler</h4>
-                        {user.documents && user.documents.length > 0 ? (
-                            user.documents.map(doc => (
-                                <div key={doc.id} style={{ marginBottom: '10px', background: '#333', padding: '10px', borderRadius: '5px' }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                        <strong>{doc.belge_tipi}</strong>
-                                        <a
-                                            href={`http://localhost:3000${doc.dosya_url}`}
-                                            target="_blank"
-                                            rel="noreferrer"
-                                            style={{
-                                                background: '#F7C948',
-                                                color: '#000',
-                                                padding: '5px 10px',
-                                                borderRadius: '5px',
-                                                textDecoration: 'none',
-                                                fontWeight: 'bold',
-                                                fontSize: '0.9rem'
-                                            }}
-                                        >
-                                            Görüntüle
-                                        </a>
+                ) : (
+                    <>
+                        <div className="modal-header">
+                            <div className="header-user-info">
+                                <div className="user-avatar-large">
+                                    {user.ad ? user.ad[0] : 'U'}
+                                </div>
+                                <div>
+                                    <h3>{user.ad} {user.soyad}</h3>
+                                    <span className="user-id-badge">Yolcu ID: #{user.id}</span>
+                                </div>
+                            </div>
+                            <button className="close-button" onClick={onClose}>&times;</button>
+                        </div>
+                        <div className="user-details-body">
+                            <div className="info-section">
+                                <h4>Hesap Bilgileri</h4>
+                                <div className="info-row">
+                                    <span className="label">E-posta:</span>
+                                    <span className="value">{user.email}</span>
+                                </div>
+                                <div className="info-row">
+                                    <span className="label">Telefon:</span>
+                                    <span className="value">{user.telefon_numarasi || 'Belirtilmemiş'}</span>
+                                </div>
+                                <div className="info-row">
+                                    <span className="label">Kayıt Tarihi:</span>
+                                    <span className="value">{new Date(user.kayit_tarihi).toLocaleDateString('tr-TR')}</span>
+                                </div>
+                            </div>
+
+                            <div className="stats-section">
+                                <h4>Kullanım İstatistikleri</h4>
+                                <div className="mini-stats-grid">
+                                    <div className="mini-stat">
+                                        <span className="stat-icon">🚗</span>
+                                        <span className="stat-label">Yolculuklar</span>
+                                        <span className="stat-value">{user.stats?.total_rides || 0}</span>
                                     </div>
-                                    <div style={{ marginTop: '5px', fontSize: '0.8rem', color: '#ccc' }}>
-                                        Durum: {doc.onay_durumu || 'Bekliyor'}
+                                    <div className="mini-stat">
+                                        <span className="stat-icon">💰</span>
+                                        <span className="stat-label">Toplam Harcama</span>
+                                        <span className="stat-value">₺{user.stats?.total_spent || '0.00'}</span>
+                                    </div>
+                                    <div className="mini-stat">
+                                        <span className="stat-icon">📏</span>
+                                        <span className="stat-label">Toplam KM</span>
+                                        <span className="stat-value">{user.stats?.total_distance_km || 0} km</span>
                                     </div>
                                 </div>
-                            ))
-                        ) : <p>Yüklenmiş belge yok.</p>}
-                    </div>
-                </div>
+                            </div>
+                        </div>
+                    </>
+                )}
             </div>
         </div>
     );
@@ -602,6 +647,246 @@ function StatCard({ title, value }) {
         <div className="stat-card">
             <h3>{title}</h3>
             <p>{value}</p>
+        </div>
+    );
+}
+
+function RidesPage({ token }) {
+    const [rides, setRides] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [searchTerm, setSearchTerm] = useState('');
+
+    const fetchRides = useCallback(async () => {
+        setLoading(true);
+        try {
+            const response = await fetch(`${API_URL}/rides`, { headers: { 'x-auth-token': token } });
+            if (!response.ok) throw new Error('Veri alınamadı');
+
+            const data = await response.json();
+            if (Array.isArray(data)) {
+                setRides(data);
+                setError(null);
+            } else {
+                throw new Error('Veri formatı hatalı');
+            }
+        } catch (err) {
+            console.error(err);
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
+    }, [token]);
+
+    useEffect(() => { fetchRides(); }, [fetchRides]);
+
+    if (loading) return <p>Yükleniyor...</p>;
+    if (error) return <p style={{ color: 'red' }}>Hata: {error}</p>;
+
+    const filteredRides = rides.filter(r =>
+        (r.user_ad + ' ' + r.user_soyad).toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (r.driver_ad + ' ' + r.driver_soyad).toLowerCase().includes(searchTerm.toLowerCase()) ||
+        r.durum.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    return (
+        <div className="table-container">
+            <div className="table-header-actiupns" style={{ marginBottom: '1rem' }}>
+                <input
+                    type="text"
+                    placeholder="Yolcu, Sürücü veya Durum ara..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="search-input"
+                />
+            </div>
+            <div style={{ overflowX: 'auto' }}>
+                <table className="drivers-table">
+                    <thead>
+                        <tr>
+                            <th>Yolcu</th>
+                            <th>Sürücü</th>
+                            <th>Başlangıç</th>
+                            <th>Bitiş</th>
+                            <th>Tutar</th>
+                            <th>Tarih</th>
+                            <th>Durum</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {filteredRides.map(r => (
+                            <tr key={r.id}>
+                                <td>{r.user_ad} {r.user_soyad}</td>
+                                <td>{r.driver_ad ? `${r.driver_ad} ${r.driver_soyad}` : '-'}</td>
+                                <td>{r.baslangic_adres_metni || 'Belirtilmedi'}</td>
+                                <td>{r.bitis_adres_metni || 'Belirtilmedi'}</td>
+                                <td>{r.gerceklesen_ucret ? `₺${r.gerceklesen_ucret}` : '-'}</td>
+                                <td>{new Date(r.talep_tarihi).toLocaleString()}</td>
+                                <td>
+                                    <span className={`status-badge status-${r.durum || 'beklemede'}`}>
+                                        {r.durum || 'beklemede'}
+                                    </span>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    );
+}
+
+function SettingsPage({ token }) {
+    const [vehicleTypes, setVehicleTypes] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    const fetchSettings = useCallback(async () => {
+        setLoading(true);
+        try {
+            const response = await fetch(`${API_URL}/settings`, { headers: { 'x-auth-token': token } });
+            if (!response.ok) throw new Error('Veri alınamadı');
+            const data = await response.json();
+            setVehicleTypes(data.vehicleTypes);
+            setError(null);
+        } catch (err) {
+            console.error(err);
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
+    }, [token]);
+
+    useEffect(() => { fetchSettings(); }, [fetchSettings]);
+
+    const handleUpdate = async (id, currentCostBase, currentCostKm) => {
+        const newCostBase = prompt('Yeni Taban Ücreti giriniz:', currentCostBase);
+        const newCostKm = prompt('Yeni KM Ücreti giriniz:', currentCostKm);
+
+        if (newCostBase && newCostKm) {
+            try {
+                const response = await fetch(`${API_URL}/settings/vehicle-types/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'x-auth-token': token },
+                    body: JSON.stringify({ taban_ucret: parseFloat(newCostBase), km_ucreti: parseFloat(newCostKm) })
+                });
+
+                if (response.ok) {
+                    alert('Araç ücreti başarıyla güncellendi.');
+                    fetchSettings();
+                } else {
+                    alert('Güncelleme başarısız oldu.');
+                }
+            } catch (err) {
+                alert('Hata oluştu.');
+            }
+        }
+    };
+
+    if (loading) return <p>Yükleniyor...</p>;
+    if (error) return <p style={{ color: 'red' }}>Hata: {error}</p>;
+
+    return (
+        <div className="table-container">
+            <h3>Araç Tipi Ücretlendirmesi</h3>
+            <p style={{ color: '#aaa', marginBottom: '20px' }}>Taksi çağrılarında yolculara yansıtılan fiyatlar bu tabloya göre hesaplanır.</p>
+            <div style={{ overflowX: 'auto' }}>
+                <table className="drivers-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Tip Adı</th>
+                            <th>Açıklama</th>
+                            <th>Taban Ücret (TL)</th>
+                            <th>KM Ücreti (TL)</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {vehicleTypes.map(vt => (
+                            <tr key={vt.id}>
+                                <td>{vt.id}</td>
+                                <td>{vt.tip_adi}</td>
+                                <td>{vt.aciklama || '-'}</td>
+                                <td style={{ fontWeight: 'bold', color: '#F7C948' }}>₺{parseFloat(vt.taban_ucret).toFixed(2)}</td>
+                                <td style={{ fontWeight: 'bold', color: '#4CAF50' }}>₺{parseFloat(vt.km_ucreti).toFixed(2)}</td>
+                                <td className="actions">
+                                    <button className="approve" onClick={() => handleUpdate(vt.id, vt.taban_ucret, vt.km_ucreti)}>
+                                        Düzenle
+                                    </button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    );
+}
+
+function ReportsPage({ token }) {
+    const [reports, setReports] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    const fetchReports = useCallback(async () => {
+        setLoading(true);
+        try {
+            const response = await fetch(`${API_URL}/reports`, { headers: { 'x-auth-token': token } });
+            if (!response.ok) throw new Error('Veri alınamadı');
+            const data = await response.json();
+            setReports(data);
+            setError(null);
+        } catch (err) {
+            console.error(err);
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
+    }, [token]);
+
+    useEffect(() => { fetchReports(); }, [fetchReports]);
+
+    if (loading) return <p>Yükleniyor...</p>;
+    if (error) return <p style={{ color: 'red' }}>Hata: {error}</p>;
+
+    return (
+        <div>
+            <div className="stats-grid" style={{ marginBottom: '2rem' }}>
+                <StatCard title="Sistem Toplam Ciro" value={`₺${reports?.totalRevenue || 0}`} />
+            </div>
+
+            <div className="table-container">
+                <h3>Sürücü Hakediş Raporu</h3>
+                <p style={{ color: '#aaa', marginBottom: '20px' }}>Sürücülerin tamamladıkları yolculuklardan elde ettikleri toplam gelir ve sürüş sayıları listelenmektedir.</p>
+                <div style={{ overflowX: 'auto' }}>
+                    <table className="drivers-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Sürücü Adı</th>
+                                <th>Toplam Sürüş</th>
+                                <th>Sürücü Kazancı (TL)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {reports?.driverEarnings?.map(d => (
+                                <tr key={d.id}>
+                                    <td>{d.id}</td>
+                                    <td>{d.ad} {d.soyad}</td>
+                                    <td>{d.total_rides}</td>
+                                    <td style={{ fontWeight: 'bold', color: '#4CAF50' }}>₺{parseFloat(d.total_earned).toFixed(2)}</td>
+                                </tr>
+                            ))}
+                            {(!reports?.driverEarnings || reports.driverEarnings.length === 0) && (
+                                <tr>
+                                    <td colSpan="4" style={{ textAlign: 'center', color: '#888' }}>Kayıtlı sürüş verisi bulunamadı.</td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     );
 }

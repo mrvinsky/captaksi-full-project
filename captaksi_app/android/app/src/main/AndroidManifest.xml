@@ -28,9 +28,8 @@
             </intent-filter>
         </activity>
         
-        <!-- Google Haritalar API Anahtarı -->
         <meta-data android:name="com.google.android.geo.API_KEY"
-                   android:value="AIzaSyBh_TTuFpUAbM0yw3lrzq4PYTPBv_R9ivA"/>
+                   android:value="AIzaSyB_Jh5g94flU9RjvtAeVFM7H44HmIBXlEk"/>
 
         <meta-data
             android:name="flutterEmbedding"

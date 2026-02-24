@@ -4,9 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../services/api_service.dart';
 import '../services/socket_service.dart';
+import '../widgets/offline_status_panel.dart';
+import '../widgets/ride_request_list.dart';
+import '../widgets/ongoing_trip_panel.dart';
 import 'profile_screen.dart';
 import 'login_screen.dart';
 import 'chat_screen.dart';
@@ -22,7 +26,6 @@ class DriverHomeScreen extends StatefulWidget {
 class _DriverHomeScreenState extends State<DriverHomeScreen> {
   bool isOnline = false;
   bool isLoading = false;
-
   bool goingToPickup = false;
   bool goingToDestination = false;
 
@@ -40,16 +43,16 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
 
   final Set<Marker> markers = {};
   final Set<Polyline> polylines = {};
+  String driverRating = "5.0";
 
   static const CameraPosition initialCam = CameraPosition(
-    target: LatLng(41.0082, 28.9784),
-    zoom: 11,
+    target: LatLng(39.9334, 32.8597),
+    zoom: 6,
   );
 
   @override
   void initState() {
     super.initState();
-
     rideSub = socket.rideRequests.listen((data) {
       if (!goingToPickup && !goingToDestination) {
         setState(() => rideRequests.insert(0, data));
@@ -57,15 +60,10 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
     });
   }
 
-  // ---------------- STATE ----------------
-  String driverRating = "0.0";
-
   Future<void> fetchStats() async {
     try {
       final res = await api.getDriverStats();
-      setState(() {
-        driverRating = res['puan_ortalamasi']?.toString() ?? "5.0";
-      });
+      setState(() => driverRating = res['puan_ortalamasi']?.toString() ?? "5.0");
     } catch (_) {}
   }
 
@@ -77,71 +75,41 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
     super.dispose();
   }
 
-  // ---------------- LOCATION ----------------
-  Future<Position> determinePos() async {
-    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) throw Exception("Konum servisleri kapalı.");
-
-    LocationPermission perm = await Geolocator.checkPermission();
-    if (perm == LocationPermission.denied)
-      perm = await Geolocator.requestPermission();
-    if (perm == LocationPermission.denied)
-      throw Exception("Konum izni verilmedi.");
-    if (perm == LocationPermission.deniedForever)
-      throw Exception("Kalıcı engel.");
-
-    final pos = await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.high,
-    );
-
-    setState(() => currentPosition = pos);
-    return pos;
-  }
-
-  void animateToLocation() {
-    if (mapController == null || currentPosition == null) return;
-    mapController!.animateCamera(
-      CameraUpdate.newLatLngZoom(
-        LatLng(currentPosition!.latitude, currentPosition!.longitude),
-        15,
-      ),
-    );
-  }
-
-  // ---------------- ONLINE TOGGLE ----------------
+  // ---------------- LOCATION & STATUS ----------------
   Future<void> toggleOnline() async {
     setState(() => isLoading = true);
-
     try {
-      final pos = await determinePos();
+      LocationPermission perm = await Geolocator.checkPermission();
+      if (perm == LocationPermission.denied) perm = await Geolocator.requestPermission();
+      
+      final pos = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
       final newStatus = !isOnline;
 
       await api.updateDriverStatus(newStatus, pos.latitude, pos.longitude);
-
-      if (mounted) setState(() => isOnline = newStatus);
+      if (mounted) setState(() {
+          isOnline = newStatus;
+          currentPosition = pos;
+      });
 
       if (newStatus) {
-        animateToLocation();
+        _animateToCurrentPosition();
         await socket.connectAndListen();
-        startLocationUpdates();
-        fetchStats(); // Puanı çek
+        _startLocationUpdates();
+        fetchStats();
       } else {
         locationTimer?.cancel();
         socket.dispose();
       }
     } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
-      );
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString()), backgroundColor: Colors.red));
     } finally {
       if (mounted) setState(() => isLoading = false);
     }
   }
 
-  void startLocationUpdates() {
+  void _startLocationUpdates() {
     locationTimer?.cancel();
-    locationTimer = Timer.periodic(const Duration(seconds: 12), (_) async {
+    locationTimer = Timer.periodic(const Duration(seconds: 15), (_) async {
       if (!isOnline) return;
       try {
         final pos = await Geolocator.getCurrentPosition();
@@ -151,450 +119,116 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
     });
   }
 
-  // ---------------- MAP HELPERS ----------------
+  void _animateToCurrentPosition() {
+    if (mapController != null && currentPosition != null) {
+      mapController!.animateCamera(CameraUpdate.newLatLngZoom(LatLng(currentPosition!.latitude, currentPosition!.longitude), 15));
+    }
+  }
+
+  // ---------------- RIDE LOGIC ----------------
   LatLng getCoord(Map<String, dynamic> ride, String prefix) {
     try {
-      // 1. Önce ayrı sütunlara bak (lat, lng)
       if (ride['${prefix}_lat'] != null && ride['${prefix}_lng'] != null) {
-        return LatLng(
-          double.parse(ride['${prefix}_lat'].toString()),
-          double.parse(ride['${prefix}_lng'].toString()),
-        );
-      }
-      
-      // 2. GeoJSON String formatı (eski yapı)
-      if (ride['${prefix}_konumu'] != null) {
-         var data = jsonDecode(ride['${prefix}_konumu'])['coordinates'];
-         return LatLng(data[1], data[0]); 
+        return LatLng(double.parse(ride['${prefix}_lat'].toString()), double.parse(ride['${prefix}_lng'].toString()));
       }
       return const LatLng(0, 0);
-    } catch (_) {
-      return const LatLng(0, 0);
-    }
+    } catch (_) { return const LatLng(0, 0); }
   }
 
-  Future<void> drawRoute(LatLng a, LatLng b,
-      {String id = "route", Color color = Colors.blue}) async {
-    List<LatLng> latlng = [];
+  Future<void> drawRoute(LatLng a, LatLng b, {String id = "route", Color color = Colors.amber}) async {
     try {
       final route = await api.getDirections(a, b);
-      final encoded = route['polyline_points'];
-      final pts = PolylinePoints().decodePolyline(encoded);
-      latlng = pts.map((e) => LatLng(e.latitude, e.longitude)).toList();
+      final pts = PolylinePoints().decodePolyline(route['polyline_points']);
+      final latlng = pts.map((e) => LatLng(e.latitude, e.longitude)).toList();
+      setState(() {
+        polylines.removeWhere((p) => p.polylineId.value == id);
+        polylines.add(Polyline(polylineId: PolylineId(id), points: latlng, width: 6, color: color));
+      });
     } catch (e) {
-      debugPrint("Harita API Hatası (Fallback düz çizgi kullanılıyor): $e");
-      // Fallback: Düz çizgi (Start -> End)
-      latlng = [a, b];
-    }
-
-    if (latlng.isNotEmpty) {
-      if (mounted) {
-        setState(() {
-          // Eski rotayı sil (aynı ID varsa)
-          polylines.removeWhere((p) => p.polylineId.value == id);
-          
-          polylines.add(
-            Polyline(
-              polylineId: PolylineId(id),
-              points: latlng,
-              width: 5,
-              color: color,
-            ),
-          );
-        });
-      }
+      setState(() => polylines.add(Polyline(polylineId: PolylineId(id), points: [a, b], width: 4, color: color.withOpacity(0.5))));
     }
   }
 
-  // ---------------- POPUP ----------------
-  void showRidePopup(Map<String, dynamic> ride) {
-    if (currentPosition == null) return;
-
-    final pickup = getCoord(ride, 'baslangic');
-
-    final distance = Geolocator.distanceBetween(
-          currentPosition!.latitude,
-          currentPosition!.longitude,
-          pickup.latitude,
-          pickup.longitude,
-        ) /
-        1000;
-
-    showModalBottomSheet(
-      context: context,
-      isDismissible: false,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
-      ),
-      builder: (_) {
-        return Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text("Yeni Yolculuk!",
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 10),
-              Text("Alış: ${ride['baslangic_adres_metni']}"),
-              Text("Varış: ${ride['bitis_adres_metni']}"),
-              const SizedBox(height: 10),
-              Text("Mesafe: ${distance.toStringAsFixed(1)} km"),
-              Text("Kazanç: ₺${ride['gerceklesen_ucret']}"),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextButton(
-                      child: const Text("Reddet"),
-                      onPressed: () {
-                        Navigator.pop(context);
-                        setState(() => rideRequests.remove(ride));
-                      },
-                    ),
-                  ),
-                  Expanded(
-                    child: ElevatedButton(
-                      child: const Text("Kabul Et"),
-                      onPressed: () async {
-                        Navigator.pop(context);
-
-                        try {
-                          final res = await api.acceptRide("${ride['id']}");
-
-                          setState(() {
-                            activeRide = res['ride'];
-                            rideRequests.clear();
-                            goingToPickup = true;
-                          });
-
-                          final driver = LatLng(currentPosition!.latitude,
-                              currentPosition!.longitude);
-                          final passenger = pickup;
-
-                          drawRoute(driver, passenger, id: "toPickup");
-
-                          markers.clear();
-                          markers.add(Marker(
-                            markerId: const MarkerId("pickup"),
-                            position: passenger,
-                            icon: BitmapDescriptor.defaultMarkerWithHue(
-                                BitmapDescriptor.hueGreen),
-                          ));
-                        } catch (e) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                                content: Text(e.toString()),
-                                backgroundColor: Colors.red),
-                          );
-                        }
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-
-
-  // ---------------- POPUP (OTOMATIK OR LIST) ----------------
-  // Note: We are using list-card approach per previous user interaction.
-
-  // ---------------- TRIP ACTIONS ----------------
-  Future<void> notifyArrival() async {
-    if (activeRide == null) return;
+  Future<void> acceptRide(Map<String, dynamic> ride) async {
     try {
-      await api.notifyArrival("${activeRide!['id']}");
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Yolcuya bildirim gönderildi! 🔔")),
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
-    }
-  }
+      final res = await api.acceptRide("${ride['id']}");
+      setState(() {
+        activeRide = res['ride'];
+        rideRequests.clear();
+        goingToPickup = true;
+        polylines.clear();
+        markers.clear();
+      });
 
-  Future<void> startTrip() async {
-    if (activeRide == null) return;
-    try { 
-      await api.startRide("${activeRide!['id']}");
-      
+      final driver = LatLng(currentPosition!.latitude, currentPosition!.longitude);
       final pickup = getCoord(activeRide!, 'baslangic');
       final dest = getCoord(activeRide!, 'bitis');
 
-      // Pickup bittiği için Mavi rotayı temizle
-      setState(() {
-         polylines.removeWhere((p) => p.polylineId.value == "toPickup");
-      });
+      drawRoute(driver, pickup, id: "toPickup", color: Colors.blue);
+      drawRoute(pickup, dest, id: "toDest", color: Colors.amber);
 
-      // Kırmızı: Yolcu -> Varış
-      drawRoute(pickup, dest, id: "toDest", color: Colors.redAccent);
-
-      setState(() {
-        goingToPickup = false;
-        goingToDestination = true;
-        
-        // Marker güncelle: Desinasyon kalsın, Pickup silinsin
-        markers.removeWhere((m) => m.markerId.value == "pickup");
-        markers.add(Marker(
-          markerId: const MarkerId("dest"),
-          position: dest,
-          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
-        ));
-      });
-    } catch(e) {
-       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+      markers.add(Marker(markerId: const MarkerId("pickup"), position: pickup, icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure)));
+      markers.add(Marker(markerId: const MarkerId("dest"), position: dest, icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange)));
+      _animateToCurrentPosition();
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString()), backgroundColor: Colors.red));
     }
+  }
+
+  Future<void> notifyArrival() async {
+    try { await api.notifyArrival("${activeRide!['id']}"); ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Yolcuya bildirim gönderildi! 🔔"))); } catch (e) {}
+  }
+
+  Future<void> startTrip() async {
+    try {
+      await api.startRide("${activeRide!['id']}");
+      setState(() { polylines.removeWhere((p) => p.polylineId.value == "toPickup"); markers.removeWhere((m) => m.markerId.value == "pickup"); goingToPickup = false; goingToDestination = true; });
+    } catch (e) {}
   }
 
   Future<void> finishTrip() async {
-    if (activeRide == null) return;
-    
     try {
-      // 1. Backend'e bitir isteği at
       await api.completeRide("${activeRide!['id']}");
-
-      // 2. Rating Ekranına Git
-      // ignore: use_build_context_synchronously
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (_) => RatePassengerScreen(
-            rideId: "${activeRide!['id']}",
-            passengerName: "${activeRide!['yolcu_adi'] ?? 'Yolcu'}",
-          ),
-        ),
-      );
-      
-    } catch(e) {
-       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
-    }
+      if (!mounted) return;
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => RatePassengerScreen(rideId: "${activeRide!['id']}", passengerName: "${activeRide!['yolcu_adi'] ?? 'Yolcu'}")));
+    } catch (e) {}
   }
 
-  // ... 
+  // ---------------- UI BUILD ----------------
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: isOnline ? _buildOnlineView() : OfflineStatusPanel(isLoading: isLoading, onToggle: toggleOnline),
+    );
+  }
 
-  // Inside buildTripPanel
-  Widget buildTripPanel() {
-    final String title =
-        goingToPickup ? "YOLCUYA GİDİLİYOR" : "YOLCULUK DEVAM EDİYOR";
-
-    final String subtitle = goingToPickup
-        ? (activeRide?["baslangic_adres_metni"] ?? "")
-        : (activeRide?["bitis_adres_metni"] ?? "");
-
-    return Positioned(
-      left: 0,
-      right: 0,
-      bottom: 0,
-      child: Container(
-        padding: const EdgeInsets.all(25),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        child: Column(
-          children: [
-            Text(title,
-                style:
-                    const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            Text(subtitle, style: const TextStyle(fontSize: 16)),
-            const SizedBox(height: 20),
-            
-            // [YENİ] CHAT BUTONU
-            if (activeRide != null)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: SizedBox(
-                    width: double.infinity,
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: OutlinedButton.icon(
-                            icon: const Icon(Icons.chat_bubble_outline),
-                            label: const Text("MESAJ"),
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: Colors.black87,
-                              side: const BorderSide(color: Colors.black87),
-                              padding: const EdgeInsets.symmetric(vertical: 12)
-                            ),
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => ChatScreen(
-                                    receiverId: activeRide!['kullanici_id'],
-                                    receiverName: activeRide!['yolcu_adi'] ?? 'Yolcu',
-                                    socketService: socket,
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                        // Notify Arrival Button
-                        if (goingToPickup) ...[
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: OutlinedButton.icon(
-                              icon: const Icon(Icons.notifications_active),
-                              label: const Text("GELDİM"),
-                              style: OutlinedButton.styleFrom(
-                                foregroundColor: Colors.orange[800],
-                                side: BorderSide(color: Colors.orange[800]!),
-                                padding: const EdgeInsets.symmetric(vertical: 12)
-                              ),
-                              onPressed: notifyArrival,
-                            ),
-                          )
-                        ]
-                      ],
-                    )
-                ),
-              ),
-
-            ElevatedButton(
-              onPressed: goingToPickup ? startTrip : finishTrip,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: goingToPickup ? Colors.blue : Colors.green,
-                minimumSize: const Size(double.infinity, 55),
-              ),
-              child: Text(
-                goingToPickup ? "YOLCULUĞU BAŞLAT" : "YOLCULUĞU TAMAMLA",
-                style: const TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold),
-              ),
-            ),
-          ],
-        ),
+  Widget _buildOnlineStatusHeader() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1E1E2C).withOpacity(0.9),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.white.withOpacity(0.05)),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 4, offset: const Offset(0, 2)),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(width: 8, height: 8, decoration: const BoxDecoration(color: Colors.green, shape: BoxShape.circle)),
+          const SizedBox(width: 10),
+          const Text("Çevrimiçi", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white)),
+          const SizedBox(width: 15),
+          const Icon(Icons.star, color: Colors.amber, size: 16),
+          const SizedBox(width: 4),
+          Text(driverRating, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white)),
+        ],
       ),
     );
   }
 
-  // Helper to init stats in toggleOnline
-  // Find toggleOnline and add fetchStats invocation:
-  /*
-      if (newStatus) {
-        fetchStats(); // Add this
-        animateToLocation();
-        ...
-  */
-
-
-  // ---------------- UI ----------------
-  Widget offlineView() {
-    return Stack(
-      children: [
-        // ----- ARKA PLAN (Modern Dark Gradient) -----
-        Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Color(0xFF0F172A), // Deep Blue
-                Color(0xFF1E293B), // Slate 800
-              ],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
-          ),
-          child: Center(
-            child: Opacity(
-              opacity: 0.05,
-              child: Icon(Icons.map, size: 400, color: Colors.white),
-            ),
-          ),
-        ),
-
-        // ----- BOTTOM PANEL -----
-        Positioned(
-          left: 0,
-          right: 0,
-          bottom: 0,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-            decoration: const BoxDecoration(
-              color: Color(0xFF1E293B), // Card Color
-              borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black45,
-                  blurRadius: 20,
-                  offset: Offset(0, -5),
-                )
-              ],
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // --- DURUM YAZISI ---
-                const Text(
-                  "Şu anda çevrimdışısın",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-
-                const SizedBox(height: 8),
-
-                const Text(
-                  "Yolculuk almaya başlamak için aktife geç",
-                  style: TextStyle(
-                    color: Colors.white54,
-                    fontSize: 16,
-                  ),
-                ),
-
-                const SizedBox(height: 30),
-
-                // --- ONLINE BUTTON ---
-                SizedBox(
-                  width: double.infinity,
-                  height: 60,
-                  child: ElevatedButton(
-                    onPressed: isLoading ? null : toggleOnline,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF38BDF8), // Cyan/Blue
-                      foregroundColor: Colors.black,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      elevation: 4,
-                      shadowColor: const Color(0xFF38BDF8).withOpacity(0.4),
-                    ),
-                    child: isLoading
-                        ? const CircularProgressIndicator(
-                            color: Colors.black,
-                          )
-                        : Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: const [
-                              Icon(Icons.power_settings_new),
-                              SizedBox(width: 12),
-                              Text(
-                                "ÇALIŞMAYA BAŞLA",
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  letterSpacing: 1,
-                                ),
-                              ),
-                            ],
-                          ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget onlineView() {
+  Widget _buildOnlineView() {
     return Stack(
       children: [
         GoogleMap(
@@ -604,313 +238,106 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
           myLocationButtonEnabled: false,
           markers: markers,
           polylines: polylines,
-          onMapCreated: (c) => mapController = c,
+          onMapCreated: (c) {
+            mapController = c;
+            c.setMapStyle(_darkMapStyle); // Daha dengeli premium stil aktif edildi
+          },
         ),
 
-        // Konum Butonu
+        // Premium Profil Butonu (Sol Üst)
         Positioned(
-          right: 15,
-          bottom: goingToPickup || goingToDestination ? 200 : 260,
-          child: FloatingActionButton(
-            backgroundColor: Colors.white,
-            child: const Icon(Icons.my_location, color: Colors.black),
-            onPressed: animateToLocation,
+          top: 60,
+          left: 20,
+          child: GestureDetector(
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfileScreen())),
+            child: Container(
+              height: 45,
+              width: 45,
+              decoration: BoxDecoration(
+                color: const Color(0xFF1E1E2C),
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.white12),
+                boxShadow: [
+                  BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 3)),
+                ],
+              ),
+              child: const Icon(Icons.person, color: Colors.amber, size: 24),
+            ),
           ),
         ),
 
-        // ----------- BOTTOM PANEL -----------
-        (!goingToPickup && !goingToDestination)
-            ? buildWaitingPanel()
-            : buildTripPanel(),
+        // Online Durum Başlığı (Üst Orta)
+        Positioned(
+          top: 60,
+          left: 80,
+          right: 80,
+          child: Center(child: _buildOnlineStatusHeader()),
+        ),
+        
+        // Floating Controls
+        Positioned(
+          right: 20,
+          bottom: (goingToPickup || goingToDestination) ? 280 : 250,
+          child: Column(
+            children: [
+               FloatingActionButton(
+                heroTag: 'loc',
+                mini: true,
+                backgroundColor: const Color(0xFF1E1E2C),
+                child: const Icon(Icons.my_location, color: Colors.amber),
+                onPressed: _animateToCurrentPosition,
+              ),
+              const SizedBox(height: 10),
+              FloatingActionButton(
+                heroTag: 'toggle',
+                mini: true,
+                backgroundColor: Colors.redAccent.withOpacity(0.8),
+                child: const Icon(Icons.power_settings_new, color: Colors.white),
+                onPressed: toggleOnline,
+              ),
+            ],
+          ),
+        ),
+
+        // Bottom Panels
+        if (!goingToPickup && !goingToDestination)
+          Positioned(left: 0, right: 0, bottom: 0, child: RideRequestList(rideRequests: rideRequests, onAccept: acceptRide, onReject: (r) => setState(() => rideRequests.remove(r))))
+        else if (activeRide != null)
+          OngoingTripPanel(
+            activeRide: activeRide!,
+            goingToPickup: goingToPickup,
+            onChat: () => Navigator.push(context, MaterialPageRoute(builder: (_) => ChatScreen(receiverId: activeRide!['kullanici_id'], receiverName: activeRide!['yolcu_adi'] ?? 'Yolcu', socketService: socket))),
+            onNotifyArrival: notifyArrival,
+            onAction: goingToPickup ? startTrip : finishTrip,
+          ),
       ],
     );
   }
 
-  // Yeni yolculuk paneli
-Widget buildWaitingPanel() {
-  return Positioned(
-    left: 0,
-    right: 0,
-    bottom: 0,
-    child: Container(
-      padding: const EdgeInsets.all(20),
-      decoration: const BoxDecoration(
-        color: Color(0xFF101010),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black54,
-            blurRadius: 12,
-            spreadRadius: 3,
-            offset: Offset(0, -2),
-          )
-        ],
-      ),
-      child: rideRequests.isEmpty
-          ? Column(
-              mainAxisSize: MainAxisSize.min,
-              children: const [
-                Icon(Icons.local_taxi, size: 36, color: Colors.white38),
-                SizedBox(height: 12),
-                Text(
-                  "Yeni yolculuklar bekleniyor...",
-                  style: TextStyle(
-                    fontSize: 18, 
-                    color: Colors.white70,
-                    fontWeight: FontWeight.w500
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            )
-          : Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  "Gelen Yolculuk Talepleri",
-                  style: TextStyle(
-                    fontSize: 18,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 12),
-
-                ...rideRequests.map((ride) {
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 14),
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF1A1A1A),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.white12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.3),
-                          blurRadius: 6,
-                        )
-                      ],
-                    ),
-                    child: Column(
-                        children: [
-                          Row(
-                            children: [
-                              // ICON SECTION
-                              Container(
-                                width: 50,
-                                height: 50,
-                                decoration: BoxDecoration(
-                                  color: Colors.blueAccent.withOpacity(0.15),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: const Icon(Icons.location_on_rounded,
-                                    color: Colors.blueAccent, size: 30),
-                              ),
-
-                              const SizedBox(width: 14),
-
-                              // TEXT SECTION
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      ride['baslangic_adres_metni'],
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      ride['bitis_adres_metni'],
-                                      style: const TextStyle(
-                                        color: Colors.white54,
-                                        fontSize: 14,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-
-                              // PRICE BADGE
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 10, vertical: 6),
-                                decoration: BoxDecoration(
-                                  color: Colors.green.shade700,
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: Text(
-                                  "₺${ride['gerceklesen_ucret']}",
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
-                          // ACTION BUTTONS
-                          Row(
-                            children: [
-                              Expanded(
-                                child: OutlinedButton(
-                                  onPressed: () {
-                                    setState(() => rideRequests.remove(ride));
-                                  },
-                                  style: OutlinedButton.styleFrom(
-                                    foregroundColor: Colors.redAccent,
-                                    side: const BorderSide(
-                                        color: Colors.redAccent),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                  ),
-                                  child: const Text("Reddet"),
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: ElevatedButton(
-                                    onPressed: () async {
-                                    try {
-                                      final res = await api.acceptRide("${ride['id']}");
-
-                                      setState(() {
-                                        activeRide = res['ride'];
-                                        rideRequests.clear();
-                                        goingToPickup = true;
-                                        polylines.clear();
-                                        markers.clear();
-                                      });
-
-                                      if (currentPosition != null) {
-                                        final driver = LatLng(currentPosition!.latitude, currentPosition!.longitude);
-                                        final passenger = getCoord(activeRide ?? ride, 'baslangic');
-                                        final dest = getCoord(activeRide ?? ride, 'bitis');
-
-                                        // 1. Mavi: Sürücü -> Yolcu
-                                        drawRoute(driver, passenger, id: "toPickup", color: Colors.blueAccent);
-                                        
-                                        // 2. Kırmızı: Yolcu -> Varış
-                                        drawRoute(passenger, dest, id: "toDest", color: Colors.redAccent);
-
-                                        markers.clear();
-                                        markers.add(Marker(
-                                          markerId: const MarkerId("pickup"),
-                                          position: passenger,
-                                          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
-                                        ));
-                                        
-                                        markers.add(Marker(
-                                          markerId: const MarkerId("dest"),
-                                          position: dest,
-                                          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
-                                        ));
-                                      }
-                                    } catch (e) {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
-                                      );
-                                    }
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor:
-                                        Theme.of(context).primaryColor,
-                                    foregroundColor: Colors.black,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                  ),
-                                  child: const Text("Kabul Et", style: TextStyle(fontWeight: FontWeight.bold)),
-                                ),
-                              ),
-                            ],
-                          )
-                        ],
-                      ),
-                  );
-                }).toList()
-              ],
-            ),
-    ),
-  );
-}
-
-
-
-
-  // ---------------- BUILD ----------------
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      appBar: AppBar(
-        title: Row(
-          children: [
-            Expanded(
-              child: Text(
-                isOnline ? "Aktif" : "Çevrimdışı",
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-              ),
-            ),
-            if (isOnline) ...[
-              const Icon(Icons.star, color: Colors.yellowAccent, size: 20),
-              const SizedBox(width: 4),
-              Text(
-                driverRating,
-                style:
-                    const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-            ]
-          ],
-        ),
-        backgroundColor: isOnline
-            ? const Color(0xFF10B981) // Emerald 500
-            : Colors.transparent, // Transparent for seamless look
-        elevation: isOnline ? 4 : 0,
-        actions: [
-          IconButton(
-            icon: Icon(isOnline ? Icons.pause : Icons.play_arrow),
-            onPressed: isLoading ? null : toggleOnline,
-          ),
-          IconButton(
-            icon: const Icon(Icons.person),
-            onPressed: () {
-              if (goingToPickup || goingToDestination) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                      content: Text("Yolculuk sırasında profil açılamaz.")),
-                );
-                return;
-              }
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const ProfileScreen()),
-              );
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () async {
-              locationTimer?.cancel();
-              socket.dispose();
-              await ApiService.deleteToken();
-              if (mounted) {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (_) => const LoginScreen()),
-                );
-              }
-            },
-          ),
-        ],
-      ),
-      body: isOnline ? onlineView() : offlineView(),
-    );
-  }
+  final String _darkMapStyle = '''
+  [
+    { "elementType": "geometry", "stylers": [ { "color": "#1e1e2c" } ] },
+    { "elementType": "labels.text.fill", "stylers": [ { "color": "#8ec3b9" } ] },
+    { "elementType": "labels.text.stroke", "stylers": [ { "color": "#1a3646" } ] },
+    { "featureType": "administrative.country", "elementType": "geometry.stroke", "stylers": [ { "color": "#4b6878" } ] },
+    { "featureType": "administrative.land_parcel", "elementType": "labels.text.fill", "stylers": [ { "color": "#64779e" } ] },
+    { "featureType": "administrative.province", "elementType": "geometry.stroke", "stylers": [ { "color": "#4b6878" } ] },
+    { "featureType": "landscape.man_made", "elementType": "geometry.stroke", "stylers": [ { "color": "#334e87" } ] },
+    { "featureType": "landscape.natural", "elementType": "geometry", "stylers": [ { "color": "#13131d" } ] },
+    { "featureType": "poi", "elementType": "geometry", "stylers": [ { "color": "#1e1e2c" } ] },
+    { "featureType": "poi", "elementType": "labels.text.fill", "stylers": [ { "color": "#6f9ba5" } ] },
+    { "featureType": "poi.park", "elementType": "geometry", "stylers": [ { "color": "#13131d" } ] },
+    { "featureType": "poi.park", "elementType": "labels.text.fill", "stylers": [ { "color": "#3C7680" } ] },
+    { "featureType": "road", "elementType": "geometry", "stylers": [ { "color": "#2c2c3c" } ] },
+    { "featureType": "road", "elementType": "labels.text.fill", "stylers": [ { "color": "#98a5be" } ] },
+    { "featureType": "road.highway", "elementType": "geometry", "stylers": [ { "color": "#3c3c4c" } ] },
+    { "featureType": "road.highway", "elementType": "geometry.stroke", "stylers": [ { "color": "#1f2835" } ] },
+    { "featureType": "road.highway", "elementType": "labels.text.fill", "stylers": [ { "color": "#b0d5ce" } ] },
+    { "featureType": "transit", "elementType": "geometry", "stylers": [ { "color": "#2f3948" } ] },
+    { "featureType": "transit.station", "elementType": "labels.text.fill", "stylers": [ { "color": "#d59563" } ] },
+    { "featureType": "water", "elementType": "geometry", "stylers": [ { "color": "#13131d" } ] },
+    { "featureType": "water", "elementType": "labels.text.fill", "stylers": [ { "color": "#515c6d" } ] },
+    { "featureType": "water", "elementType": "labels.text.stroke", "stylers": [ { "color": "#17263c" } ] }
+  ]
+  ''';
 }

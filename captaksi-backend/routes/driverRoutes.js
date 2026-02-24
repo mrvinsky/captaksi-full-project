@@ -31,4 +31,8 @@ router.put('/me', authDriver, updateDriverProfile);
 router.get('/me/vehicles', authDriver, getDriverVehicle);
 router.put('/me/vehicles', authDriver, updateDriverVehicle);
 
+// ---------- WITHDRAWAL (PAYTR / BANK) ----------
+const paymentController = require('../controllers/paymentController');
+router.post('/withdraw', authDriver, paymentController.requestWithdrawal);
+
 module.exports = router;

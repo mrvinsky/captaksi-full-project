@@ -5,6 +5,21 @@ async function createTables() {
   try {
     console.log('🔌 Connecting to DB...');
 
+    // 0. Create Users Table
+    await db.query(`
+      CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        ad VARCHAR(100),
+        soyad VARCHAR(100),
+        telefon_numarasi VARCHAR(20),
+        email VARCHAR(100) UNIQUE,
+        sifre_hash VARCHAR(255),
+        aktif_mi BOOLEAN DEFAULT TRUE,
+        kayit_tarihi TIMESTAMP DEFAULT NOW()
+      );
+    `);
+    console.log('✅ Table "users" ensured.');
+
     // 1. Create Drivers Table (No GEOMETRY, use FLOAT)
     await db.query(`
       CREATE TABLE IF NOT EXISTS drivers (
@@ -19,6 +34,7 @@ async function createTables() {
         longitude DOUBLE PRECISION DEFAULT 0.0,
         puan_ortalamasi NUMERIC DEFAULT 5.0,
         hesap_onay_durumu VARCHAR(50) DEFAULT 'bekliyor',
+        is_approved BOOLEAN DEFAULT FALSE,
         kayit_tarihi TIMESTAMP DEFAULT NOW()
       );
     `);
@@ -28,7 +44,10 @@ async function createTables() {
     await db.query(`
       CREATE TABLE IF NOT EXISTS vehicle_types (
         id SERIAL PRIMARY KEY,
-        tip_adi VARCHAR(50)
+        tip_adi VARCHAR(50),
+        taban_ucret NUMERIC DEFAULT 0,
+        km_ucreti NUMERIC DEFAULT 0,
+        aciklama VARCHAR(255)
       );
     `);
     console.log('✅ Table "vehicle_types" ensured.');

@@ -245,21 +245,21 @@ exports.getUserDetails = async (req, res) => {
 
         if (user.rows.length === 0) return res.status(404).json({ message: 'Kullanıcı bulunamadı' });
 
-        // İstatistikler
+        // İstatistikler (Sadece tamamlanmış yolculuklar)
         const stats = await db.query(`
             SELECT COUNT(*) as totalRides, COALESCE(SUM(gerceklesen_ucret),0) as totalSpent 
             FROM rides WHERE kullanici_id = $1 AND durum = 'tamamlandi'
         `, [id]);
 
-        // Kullanıcı belgelerini çek
-        const documents = await db.query('SELECT id, belge_tipi, dosya_url, yuklenme_tarihi, onay_durumu FROM documents WHERE kullanici_id = $1', [id]);
-
         const userData = user.rows[0];
         userData.stats = {
             totalRides: stats.rows[0].totalrides,
-            totalDistanceKm: 0
+            totalSpent: stats.rows[0].totalspent,
+            totalDistanceKm: 0 // Optional for future
         };
-        userData.documents = documents.rows;
+
+        // Kullanıcıların belgesi (şoförler gibi) olmadığı için boş liste döndür
+        userData.documents = [];
 
         res.json(userData);
     } catch (err) {
@@ -275,6 +275,96 @@ exports.deleteUser = async (req, res) => {
         res.json({ message: 'Kullanıcı başarıyla silindi.' });
     } catch (err) {
         console.error("Kullanıcı silme hatası:", err.message);
+        res.status(500).send("Sunucu hatası");
+    }
+};
+
+// =========================
+// YOLCULUK YONETIMI
+// =========================
+exports.getAllRides = async (req, res) => {
+    try {
+        const result = await db.query(`
+            SELECT 
+                r.id, r.durum, r.gerceklesen_ucret, r.talep_tarihi,
+                r.baslangic_adres_metni, r.bitis_adres_metni,
+                u.ad AS user_ad, u.soyad AS user_soyad,
+                d.ad AS driver_ad, d.soyad AS driver_soyad
+            FROM rides r
+            LEFT JOIN users u ON r.kullanici_id = u.id
+            LEFT JOIN drivers d ON r.surucu_id = d.id
+            ORDER BY r.id DESC
+        `);
+        res.json(result.rows);
+    } catch (err) {
+        console.error("Yolculuk listesi hatası:", err.message);
+        res.status(500).send("Sunucu hatası");
+    }
+};
+
+// =========================
+// SISTEM AYARLARI YONETIMI
+// =========================
+exports.getSettings = async (req, res) => {
+    try {
+        const vehicleTypes = await db.query(
+            "SELECT id, tip_adi, aciklama, taban_ucret, km_ucreti FROM vehicle_types ORDER BY id ASC"
+        );
+        res.json({ vehicleTypes: vehicleTypes.rows });
+    } catch (err) {
+        console.error("Ayarlar getirme hatası:", err.message);
+        res.status(500).send("Sunucu hatası");
+    }
+};
+
+exports.updateVehicleType = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { taban_ucret, km_ucreti } = req.body;
+
+        const result = await db.query(
+            "UPDATE vehicle_types SET taban_ucret = $1, km_ucreti = $2 WHERE id = $3 RETURNING *",
+            [taban_ucret, km_ucreti, id]
+        );
+
+        if (result.rowCount === 0) {
+            return res.status(404).json({ message: 'Araç tipi bulunamadı' });
+        }
+
+        res.json({ message: 'Ayarlar güncellendi', vehicleType: result.rows[0] });
+    } catch (err) {
+        console.error("Ayar güncelleme hatası:", err.message);
+        res.status(500).send("Sunucu hatası");
+    }
+};
+
+// =========================
+// RAPORLAR VE FILANS
+// =========================
+exports.getReports = async (req, res) => {
+    try {
+        // Genel Ciro
+        const totalRevenueResult = await db.query("SELECT COALESCE(SUM(gerceklesen_ucret), 0) as total_revenue FROM rides WHERE durum = 'tamamlandi'");
+
+        // Sürücü Bazlı Kazançlar (Son 30 Gün vs yapılabilirdi ama tüm zamanları alıyoruz)
+        const driverEarningsResult = await db.query(`
+            SELECT 
+                d.id, d.ad, d.soyad, 
+                COUNT(r.id) as total_rides,
+                COALESCE(SUM(r.gerceklesen_ucret), 0) as total_earned
+            FROM drivers d
+            LEFT JOIN rides r ON d.id = r.surucu_id AND r.durum = 'tamamlandi'
+            GROUP BY d.id, d.ad, d.soyad
+            ORDER BY total_earned DESC
+        `);
+
+        res.json({
+            totalRevenue: parseFloat(totalRevenueResult.rows[0].total_revenue).toFixed(2),
+            driverEarnings: driverEarningsResult.rows
+        });
+
+    } catch (err) {
+        console.error("Rapor çekme hatası:", err.message);
         res.status(500).send("Sunucu hatası");
     }
 };

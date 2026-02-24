@@ -23,4 +23,14 @@ router.get('/users', authAdmin, adminController.getAllUsers);
 router.get('/users/:id/details', authAdmin, adminController.getUserDetails);
 router.delete('/users/:id', authAdmin, adminController.deleteUser);
 
+// Yolculuklar (Protected)
+router.get('/rides', authAdmin, adminController.getAllRides);
+
+// Ayarlar (Protected)
+router.get('/settings', authAdmin, adminController.getSettings);
+router.put('/settings/vehicle-types/:id', authAdmin, adminController.updateVehicleType);
+
+// Raporlar ve Finans (Protected)
+router.get('/reports', authAdmin, adminController.getReports);
+
 module.exports = router;

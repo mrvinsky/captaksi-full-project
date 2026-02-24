@@ -17,6 +17,7 @@ const userRoutes = require('./routes/userRoutes');
 const driverRoutes = require('./routes/driverRoutes');
 const rideRoutes = require('./routes/rideRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const paymentRoutes = require('./routes/paymentRoutes');
 
 const app = express();
 const server = http.createServer(app);
@@ -33,7 +34,7 @@ const PORT = process.env.PORT || 3000;
 // =======================
 // GLOBAL MIDDLEWARE
 // =======================
-app.use(helmet());
+// app.use(helmet());
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' ? ['https://admin.captaksi.com'] : '*', // Prodüksiyon için düzenleyiniz
   credentials: true
@@ -174,6 +175,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/drivers', driverRoutes);
 app.use('/api/rides', rideRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/payments', paymentRoutes);
 
 // =======================
 // SERVER BAŞLAT

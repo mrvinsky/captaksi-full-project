@@ -37,6 +37,7 @@ dependencies:
   # 7. Firebase Cloud Messaging
   firebase_core: ^3.0.0
   firebase_messaging: ^15.0.0
+  google_fonts: ^8.0.2
 
 dev_dependencies:
   flutter_test:

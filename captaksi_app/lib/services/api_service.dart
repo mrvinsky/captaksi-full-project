@@ -16,11 +16,17 @@ class ApiService {
   // 🌍 YOLCU API'sinin temel URL'si
   // 🌍 YOLCU API'sinin temel URL'si
   // Fiziksel Cihaz / LAN Testi için IP:
-  static const String _baseUrl = 'http://10.0.2.2:3000/api';
+  static String get _baseUrl {
+    if (kIsWeb) return 'http://localhost:3000/api';
+    try {
+      if (Platform.isAndroid) return 'http://10.0.2.2:3000/api';
+    } catch (_) {}
+    return 'http://localhost:3000/api';
+  }
   static const _storage = FlutterSecureStorage();
 
   // 🔑 Google API Anahtarımız
-  static const String _googleApiKey = 'AIzaSyBh_TTuFpUAbM0yw3lrzq4PYTPBv_R9ivA';
+  static const String _googleApiKey = 'AIzaSyB_Jh5g94flU9RjvtAeVFM7H44HmIBXlEk';
 
   // --- TOKEN YÖNETİMİ ---
   static Future<void> storeToken(String token) async {

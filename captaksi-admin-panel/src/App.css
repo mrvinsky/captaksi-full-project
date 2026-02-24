@@ -141,7 +141,7 @@ body {
   font-weight: 700;
   margin: 0;
   background: -webkit-linear-gradient(45deg, #fff, #888);
-  -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -300,10 +300,36 @@ body {
   border: 1px solid rgba(244, 67, 54, 0.3);
 }
 
+.status-iptal,
+.status-iptal_edildi {
+  background-color: rgba(244, 67, 54, 0.1);
+  color: var(--danger-color);
+  border: 1px solid rgba(244, 67, 54, 0.3);
+}
+
 .status-yuklendi {
   background-color: rgba(33, 150, 243, 0.1);
   color: var(--blue-color);
   border: 1px solid rgba(33, 150, 243, 0.3);
+}
+
+.status-aktif,
+.status-kabul_edildi {
+  background-color: rgba(33, 150, 243, 0.1);
+  color: var(--blue-color);
+  border: 1px solid rgba(33, 150, 243, 0.3);
+}
+
+.status-tamamlandi {
+  background-color: rgba(76, 175, 80, 0.1);
+  color: var(--success-color);
+  border: 1px solid rgba(76, 175, 80, 0.3);
+}
+
+.status-beklemede {
+  background-color: rgba(255, 152, 0, 0.1);
+  color: var(--warning-color);
+  border: 1px solid rgba(255, 152, 0, 0.3);
 }
 
 /* Buttons inside Table */
@@ -426,4 +452,177 @@ body {
 
 .document-list li {
   background: #2a2a2a;
+}
+
+/* Action Buttons Enhancement */
+.details-btn,
+.delete-btn {
+  padding: 0.6rem 1.2rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-main);
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-right: 0.5rem;
+}
+
+.details-btn:hover {
+  background: rgba(247, 201, 72, 0.1);
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.delete-btn:hover {
+  background: rgba(244, 67, 54, 0.1);
+  border-color: var(--danger-color);
+  color: var(--danger-color);
+}
+
+.details-btn .icon,
+.delete-btn .icon {
+  font-size: 1.1rem;
+}
+
+/* User Detail Modal Styling */
+.user-modal {
+  max-width: 600px !important;
+  background: var(--bg-sidebar) !important;
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+}
+
+.header-user-info {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.user-avatar-large {
+  width: 60px;
+  height: 60px;
+  background: var(--primary-color);
+  color: #000;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  font-weight: 800;
+  box-shadow: 0 0 20px var(--primary-glow);
+}
+
+.user-id-badge {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  background: rgba(255, 255, 255, 0.05);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.user-details-body {
+  padding: 1rem 0;
+}
+
+.info-section,
+.stats-section {
+  margin-bottom: 2rem;
+}
+
+.info-section h4,
+.stats-section h4 {
+  color: var(--primary-color);
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 1.2rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.8rem;
+}
+
+.info-row .label {
+  color: var(--text-muted);
+}
+
+.info-row .value {
+  color: var(--text-main);
+  font-weight: 500;
+}
+
+.mini-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.mini-stat {
+  background: rgba(255, 255, 255, 0.03);
+  padding: 1.2rem;
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  border: 1px solid var(--border-color);
+  transition: transform 0.2s;
+}
+
+.mini-stat:hover {
+  transform: translateY(-5px);
+  border-color: #444;
+}
+
+.stat-icon {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.stat-label {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin-bottom: 0.3rem;
+}
+
+.stat-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+/* Loading Spinner */
+.loading-spinner-container {
+  padding: 4rem;
+  text-align: center;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(247, 201, 72, 0.1);
+  border-top: 4px solid var(--primary-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }

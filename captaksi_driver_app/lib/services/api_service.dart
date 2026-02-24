@@ -10,16 +10,19 @@ import 'package:http/http.dart' as http;
 
 class ApiService {
   static String get _baseUrlHost {
-    // Fiziksel cihaz testi için Local IP
-    const String localIp = '10.71.98.113';
-    return 'http://$localIp:3000';
+    if (kIsWeb) return 'http://localhost:3000';
+    // Fiziksel cihaz testi için Local IP, Emulator için platforma göre otomatik seçim
+    try {
+      if (Platform.isAndroid) return 'http://10.0.2.2:3000';
+    } catch (_) {}
+    return 'http://localhost:3000';
   }
 
   static String get _driverBaseUrl => '$_baseUrlHost/api/drivers';
   static String get _rideBaseUrl => '$_baseUrlHost/api/rides';
 
   // GOOGLE KEY
-  static const String _googleApiKey = "AIzaSyBh_TTuFpUAbM0yw3lrzq4PYTPBv_R9ivA";
+  static const String _googleApiKey = 'AIzaSyB_Jh5g94flU9RjvtAeVFM7H44HmIBXlEk';
 
   // <<< BURASI ÖNEMLİ: typo düzeltildi >>>
   static const FlutterSecureStorage _storage = FlutterSecureStorage();
@@ -129,19 +132,29 @@ class ApiService {
       );
     }
 
-    final stream = await req.send();
-    final res = await http.Response.fromStream(stream);
+    debugPrint("Enviando registro para: $url");
+    try {
+      final stream = await req.send().timeout(const Duration(seconds: 15));
+      final res = await http.Response.fromStream(stream);
 
-    if (res.statusCode == 201) {
-      final body = jsonDecode(res.body);
-      // [FIX] Kayıt sonrası otomatik login için token'ı kaydet
-      if (body["token"] != null) {
-        await storeToken(body["token"]);
+      debugPrint("Registro response: ${res.statusCode} - ${res.body}");
+
+      if (res.statusCode == 201) {
+        final body = jsonDecode(res.body);
+        if (body["token"] != null) {
+          await storeToken(body["token"]);
+        }
+        return body["message"] ?? "Kayıt başarılı.";
       }
-      return body["message"] ?? "Kayıt başarılı.";
-    }
 
-    throw _buildException(res);
+      throw _buildException(res);
+    } catch (e) {
+      debugPrint("Registro hatası: $e");
+      if (e is SocketException) {
+        throw Exception("Sunucuya bağlanılamadı. Lütfen internet bağlantınızı ve API adresini kontrol edin.");
+      }
+      rethrow;
+    }
   }
 
   // ---------------- DURUM / KONUM ----------------
@@ -291,6 +304,25 @@ class ApiService {
     );
 
     if (res.statusCode != 200) throw _buildException(res);
+  }
+
+  // ---------------- PAYOUT / WITHDRAWAL ----------------
+  
+  Future<Map<String, dynamic>> requestWithdrawal(double amount, String iban) async {
+    final token = await getToken();
+    if (token == null) throw Exception("Giriş gerekli.");
+
+    final url = _buildUri(_driverBaseUrl, "/withdraw");
+
+    final res = await _client.post(
+      url,
+      headers: _jsonHeaders(token),
+      body: jsonEncode({"amount": amount, "iban": iban}),
+    );
+
+    if (res.statusCode == 200 || res.statusCode == 201) return jsonDecode(res.body);
+
+    throw _buildException(res);
   }
 
   // ---------------- VEHICLE ----------------
