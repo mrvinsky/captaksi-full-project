@@ -1,7 +1,7 @@
-import 'package:captaksi_app/screens/home_screen.dart';
-import 'package:captaksi_app/screens/register_screen.dart'; // Yeni ekranımızı import ettik
-import 'package:captaksi_app/services/api_service.dart';
-import 'package:captaksi_app/services/notification_service.dart'; // [YENİ]
+import 'package:alibinali_app/screens/home_screen.dart';
+import 'package:alibinali_app/screens/register_screen.dart'; // Yeni ekranımızı import ettik
+import 'package:alibinali_app/services/api_service.dart';
+import 'package:alibinali_app/services/notification_service.dart'; // [YENİ]
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 

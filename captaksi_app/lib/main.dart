@@ -1,4 +1,4 @@
-import 'package:captaksi_app/screens/splash_screen.dart';
+import 'package:alibinali_app/screens/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -12,16 +12,16 @@ void main() async {
   } catch (e) {
     debugPrint("Firebase başlatma hatası: $e");
   }
-  runApp(const CaptaksiApp());
+  runApp(const Ali Bin AliApp());
 }
 
-class CaptaksiApp extends StatelessWidget {
-  const CaptaksiApp({super.key});
+class Ali Bin AliApp extends StatelessWidget {
+  const Ali Bin AliApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Captaksi',
+      title: 'Ali Bin Ali',
       debugShowCheckedModeBanner: false,
       themeMode: ThemeMode.dark,
       darkTheme: ThemeData(

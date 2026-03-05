@@ -4,7 +4,7 @@ const fetch = global.fetch;
 
 
 const jwt = require('jsonwebtoken');
-const JWT_SECRET = 'captaksi_guvenli_secret_anahtari_2024';
+const JWT_SECRET = 'alibinali_guvenli_secret_anahtari_2024';
 
 // Generate Fresh Token for Driver 2
 const DRIVER_TOKEN = jwt.sign(

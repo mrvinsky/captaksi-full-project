@@ -9,7 +9,7 @@ exports.loginAdmin = async (req, res) => {
         const { email, sifre } = req.body;
 
         // Basit hardcoded admin kontrolü (Prodüksiyonda veritabanından çekilmelidir)
-        if (email === 'admin@captaksi.com' && sifre === '123456') {
+        if (email === 'admin@alibinali.com' && sifre === '123456') {
             const payload = { admin: { id: 'admin-1' } };
 
             jwt.sign(

@@ -54,7 +54,7 @@ exports.getPaymentToken = async (req, res) => {
         params.append("debug_on", "1");
         params.append("no_installment", "0");
         params.append("max_installment", "0");
-        params.append("user_name", "Captaksi Yolcusu");
+        params.append("user_name", "Ali Bin Ali Yolcusu");
         params.append("user_address", "Belirtilmedi");
         params.append("user_phone", "0000000000");
         params.append("merchant_ok_url", "http://localhost:3000/api/payments/paytr/success");

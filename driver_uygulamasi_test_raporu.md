@@ -1,4 +1,4 @@
-# Captaksi Sürücü Uygulaması (Driver App) Test Raporu
+# Ali Bin Ali Sürücü Uygulaması (Driver App) Test Raporu
 
 **Tarih:** 17 Ocak 2026
 **Durum:** ✅ Başarılı (Uygulama Çalışıyor)
@@ -15,7 +15,7 @@
 - **Doğrulama:** Oluşturulan kullanıcı ile "Login" işlemi yapıldı ve geçerli bir **JWT Token** alındı. Bu, kullanıcının veritabanına sorunsuz işlendiğini kanıtlar.
 
 ### C. Mobil Uygulama Testi (Android)
-- **İşlem:** `captaksi_driver_app` Android emülatörde (`emulator-5554`) derlendi ve başlatıldı.
+- **İşlem:** `alibinali_driver_app` Android emülatörde (`emulator-5554`) derlendi ve başlatıldı.
 - **Sonuç:** ✅ Uygulama çökme olmadan (Build Success) açıldı.
 
 ## 2. Test İçin Oluşturulan Sürücü Bilgileri

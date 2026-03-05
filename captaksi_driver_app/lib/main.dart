@@ -25,16 +25,16 @@ void main() async {
   } catch (e) {
     debugPrint("Firebase başlatma hatası: $e");
   }
-  runApp(const CaptaksiDriverApp());
+  runApp(const Ali Bin AliDriverApp());
 }
 
-class CaptaksiDriverApp extends StatelessWidget {
-  const CaptaksiDriverApp({super.key});
+class Ali Bin AliDriverApp extends StatelessWidget {
+  const Ali Bin AliDriverApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Captaksi Sürücü',
+      title: 'Ali Bin Ali Sürücü',
       debugShowCheckedModeBanner: false,
 
       theme: ThemeData(

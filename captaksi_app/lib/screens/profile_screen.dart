@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:captaksi_app/models/user_model.dart';
-import 'package:captaksi_app/models/ride_model.dart';
-import 'package:captaksi_app/services/api_service.dart';
+import 'package:alibinali_app/models/user_model.dart';
+import 'package:alibinali_app/models/ride_model.dart';
+import 'package:alibinali_app/services/api_service.dart';
 import 'rating_screen.dart';
 import 'login_screen.dart';
 

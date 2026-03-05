@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Ali Bin Ali – Güvenli, Hızlı ve Konforlu Taksi Uygulaması. Türkiye'nin Premium Yolculuk Deneyimi." />
+  <title>Ali Bin Ali – Güvenli ve Hızlı Yolculuk</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+<!-- ─── NAVBAR ──────────────────────────────────────────── -->
+<nav class="navbar" id="navbar">
+  <div class="nav-container">
+    <a href="#" class="logo">
+      <span class="logo-icon">🚖</span>
+      <span>CAP<span class="logo-accent">TAKSI</span></span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#features">Özellikler</a></li>
+      <li><a href="#how">Nasıl Çalışır</a></li>
+      <li><a href="#driver">Kaptan Ol</a></li>
+      <li><a href="#contact" class="nav-cta">İletişim</a></li>
+    </ul>
+    <button class="hamburger" id="hamburger" aria-label="Menü">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- ─── HERO ────────────────────────────────────────────── -->
+<section class="hero" id="home">
+  <div class="hero-bg">
+    <div class="grid-overlay"></div>
+    <div class="glow glow-1"></div>
+    <div class="glow glow-2"></div>
+  </div>
+  <div class="hero-content">
+    <div class="hero-badge animate-in">🚀 Türkiye'nin Premium Taksi Uygulaması</div>
+    <h1 class="animate-in delay-1">
+      Varış Noktanıza<br />
+      <span class="gradient-text">Güvenle</span> Ulaşın
+    </h1>
+    <p class="hero-sub animate-in delay-2">
+      Ali Bin Ali ile dakikalar içinde kapınızda. Şeffaf fiyatlandırma,<br />
+      güvenilir kaptanlar ve konforlu araçlar. Her zaman, her yerde.
+    </p>
+    <div class="hero-buttons animate-in delay-3">
+      <a href="#" class="btn btn-primary">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+        App Store'dan İndir
+      </a>
+      <a href="#" class="btn btn-secondary">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M3.609 1.814L13.792 12 3.61 22.186a.996.996 0 01-.61-.92V2.734a1 1 0 01.609-.92zm10.89 10.893l2.302 2.302-10.937 6.333 8.635-8.635zm3.199-1.575l2.302 2.302a1.002 1.002 0 010 1.132l-2.302 2.302L15.396 12l2.302-2.868zM5.864 2.658L16.8 8.99l-2.302 2.302-8.635-8.635z"/></svg>
+        Google Play'den İndir
+      </a>
+    </div>
+    <div class="hero-stats animate-in delay-4">
+      <div class="stat">
+        <span class="stat-num">50K+</span>
+        <span class="stat-label">Mutlu Yolcu</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat">
+        <span class="stat-num">5K+</span>
+        <span class="stat-label">Aktif Kaptan</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat">
+        <span class="stat-num">81</span>
+        <span class="stat-label">İl</span>
+      </div>
+    </div>
+  </div>
+  <div class="hero-phones animate-in delay-3">
+    <div class="phone phone-back">
+      <div class="phone-screen screen-driver"></div>
+    </div>
+    <div class="phone phone-front">
+      <div class="phone-screen screen-rider">
+        <div class="map-dots"></div>
+        <div class="taxi-icon">🚖</div>
+        <div class="ride-card">
+          <div class="ride-eta">4 dk</div>
+          <div class="ride-info">
+            <span class="ride-driver">Mehmet K. ⭐ 4.9</span>
+            <span class="ride-car">Fiat Egea · 34 AB 123</span>
+          </div>
+          <div class="ride-price">₺45</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── FEATURES ─────────────────────────────────────────── -->
+<section class="features" id="features">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-tag">Neden Ali Bin Ali?</span>
+      <h2>Fark Yaratan <span class="gradient-text">Özellikler</span></h2>
+      <p>Sıradan bir taksi uygulaması değil. Her detayı düşünülmüş bir deneyim.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card" data-delay="0">
+        <div class="feature-icon">⚡</div>
+        <h3>Anlık Eşleştirme</h3>
+        <p>Yapay zeka destekli sistemimiz sizi en yakın, en uygun kaptanla saniyeler içinde eşleştirir.</p>
+      </div>
+      <div class="feature-card" data-delay="100">
+        <div class="feature-icon">🔒</div>
+        <h3>Güvenli Yolculuk</h3>
+        <p>Tüm kaptanlarımız kimlik doğrulamasından geçer. Her yolculuk kayıt altındadır.</p>
+      </div>
+      <div class="feature-card" data-delay="200">
+        <div class="feature-icon">💳</div>
+        <h3>Esnek Ödeme</h3>
+        <p>Nakit, kredi kartı veya uygulama içi cüzdan ile kolayca ödeyin. Güvenli altyapı ile.</p>
+      </div>
+      <div class="feature-card" data-delay="300">
+        <div class="feature-icon">📍</div>
+        <h3>Canlı Takip</h3>
+        <p>Aracınızın konumunu gerçek zamanlı takip edin, sevdiklerinizle paylaşın.</p>
+      </div>
+      <div class="feature-card" data-delay="400">
+        <div class="feature-icon">⭐</div>
+        <h3>Puan Sistemi</h3>
+        <p>Her yolculuktan sonra kaptan ve yolcu değerlendirmesi. Kalite hep en üstte.</p>
+      </div>
+      <div class="feature-card" data-delay="500">
+        <div class="feature-icon">🎯</div>
+        <h3>Şeffaf Fiyat</h3>
+        <p>Binmeden önce ücreti görün. Sürpriz fiyat, gizli tarife yok. Her zaman adil.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── HOW IT WORKS ──────────────────────────────────────── -->
+<section class="how" id="how">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-tag">Süreç</span>
+      <h2>3 Adımda <span class="gradient-text">Yolculuk</span></h2>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">01</div>
+        <div class="step-content">
+          <h3>Uygulamayı Aç</h3>
+          <p>Nereye gitmek istediğinizi girin. Haritadan konum seçebilir veya adres yazabilirsiniz.</p>
+        </div>
+      </div>
+      <div class="step-arrow">→</div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <div class="step-content">
+          <h3>Kaptan Seç</h3>
+          <p>Size en uygun aracı seçin, fiyatı onaylayın. Kaptan dakikalar içinde yola çıkar.</p>
+        </div>
+      </div>
+      <div class="step-arrow">→</div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <div class="step-content">
+          <h3>Varış Noktanıza!</h3>
+          <p>Konforlu yolculuğunuzun ardından ödeme yapın, kaptanınızı değerlendirin.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── DRIVER CTA ─────────────────────────────────────────── -->
+<section class="driver-cta" id="driver">
+  <div class="container">
+    <div class="driver-cta-grid">
+      <div class="driver-cta-text">
+        <span class="section-tag">Kazanmaya Başla</span>
+        <h2>Sen de <span class="gradient-text">Kaptan</span> Ol!</h2>
+        <p>Ali Bin Ali ailene katıl, istediğin saatte çalış, kazancını anında gör. Kendi patronun sen ol.</p>
+        <ul class="driver-perks">
+          <li>✅ Esnek çalışma saatleri</li>
+          <li>✅ Anlık kazanç takibi</li>
+          <li>✅ Güvenli IBAN ödemesi</li>
+          <li>✅ 7/24 kaptan desteği</li>
+        </ul>
+        <a href="#contact" class="btn btn-primary">Hemen Başvur</a>
+      </div>
+      <div class="driver-stats-box">
+        <div class="d-stat">
+          <span class="d-stat-num">₺12.500</span>
+          <span class="d-stat-label">Aylık Ortalama Kazanç</span>
+        </div>
+        <div class="d-stat">
+          <span class="d-stat-num">%0</span>
+          <span class="d-stat-label">İlk 30 Gün Komisyon</span>
+        </div>
+        <div class="d-stat">
+          <span class="d-stat-num">24 Saat</span>
+          <span class="d-stat-label">Kayıt Onay Süresi</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── CONTACT ────────────────────────────────────────────── -->
+<section class="contact" id="contact">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-tag">Bize Ulaşın</span>
+      <h2>Sorularınız mı <span class="gradient-text">Var?</span></h2>
+      <p>Mesajınızı bırakın, ekibimiz en kısa sürede dönüş yapar.</p>
+    </div>
+    <div class="contact-grid">
+      <div class="contact-info">
+        <div class="contact-item">
+          <span class="contact-icon">📧</span>
+          <div>
+            <strong>E-posta</strong>
+            <span>iletisim@alibinali.com</span>
+          </div>
+        </div>
+        <div class="contact-item">
+          <span class="contact-icon">📞</span>
+          <div>
+            <strong>Telefon</strong>
+            <span>+90 (212) 000 00 00</span>
+          </div>
+        </div>
+        <div class="contact-item">
+          <span class="contact-icon">📍</span>
+          <div>
+            <strong>Adres</strong>
+            <span>İstanbul, Türkiye</span>
+          </div>
+        </div>
+        <div class="social-links">
+          <a href="#" class="social-btn">𝕏</a>
+          <a href="#" class="social-btn">in</a>
+          <a href="#" class="social-btn">f</a>
+          <a href="#" class="social-btn">📸</a>
+        </div>
+      </div>
+      <form class="contact-form" id="contactForm" action="send_mail.php" method="POST">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="name">Adınız</label>
+            <input type="text" id="name" name="name" placeholder="Ahmet Yılmaz" required />
+          </div>
+          <div class="form-group">
+            <label for="email">E-posta</label>
+            <input type="email" id="email" name="email" placeholder="ahmet@mail.com" required />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="subject">Konu</label>
+          <select id="subject" name="subject">
+            <option value="genel">Genel Soru</option>
+            <option value="kaptan">Kaptan Başvurusu</option>
+            <option value="destek">Teknik Destek</option>
+            <option value="sikayet">Şikayet / Öneri</option>
+            <option value="basin">Basın & İletişim</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="message">Mesajınız</label>
+          <textarea id="message" name="message" rows="5" placeholder="Mesajınızı buraya yazın..." required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full" id="submitBtn">
+          <span id="submitText">Mesajı Gönder</span>
+          <span id="submitLoader" style="display:none;">⏳ Gönderiliyor...</span>
+        </button>
+        <div id="formFeedback" class="form-feedback"></div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- ─── FOOTER ─────────────────────────────────────────────── -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="#" class="logo">
+          <span class="logo-icon">🚖</span>
+          <span>CAP<span class="logo-accent">TAKSI</span></span>
+        </a>
+        <p>Türkiye'nin en güvenilir ve hızlı taksi platformu. Her yolculukta yanınızdayız.</p>
+      </div>
+      <div class="footer-links">
+        <h4>Uygulama</h4>
+        <ul>
+          <li><a href="#features">Özellikler</a></li>
+          <li><a href="#how">Nasıl Çalışır</a></li>
+          <li><a href="#driver">Kaptan Ol</a></li>
+        </ul>
+      </div>
+      <div class="footer-links">
+        <h4>Şirket</h4>
+        <ul>
+          <li><a href="#">Hakkımızda</a></li>
+          <li><a href="#">Basın</a></li>
+          <li><a href="#">Kariyer</a></li>
+          <li><a href="#">Blog</a></li>
+        </ul>
+      </div>
+      <div class="footer-links">
+        <h4>Yasal</h4>
+        <ul>
+          <li><a href="#">Gizlilik Politikası</a></li>
+          <li><a href="#">Kullanım Koşulları</a></li>
+          <li><a href="#">KVKK</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2025 Ali Bin Ali. Tüm hakları saklıdır.</span>
+      <span>🇹🇷 İstanbul'dan sevgiyle yapıldı.</span>
+    </div>
+  </div>
+</footer>
+
+<script src="main.js"></script>
+</body>
+</html>

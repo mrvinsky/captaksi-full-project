@@ -25,11 +25,11 @@ if (process.env.SMTP_HOST && process.env.SMTP_USER) {
  * @param {string} code 
  */
 async function sendVerificationEmail(toEmail, code) {
-    const subject = "Captaksi Hesap Doğrulama Kodu";
-    const text = `Merhaba,\n\nCaptaksi hesap doğrulama kodunuz: ${code}\n\nBu kodu kimseyle paylaşmayın.`;
+    const subject = "Ali Bin Ali Hesap Doğrulama Kodu";
+    const text = `Merhaba,\n\nAli Bin Ali hesap doğrulama kodunuz: ${code}\n\nBu kodu kimseyle paylaşmayın.`;
     const html = `
     <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
-      <h2 style="color: #FFD600;">Captaksi Doğrulama</h2>
+      <h2 style="color: #FFD600;">Ali Bin Ali Doğrulama</h2>
       <p>Merhaba,</p>
       <p>Hesap güvenliğiniz için doğrulama kodunuz aşağıdadır:</p>
       <h1 style="letter-spacing: 5px; background: #f4f4f4; padding: 10px; display: inline-block;">${code}</h1>
@@ -40,7 +40,7 @@ async function sendVerificationEmail(toEmail, code) {
     if (transporter) {
         try {
             let info = await transporter.sendMail({
-                from: '"Captaksi Security" <security@captaksi.com>',
+                from: '"Ali Bin Ali Security" <security@alibinali.com>',
                 to: toEmail,
                 subject: subject,
                 text: text,

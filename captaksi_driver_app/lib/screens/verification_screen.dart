@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:captaksi_driver_app/screens/driver_home_screen.dart';
-import 'package:captaksi_driver_app/screens/pending_approval_screen.dart'; // [YENİ]
+import 'package:alibinali_driver_app/screens/driver_home_screen.dart';
+import 'package:alibinali_driver_app/screens/pending_approval_screen.dart'; // [YENİ]
 
 class VerificationScreen extends StatefulWidget {
   final String email;

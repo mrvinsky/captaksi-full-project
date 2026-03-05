@@ -36,7 +36,7 @@ const PORT = process.env.PORT || 3000;
 // =======================
 // app.use(helmet());
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' ? ['https://admin.captaksi.com'] : '*', // Prodüksiyon için düzenleyiniz
+  origin: process.env.NODE_ENV === 'production' ? ['https://admin.alibinali.com'] : '*', // Prodüksiyon için düzenleyiniz
   credentials: true
 }));
 app.use(express.json());
@@ -140,7 +140,7 @@ io.on('connection', (socket) => {
 // TEMEL ROTALAR
 // =======================
 app.get('/', (req, res) => {
-  res.send('captaksi API sunucusu çalışıyor!');
+  res.send('alibinali API sunucusu çalışıyor!');
 });
 
 app.get('/db-test', async (req, res) => {
@@ -181,6 +181,6 @@ app.use('/api/payments', paymentRoutes);
 // SERVER BAŞLAT
 // =======================
 server.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚖 captaksi sunucusu ${PORT} portunda çalışıyor (0.0.0.0)...`);
+  console.log(`🚖 alibinali sunucusu ${PORT} portunda çalışıyor (0.0.0.0)...`);
 });
 app.use("/api/vehicles", require("./routes/vehicleRoutes"));

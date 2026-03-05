@@ -1,4 +1,4 @@
-import 'package:captaksi_app/models/vehicle_type_model.dart';
+import 'package:alibinali_app/models/vehicle_type_model.dart';
 import 'package:flutter/material.dart';
 
 class RideSelectionSheet extends StatefulWidget {

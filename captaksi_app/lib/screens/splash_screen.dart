@@ -1,6 +1,6 @@
-import 'package:captaksi_app/screens/home_screen.dart';
-import 'package:captaksi_app/screens/login_screen.dart';
-import 'package:captaksi_app/services/api_service.dart';
+import 'package:alibinali_app/screens/home_screen.dart';
+import 'package:alibinali_app/screens/login_screen.dart';
+import 'package:alibinali_app/services/api_service.dart';
 import 'package:flutter/material.dart';
 
 class SplashScreen extends StatefulWidget {

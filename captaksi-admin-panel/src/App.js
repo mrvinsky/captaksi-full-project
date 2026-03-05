@@ -27,7 +27,7 @@ function App() {
 }
 
 function Login({ onLoginSuccess }) {
-    const [email, setEmail] = useState('admin@captaksi.com');
+    const [email, setEmail] = useState('admin@alibinali.com');
     const [password, setPassword] = useState('123456');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
@@ -59,7 +59,7 @@ function Login({ onLoginSuccess }) {
         <div className="login-container">
             <div className="login-box">
                 <div className="icon">🚖</div>
-                <h2>Captaksi Takip Merkezi</h2>
+                <h2>Ali Bin Ali Takip Merkezi</h2>
                 <form onSubmit={handleLogin}>
                     <div className="form-group">
                         <input
@@ -101,7 +101,7 @@ function Dashboard({ token, onLogout }) {
     return (
         <div className="dashboard-layout">
             <aside className={`sidebar ${isMobileMenuOpen ? 'open' : ''}`}>
-                <h1>Captaksi</h1>
+                <h1>Ali Bin Ali</h1>
                 <nav>
                     <ul>
                         <li className={activePage === 'dashboard' ? 'active' : ''} onClick={() => navigateTo('dashboard')}>

@@ -2,11 +2,11 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:captaksi_app/services/api_service.dart';
-import 'package:captaksi_app/services/notification_service.dart'; // [YENİ]
-import 'package:captaksi_app/screens/verification_screen.dart'; // [YENİ]
-import 'package:captaksi_app/screens/home_screen.dart';
-import 'package:captaksi_app/screens/login_screen.dart'; // Geri dönmek için eklendi
+import 'package:alibinali_app/services/api_service.dart';
+import 'package:alibinali_app/services/notification_service.dart'; // [YENİ]
+import 'package:alibinali_app/screens/verification_screen.dart'; // [YENİ]
+import 'package:alibinali_app/screens/home_screen.dart';
+import 'package:alibinali_app/screens/login_screen.dart'; // Geri dönmek için eklendi
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});

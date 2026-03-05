@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:captaksi_driver_app/services/api_service.dart';
-import 'package:captaksi_driver_app/screens/login_screen.dart';
-import 'package:captaksi_driver_app/screens/driver_home_screen.dart';
+import 'package:alibinali_driver_app/services/api_service.dart';
+import 'package:alibinali_driver_app/screens/login_screen.dart';
+import 'package:alibinali_driver_app/screens/driver_home_screen.dart';
 
 class PendingApprovalScreen extends StatefulWidget {
   const PendingApprovalScreen({super.key});

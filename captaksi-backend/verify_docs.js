@@ -43,7 +43,7 @@ async function verifyDocs() {
     // 1. Login
     let token;
     try {
-        const res = await makeRequest('/login', 'POST', { email: 'admin@captaksi.com', sifre: '123456' });
+        const res = await makeRequest('/login', 'POST', { email: 'admin@alibinali.com', sifre: '123456' });
         if (res.status === 200) {
             token = res.body.token;
             console.log('✅ Login successful.');

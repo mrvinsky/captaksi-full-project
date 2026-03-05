@@ -1,23 +1,23 @@
-# 🚖 CAPTAKSI - Full Stack Taksi Çağırma Projesi
+# 🚖 ALI BIN ALI - Full Stack Taksi Çağırma Projesi
 
 Bu proje, modern bir taksi çağırma platformunun uçtan uca (Yolcu App, Sürücü App, Backend, Admin Panel) implementasyonudur.
 
 ## 📁 Proje Yapısı
 
-1.  **`captaksi_app`**: Yolcu (Müşteri) için geliştirilen mobil uygulama (Flutter).
-2.  **`captaksi_driver_app`**: Sürücüler için geliştirilen mobil uygulama (Flutter).
-3.  **`captaksi-backend`**: Node.js/Express ve PostgreSQL tabanlı REST API sunucusu. Socket.IO ile gerçek zamanlı takip sağlar.
-4.  **`captaksi-admin-panel`**: **[YENİ]** Yönetim için geliştirilen Dashboard (React).
+1.  **`alibinali_app`**: Yolcu (Müşteri) için geliştirilen mobil uygulama (Flutter).
+2.  **`alibinali_driver_app`**: Sürücüler için geliştirilen mobil uygulama (Flutter).
+3.  **`alibinali-backend`**: Node.js/Express ve PostgreSQL tabanlı REST API sunucusu. Socket.IO ile gerçek zamanlı takip sağlar.
+4.  **`alibinali-admin-panel`**: **[YENİ]** Yönetim için geliştirilen Dashboard (React).
 
 ---
 
-## 🚀 4. Captaksi Yönetim (Admin) Paneli
+## 🚀 4. Ali Bin Ali Yönetim (Admin) Paneli
 
 Projenin yönetim merkezi olan Admin Paneli, modern "Dark Mode" tasarımı ve gelişmiş özellikleriyle yenilendi.
 
 *   **Teknolojiler:** React, Recharts, CSS Modules.
 *   **Adres:** `http://localhost:3001`
-*   **Giriş Bilgileri:** `admin@captaksi.com` / `123456`
+*   **Giriş Bilgileri:** `admin@alibinali.com` / `123456`
 
 ### Özellikler (V3.1 Güncellemesi)
 1.  **📊 Gelişmiş Dashboard:**
@@ -31,7 +31,7 @@ Projenin yönetim merkezi olan Admin Paneli, modern "Dark Mode" tasarımı ve ge
 
 ### Kurulum ve Çalıştırma
 ```bash
-cd captaksi-admin-panel
+cd alibinali-admin-panel
 npm install
 npm start
 ```
@@ -48,7 +48,7 @@ Sunucunun ve veritabanının sağlıklı çalışması için:
     *   *Sürücü tablosu güncellendi: `hesap_onay_durumu`, `kayit_tarihi` sütunları eklendi.*
 
 ```bash
-cd captaksi-backend
+cd alibinali-backend
 node server.js
 ```
 
@@ -56,8 +56,8 @@ node server.js
 
 ## 📱 Mobil Uygulamalar
 
-*   **Yolcu Uygulaması:** `captaksi_app` dizininde `flutter run` ile çalıştırın.
-*   **Sürücü Uygulaması:** `captaksi_driver_app` dizininde `flutter run` ile çalıştırın.
+*   **Yolcu Uygulaması:** `alibinali_app` dizininde `flutter run` ile çalıştırın.
+*   **Sürücü Uygulaması:** `alibinali_driver_app` dizininde `flutter run` ile çalıştırın.
 
 ---
 

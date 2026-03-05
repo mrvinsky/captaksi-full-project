@@ -1,6 +1,6 @@
 {
-    "name": "captaksi_app",
-    "short_name": "captaksi_app",
+    "name": "alibinali_app",
+    "short_name": "alibinali_app",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

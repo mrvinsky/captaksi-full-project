@@ -23,7 +23,7 @@ async function testSecurity() {
     try {
         console.log('Logging in...');
         const res = await axios.post(`${baseUrl}/login`, {
-            email: 'admin@captaksi.com',
+            email: 'admin@alibinali.com',
             sifre: '123456'
         });
         token = res.data.token;

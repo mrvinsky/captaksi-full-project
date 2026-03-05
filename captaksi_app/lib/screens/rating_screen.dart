@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:captaksi_app/services/api_service.dart';
+import 'package:alibinali_app/services/api_service.dart';
 
 class RatingScreen extends StatefulWidget {
   final Map<String, dynamic> finishedRide;

@@ -1,5 +1,5 @@
-import 'package:captaksi_app/models/place_model.dart';
-import 'package:captaksi_app/services/api_service.dart';
+import 'package:alibinali_app/models/place_model.dart';
+import 'package:alibinali_app/services/api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 
